@@ -1,3 +1,0 @@
-# The site has no auth; abuse is handled in the function (origin check, validation, rate limit).
-[functions.ask]
-verify_jwt = false

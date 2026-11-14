@@ -44,30 +44,25 @@ body{margin:0}
 .fbo .btn.ghost:hover{background:rgba(var(--bgc),.5);border-color:var(--accent);color:var(--accent)}
 .fbo .btn.on{border-color:var(--accent);color:var(--accent)}
 .fbo .btn.sm{min-height:48px;padding:0 20px}
-.fbo .btn:disabled{opacity:.55;cursor:default;transform:none}
+/* header CTA: same Messenger link as the hero, sized like the theme pill; icon only where the nav gets tight (≤1000px) */
+.fbo .hcta{min-height:44px;padding:0 16px;gap:9px}
 .fbo .icb{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;flex:none;border-radius:999px;border:1px solid var(--line);background:rgba(var(--bgc),.6);color:var(--ink);cursor:pointer;transition:border-color .2s ease,color .2s ease,transform .15s ease}
 .fbo .icb:hover,.fbo .icb.on{border-color:var(--accent);color:var(--accent)}
 .fbo .icb:active{transform:scale(.94)}
-/* chat rating: 32px buttons with a 44px hit area (::after) that takes no layout space */
-.fbo .rt{position:relative;width:32px;height:32px}.fbo .rt::after{content:'';position:absolute;inset:-7px}.fbo .rt .ic{width:16px;height:16px}
-.fbo .rt[aria-disabled=true]{cursor:default;transform:none}.fbo .rt[aria-disabled=true]:not(.on){opacity:.55;border-color:var(--line);color:var(--ink)}
 .fbo .lnk{display:inline-flex;align-items:center;min-height:48px;padding:0 4px;font:500 12px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none;color:var(--mute);background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-repeat:no-repeat;background-position:4px calc(50% + 11px);transition:color .2s ease,background-size .3s ease}
 .fbo .lnk:hover{color:var(--ink);background-size:calc(100% - 8px) 1px}
+.fbo .lab .lnk{color:var(--ink)}
 .fbo .cut{clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,26px 100%,0 calc(100% - 26px))}
-/* hero: the name has its own column, sized to fit; the portrait sits beside it and never covers it */
-.fbo .stg{--avw:min(430px,46vh);--cg:clamp(20px,3vw,44px);display:grid;grid-template-columns:minmax(0,1fr) var(--avw);column-gap:var(--cg);align-items:stretch}
-.fbo .nmc{position:relative;z-index:4;display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-width:0}
-.fbo .nm{margin:0;display:flex;flex-direction:column;font-family:var(--serif);font-weight:300;transform:translate3d(0,calc(var(--sp,0)*40px),0)}
-.fbo .gt{display:block;margin-left:-.04em;font-size:min(330px,calc((min(100vw,1360px) - 2 * var(--pad) - var(--avw) - var(--cg)) / 2.8));line-height:.84;letter-spacing:-.045em;white-space:nowrap;transform:translate3d(calc(var(--px,0)*-10px),calc(var(--py,0)*-6px),0)}
-.fbo .ft{display:block;align-self:flex-end;margin:.04em calc(var(--avw)*-.1) 0 0;font-style:italic;font-size:clamp(40px,6vw,88px);line-height:.95;letter-spacing:-.03em;white-space:nowrap;color:var(--accent);text-shadow:0 0 28px var(--bg),0 0 10px var(--bg);transform:translate3d(calc(var(--px,0)*12px),calc(var(--py,0)*6px),0)}
-.fbo .av{position:relative;z-index:3;width:var(--avw);aspect-ratio:1/1;align-self:center}
+/* hero: name, value line, supporting line, two buttons; portrait right (below on small screens).
+   The name stays on one line and scales with its column (cqi), so the ASCII decode never rewraps it. */
+.fbo .stg{--avw:min(400px,42vh,34vw);display:grid;grid-template-columns:minmax(0,1fr) var(--avw);gap:44px clamp(24px,5vw,72px);align-items:center}
+.fbo .hc{container-type:inline-size;display:flex;flex-direction:column;gap:18px;min-width:0}
+.fbo .nm{margin:0 0 8px;font:300 min(8vw,128px,15cqi)/.95 var(--serif);letter-spacing:-.03em;white-space:nowrap}
+.fbo .nm em{color:var(--accent)}
+.fbo .vp{margin:0;max-width:32ch;font:300 clamp(22px,2.1vw,30px)/1.22 var(--serif);letter-spacing:-.01em;text-wrap:balance}
+.fbo .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.fbo .av{position:relative;z-index:3;width:var(--avw);aspect-ratio:1/1}
 .fbo .plate{position:absolute;inset:0;background:var(--bg);-webkit-mask:url(/img/avatar-ink.webp) center/100% 100% no-repeat;mask:url(/img/avatar-ink.webp) center/100% 100% no-repeat;transition:background-color .5s ease}
-.fbo .crn{margin:0;display:flex;flex-wrap:wrap;gap:4px 22px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--mute)}
-.fbo .hb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,470px);gap:22px 64px;align-items:end;margin-top:16px}
-.fbo .ask{flex:1 1 140px;min-width:0;min-height:56px;background:rgba(var(--bgc),.5);border:1px solid var(--line);color:var(--ink);font:400 14px/1.2 var(--mono);padding:0 22px;border-radius:999px;transition:border-color .2s ease}
-.fbo .ask::placeholder{color:var(--mute);opacity:1}
-.fbo .ask:focus{outline:none;border-color:var(--accent)}
-.fbo .bub{background:var(--bg2)}
 /* marquee */
 .fbo .mq{position:relative;z-index:1;overflow:hidden;height:56px;display:flex;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .fbo .mqt{display:flex;flex:none;white-space:nowrap;animation:fbo-mq 48s linear infinite;font:500 13px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
@@ -140,6 +135,8 @@ from{opacity:0;transform:translateY(10px)}
 50%{opacity:0}
 }
 @media (max-width:1000px){
+.fbo .hcta{width:44px;padding:0}
+.fbo .hcta span{display:none}
 .fbo .skg{grid-template-columns:minmax(0,1fr)}
 .fbo .mbox{grid-template-columns:minmax(0,1fr)}
 .fbo .minf{padding:8px 24px 28px}
@@ -149,13 +146,11 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .icb.mnb{display:inline-flex}
 .fbo .sec{min-height:0}
 .fbo .wrap{padding:56px var(--pad)}
-.fbo .stg{--avw:min(100%,420px);grid-template-columns:minmax(0,1fr);row-gap:10px}
-.fbo .nm{transform:none}
-.fbo .gt{font-size:min(29vw,200px)}
-.fbo .ft{margin-right:0;font-size:min(12.5vw,80px)}
-.fbo .av{width:min(100%,420px);justify-self:center}
-.fbo .hb{grid-template-columns:minmax(0,1fr);gap:28px}
-.fbo .hero-cta .btn{flex:1 1 100%}
+.fbo .stg{--avw:min(100%,320px);grid-template-columns:minmax(0,1fr)}
+.fbo .nm{font-size:clamp(56px,8vw,128px)}
+.fbo .nm em{display:block}
+.fbo .av{justify-self:center}
+.fbo .hero-cta .btn,.fbo .cta .btn{flex:1 1 100%;padding:0 16px}
 .fbo .pans{flex-direction:column;height:auto;min-height:0}
 .fbo .pan,.fbo .pan.on{flex:none}
 .fbo .pan:not(.on) .ph{height:auto;flex-direction:row;justify-content:flex-start;gap:16px;padding:20px 22px}
@@ -170,8 +165,11 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .deck{transform:none}
 .fbo .dnav{display:none}
 .fbo .abp{--abh:calc(min(100vw - 2 * var(--pad), 440px) * 1.2);height:var(--abh)}
-.fbo .cta .btn{flex:1 1 100%}
 .fbo .modal{padding:10px;align-items:flex-start}
+}
+/* 320px phones: the theme pill drops its word (its aria-label still names the action) so the header CTA fits */
+@media (max-width:360px){
+.fbo [data-bind=modeLabel]{display:none}
 }
 @media (prefers-reduced-motion:reduce){
 html{scroll-behavior:auto}

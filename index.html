@@ -9,10 +9,10 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://febrielportfolio.vercel.app/">
 <meta property="og:title" content="Febriel B. Otud — Designer, developer, social media manager">
-<meta property="og:description" content="I design the interface and write the code. I can run and manage your socials too.">
+<meta property="og:description" content="I design the interface, write the code, and run the socials after launch.">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Febriel B. Otud — Designer, developer, social media manager">
-<meta name="twitter:description" content="I design the interface and write the code. I can run and manage your socials too.">
+<meta name="twitter:description" content="I design the interface, write the code, and run the socials after launch.">
 <meta name="theme-color" content="#08191D">
 <meta name="color-scheme" content="dark light">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -28,11 +28,12 @@
 <div id="top" class="fbo pal-tidal is-dark" data-ref="root" style="position: relative; overflow-x: clip">
 <script>try{if(localStorage['fbo-mode']==='light')document.getElementById('top').classList.replace('is-dark','is-light')}catch(e){}</script>
 <a class="btn sm skip" href="#main">Skip to content</a>
+<span id="nt" hidden>Opens in a new tab</span>
 
 <header class="nav">
 <div class="navi">
 <a href="#top" data-scr style="font-family: var(--mono); font-weight: 500; font-size: 14px; letter-spacing: 0.02em; text-decoration: none; min-height: 48px; display: inline-flex; align-items: center">f.b.otud<span class="cur" aria-hidden="true">_</span></a>
-<div style="display: flex; align-items: center; gap: 10px 22px">
+<div style="display: flex; align-items: center; gap: 10px clamp(10px, 1.6vw, 22px)">
 <nav class="navl" aria-label="Sections">
 <a class="lnk" data-scr href="#services">Services</a>
 <a class="lnk" data-scr href="#skills">Skills</a>
@@ -44,6 +45,7 @@
 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 1.8a6.2 6.2 0 0 0 0 12.4z" fill="currentColor"/></svg>
 <span data-nofx data-bind="modeLabel">Dark</span>
 </button>
+<a class="btn hcta" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-label="Message me on Messenger" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Message me</span></a>
 <button type="button" class="icb mnb" data-act="toggleMenu" aria-expanded="false" aria-label="Menu">
 <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
 </button>
@@ -61,11 +63,15 @@
 <main id="main">
 <section data-sec="hero" class="sec" style="min-height: calc(min(100vh, 900px) - 120px)">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb">
-<div class="stg">
-<div class="nmc">
-<p class="crn"><span>Dipolog City, Philippines</span><span>08.59° N, 123.34° E</span><span data-nofx data-bind="time">UTC+8</span></p>
-<h1 class="nm"><span class="gt">Febriel</span> <span class="ft">B. Otud</span></h1>
+<div class="wrap fxb stg">
+<div class="hc">
+<h1 class="nm">Febriel <em>B. Otud</em></h1>
+<p class="vp">I design the interface, write the code, and run the socials after launch.</p>
+<p style="margin: 0; max-width: 46ch; color: var(--mute); text-wrap: pretty">Freelance and <span style="white-space: nowrap">part-time</span>. Remote, or <span style="white-space: nowrap">on-site</span> in Dipolog and Dapitan. I reply within two hours.</p>
+<div class="hero-cta">
+<a class="btn" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Message me on Messenger</a>
+<a class="btn ghost" data-scr href="#work">See my work<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
+</div>
 </div>
 <div class="av">
 <div data-ref="tilt" style="position: absolute; inset: 0; transition: transform 0.25s ease-out; will-change: transform">
@@ -75,41 +81,6 @@
 <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
 </button>
 </div>
-</div>
-</div>
-
-<div class="hb">
-<div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
-<p style="margin: 0; font-family: var(--serif); font-style: italic; font-weight: 300; font-size: clamp(21px, 2.05vw, 28px); line-height: 1.22; letter-spacing: -0.01em; max-width: 30ch">I design the interface and write the code. I can run and manage your socials too.</p>
-<p style="margin: 0; max-width: 52ch; color: var(--mute)">Designer, developer, social media manager. Third-year information systems student in Dipolog City, and AI is in almost everything I make.</p>
-<div class="hero-cta" style="display: flex; flex-wrap: wrap; gap: 12px">
-<a class="btn" data-scr href="#work">See my work<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-<a class="btn ghost" data-scr href="#fbo-ask" data-act="focusAsk"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Ask my avatar</a>
-</div>
-</div>
-
-<form data-ref="askForm" style="display: flex; flex-direction: column; gap: 10px; min-width: 0">
-<div class="bub cut" data-nofx>
-<div data-ref="log" aria-live="polite" style="height: 78px; overflow-y: auto; padding: 14px 22px; display: flex; flex-direction: column; gap: 8px">
-<div style="display: flex; gap: 12px; align-items: baseline">
-<span style="flex: 0 0 56px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--accent)">Avatar</span>
-<p style="margin: 0; font-family: var(--mono); font-size: 13px; line-height: 1.5; white-space: pre-wrap; min-width: 0">Hi. I am Febriel in ASCII. Hover my face to see the drawing, or ask me something.</p>
-</div>
-</div>
-</div>
-<div style="display: flex; gap: 10px; align-items: center">
-<label for="fbo-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%)">Ask the avatar a question</label>
-<input data-ref="askInput" id="fbo-ask" class="ask" data-nofx aria-describedby="fbo-ask-note" type="text" autocomplete="off" maxlength="240" placeholder="Ask about my work, tools or AI" value="">
-<button type="submit" class="btn" data-ref="send" data-scr style="padding: 0 24px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-6 16-3-7z"/></svg>Send</button>
-</div>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<button type="button" class="btn ghost sm" data-scr data-q="What do you build?">Services</button>
-<button type="button" class="btn ghost sm" data-scr data-q="How do you use AI?">AI</button>
-<button type="button" class="btn ghost sm" data-scr data-q="What is your stack?">Stack</button>
-<button type="button" class="btn ghost sm" data-scr data-q="What is Invex?">Invex</button>
-</div>
-<p class="hint" id="fbo-ask-note" data-nofx>Answers are AI-generated via Groq. Chats are kept for 180 days to improve the avatar. Don't share private info.</p>
-</form>
 </div>
 </div>
 </section>
@@ -263,14 +234,15 @@
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb" style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 28px">
 <h2 style="margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 5.6vw, 84px); line-height: 0.98; letter-spacing: -0.03em; max-width: 17ch; text-wrap: balance">Got an app, a brand or a feed that needs <em>building?</em></h2>
-<p style="margin: 0; max-width: 44ch; color: var(--mute)">Tell me what it is. I'll tell you how I'd do it.</p>
+<p style="margin: 0; max-width: 44ch; color: var(--mute); text-wrap: pretty">Tell me what it is. I'll tell you how I'd do it.<br>I reply within two hours.</p>
 <div class="cta" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
-<a class="btn" data-scr href="mailto:febrielotud0@gmail.com" style="text-transform: none; letter-spacing: 0.02em"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 7 9-7"/></svg>febrielotud0@gmail.com</a>
-<a class="btn ghost" data-scr href="https://www.linkedin.com/in/febriel-otud-86500b390" target="_blank" rel="noopener">LinkedIn<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
-<a class="btn ghost" data-scr href="https://www.instagram.com/bongieex" target="_blank" rel="noopener">Instagram<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
-<a class="btn ghost" data-scr href="https://www.facebook.com/share/1DxyjUGUTL/" target="_blank" rel="noopener">Facebook<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
-<a class="btn ghost" data-scr href="https://github.com/FebyStack" target="_blank" rel="noopener">GitHub<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+<a class="btn" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Message me on Messenger</a>
+<a class="btn ghost" data-scr href="https://www.instagram.com/bongieex" target="_blank" rel="noopener" aria-describedby="nt">Instagram<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+<a class="btn ghost" data-scr href="mailto:febrielotud0@gmail.com" style="text-transform: none; letter-spacing: 0.02em"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3zM3 7l9 7 9-7"/></svg>febrielotud0@gmail.com</a>
+<a class="btn ghost" data-scr href="https://www.linkedin.com/in/febriel-otud-86500b390" target="_blank" rel="noopener" aria-describedby="nt">LinkedIn<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+<a class="btn ghost" data-scr href="https://github.com/FebyStack" target="_blank" rel="noopener" aria-describedby="nt">GitHub<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
 </div>
+<p class="lab" style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 14px">Follow INKWILD <a class="lnk" data-scr href="https://www.tiktok.com/@inkwil0" target="_blank" rel="noopener" aria-describedby="nt">TikTok</a> <a class="lnk" data-scr href="https://www.youtube.com/@inkwildanimals" target="_blank" rel="noopener" aria-describedby="nt">YouTube</a></p>
 </div>
 <div style="position: relative; z-index: 1; width: 100%; height: clamp(200px, 30vh, 280px)">
 <canvas data-ref="tide" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y"></canvas>
