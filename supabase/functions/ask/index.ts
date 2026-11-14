@@ -106,7 +106,11 @@ Deno.serve(async (req) => {
     return reply(200, { ok: true });
   }
 
-  const key = Deno.env.get('XAI_API_KEY');
+  // Trim and drop one pair of wrapping quotes, so a pasted space, newline or "…" can't break the key.
+  const raw = Deno.env.get('XAI_API_KEY') ?? '';
+  let key = raw.trim();
+  const trimmed = key !== raw, quoted = /^(["']).*\1$/s.test(key);
+  if (quoted) key = key.slice(1, -1).trim();
   if (!key) { console.error('ask: XAI_API_KEY is not set'); return reply(500, { error: 'Not configured' }); }
 
   const id = crypto.randomUUID(), t0 = Date.now();
@@ -136,6 +140,10 @@ Deno.serve(async (req) => {
       let why = '';
       try { why = (await r.text()).replace(/xai-[A-Za-z0-9*._-]+/g, 'xai-[redacted]').slice(0, 300); } catch { /* logging must not break the reply */ }
       console.error('ask: upstream status', r.status, why);
+      // The key's shape only, never its value or any slice of it.
+      if (r.status === 400 || r.status === 401) {
+        console.error(`ask: key shape len=${key.length} xai_prefix=${key.startsWith('xai-')} trimmed=${trimmed} quoted=${quoted}`);
+      }
       log(null, r.status); return reply(502, { error: 'Upstream error' });
     }
     const data = await r.json();
