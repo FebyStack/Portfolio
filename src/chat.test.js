@@ -38,6 +38,19 @@ test('localAnswer routes questions to the right fact', () => {
   assert.equal(localAnswer('What campus are you in?'), factFor('jrmsu'));
   assert.equal(localAnswer('Do you use Firebase?'), factFor('firebase'));
   assert.equal(localAnswer('What kind of projects do you take on?'), factFor('part-time'));
+  assert.equal(localAnswer('What games do you play?'), factFor('hobby'));
+  assert.equal(localAnswer('Do you read manga?'), factFor('hobby'));
+  assert.equal(localAnswer('Do you play COD Mobile?'), factFor('hobby'));
+  assert.equal(localAnswer('What is your design style?'), factFor('design style'));
+  assert.equal(localAnswer('Who inspires your design?'), factFor('design style'));
+  assert.equal(localAnswer('Do you design apps?'), factFor('figma'));
+  assert.equal(localAnswer('What are you proudest of?'), factFor('proud'));
+  assert.equal(localAnswer('Do you have any awards or certificates?'), factFor('proud'));
+  assert.equal(localAnswer('How do you lead a team?'), factFor('brainstorm'));
+  assert.equal(localAnswer('How fast do you reply?'), factFor('contact'));
+  assert.equal(localAnswer('What’s the best way to message you?'), factFor('contact'));
+  assert.equal(localAnswer('What is your email?'), factFor('gmail'));
+  assert.equal(localAnswer('How do you plan content?'), factFor('funnel'));
   assert.equal(localAnswer('qzx vbn'), FALLBACK);
   // keywords match at word starts, not inside words ('live' in "deliver", 'fun' in "function")
   assert.equal(localAnswer('Can you deliver a website?'), factFor('service'));
