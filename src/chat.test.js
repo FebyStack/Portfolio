@@ -51,6 +51,23 @@ test('localAnswer routes questions to the right fact', () => {
   assert.equal(localAnswer('What’s the best way to message you?'), factFor('contact'));
   assert.equal(localAnswer('What is your email?'), factFor('gmail'));
   assert.equal(localAnswer('How do you plan content?'), factFor('funnel'));
+  assert.equal(localAnswer('How do you use Claude?'), factFor('claude'));
+  assert.equal(localAnswer('Do you use AI for graphic design?'), factFor('claude'));
+  assert.equal(localAnswer('Do you write prompts?'), factFor('prompt'));
+  assert.equal(localAnswer('Do you build AI agents?'), factFor('prompt'));
+  assert.equal(localAnswer('What AI tools do you use?'), factFor('stack'));
+  assert.equal(localAnswer('Why did you choose Information Systems?'), factFor('information system'));
+  assert.equal(localAnswer('What do you study?'), factFor('jrmsu'));
+  assert.equal(localAnswer('What problems do you like solving?'), factFor('like solving'));
+  assert.equal(localAnswer('How would others describe you?'), factFor('dependable'));
+  assert.equal(localAnswer('Describe yourself'), factFor('who are'));
+  assert.equal(localAnswer('What are you working on next?'), factFor('jarvis'));
+  assert.equal(localAnswer('What is Project Jarvis?'), factFor('jarvis'));
+  assert.equal(localAnswer('What’s next for PilaPass?'), factFor('in use'));
+  assert.equal(localAnswer('Do you take animation commissions?'), factFor('commission'));
+  assert.equal(localAnswer('What is INKWILD about?'), factFor('animation'));
+  assert.equal(localAnswer('Why are you called Bong?'), factFor('pronounc'));
+  assert.equal(localAnswer('What is your motto?'), factFor('motto'));
   assert.equal(localAnswer('qzx vbn'), FALLBACK);
   // keywords match at word starts, not inside words ('live' in "deliver", 'fun' in "function")
   assert.equal(localAnswer('Can you deliver a website?'), factFor('service'));
