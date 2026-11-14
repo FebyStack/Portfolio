@@ -23,6 +23,21 @@ test('localAnswer routes questions to the right fact', () => {
   assert.equal(localAnswer('Where can I watch INKWILD?'), factFor('tiktok'));
   assert.equal(localAnswer('How do you work with clients?'), factFor('work with'));
   assert.equal(localAnswer('What happens after launch?'), factFor('after launch'));
+  assert.equal(localAnswer('Where is INKWILD on TikTok?'), factFor('tiktok'));
+  assert.equal(localAnswer('What are your hobbies?'), factFor('hobby'));
+  assert.equal(localAnswer('What do you do for fun?'), factFor('hobby'));
+  assert.equal(localAnswer('Are you a leader?'), factFor('leader'));
+  assert.equal(localAnswer('When did you start coding?'), factFor('python'));
+  assert.equal(localAnswer('How long have you been coding?'), factFor('python'));
+  assert.equal(localAnswer('Since when have you worked at The Sev Clinic?'), factFor('since'));
+  assert.equal(localAnswer('What do you do for KONSEPTO?'), factFor('for konsepto'));
+  assert.equal(localAnswer('What is KONSEPTO?'), factFor('konsepto'));
+  assert.equal(localAnswer('Is Invex live?'), factFor('use invex'));
+  assert.equal(localAnswer('Did you build Invex alone?'), factFor('use invex'));
+  assert.equal(localAnswer('Which campus is PilaPass for?'), factFor('pilapass for'));
+  assert.equal(localAnswer('What campus are you in?'), factFor('jrmsu'));
+  assert.equal(localAnswer('Do you use Firebase?'), factFor('firebase'));
+  assert.equal(localAnswer('What kind of projects do you take on?'), factFor('part-time'));
   assert.equal(localAnswer('qzx vbn'), FALLBACK);
 });
 

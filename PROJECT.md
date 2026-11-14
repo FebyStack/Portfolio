@@ -16,7 +16,7 @@ One-page ASCII portfolio. Source of truth for look and behaviour: `design/Main.d
 - `src/styles.css` — the design's `<helmet><style>`, verbatim, fonts/images repointed to `/fonts`, `/img`.
 - `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim. Do not restyle it;
   port fixes only. `startEngine(logic)` → `{ sync, stop }`.
-- `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (set `video` per project here).
+- `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (set `video` per project here; optional `links: [[label, url], …]`).
 - `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
   object the engine expects.
 - `supabase/functions/_shared/facts.js` — `FACTS`, `FALLBACK`, `PROMPT`, `localAnswer`. Single
@@ -56,14 +56,16 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
 - Work cards: `button.wk[data-open="N"]` (N = `PROJECTS` index), canvas `data-cover="shape"`.
 - Modal: `<template data-ref="modalTpl">` (last child of `#work`). Cloned in on open, removed on
   close — engine relies on mount/unmount. While open, `#work .wrap` is `inert`. Inside: `.modal[data-modal]`, `[data-ref="mclose"]`,
-  `video[data-ref="vid"]`, and `[data-novideo]` on the cover canvas (`data-big="1"`) and its label.
+  `video[data-ref="vid"]`, and `[data-novideo]` on the cover canvas (`data-big="1"`) and its label. A project's `links` are
+  built by JS right after `modTags` (no hook): a flex row of `a.btn.ghost.sm[data-scr][target=_blank][rel=noopener]` + arrow icon.
 - `.fbo [hidden]{display:none!important}` exists because layout rules out-rank the UA `[hidden]` rule.
 
 ## Run
 
 - `npm run dev` (5173) · `npm run build` → `dist/` · `npm run preview` · `npm test` (node --test, no deps)
-- Env (`.env`, see `.env.example`): `VITE_ASK_URL` = deployed `ask` function URL. Unset → avatar
-  answers from `localAnswer` only.
+- Env: `VITE_ASK_URL` = deployed `ask` function URL. Production builds read it from the committed `.env.production`
+  (public config only, never secrets; the one env file un-ignored in `.gitignore`). Dev reads ignored `.env`/`.env.local`
+  (see `.env.example`); unset → avatar answers from `localAnswer` only (dev default).
 - Edge function secrets (Supabase, never in repo): `XAI_API_KEY`, optional `XAI_MODEL`, `ALLOWED_ORIGIN` (comma-separated;
   unset → every browser request gets 403; local dev needs `ALLOWED_ORIGIN=http://localhost:5173`). `SUPABASE_URL` and
   `SUPABASE_SECRET_KEYS` (falls back to legacy `SUPABASE_SERVICE_ROLE_KEY`) are injected by Supabase — don't set them.
@@ -83,5 +85,7 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
   memory only. "Unanswered" = answer contains "on file" (heuristic, matches the system prompt's wording).
   Page analytics, if wanted: a cookieless one (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted, set up later by Febriel.
+- Avatar says only what Febriel has shared (his rule): `PROMPT` forbids guessing or filling gaps; new facts come from him,
+  first person, one to three short sentences. `localAnswer` keyword routes are pinned by `src/chat.test.js`.
 
-last Claude session: 2026-11-14 10:45 (Asia/Manila)
+last Claude session: 2026-11-14 12:05 (Asia/Manila)

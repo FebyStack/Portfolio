@@ -20,6 +20,7 @@ const refHost = document.referrer && new URL(document.referrer).hostname;
 const REF = refHost !== location.hostname && HOST.test(refHost) ? refHost : undefined;
 // Thumb drawn on the .ic grid (24 box, 1.5 stroke, round caps); thumbs down is the same path turned 180deg.
 const THUMB = 'M3 10h4v10H3zM7 10l3.5-6.5c1.4 0 2.4 1.2 2 2.6L12 10h6.2a1.8 1.8 0 0 1 1.8 2.1l-1.2 6.2a2 2 0 0 1-2 1.7H7';
+const ARROW = 'M7 17 17 7M8 7h9v9'; // same arrow as the contact section's external links
 
 const state = {
   dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', pin: false, menu: false, modal: -1, busy: false, time: 'UTC+8',
@@ -126,7 +127,16 @@ function renderModal() {
     modalEl.setAttribute('aria-label', m.title);
     bind('modTitle', frag).textContent = m.title;
     bind('modDesc', frag).textContent = m.desc;
-    bind('modTags', frag).textContent = m.tags;
+    const tags = bind('modTags', frag);
+    tags.textContent = m.tags;
+    if (m.links) tags.after(el('div', null, 'display: flex; flex-wrap: wrap; gap: 12px', ...m.links.map(([label, url]) => {
+      const a = el('a', 'btn ghost sm', null, label, icon(ARROW));
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.dataset.scr = '';
+      return a;
+    })));
     const vid = ref('vid', frag);
     const novideo = frag.querySelectorAll('[data-novideo]');
     if (m.video) {
@@ -152,13 +162,8 @@ function rateBox(m) {
   box.setAttribute('role', 'group');
   box.setAttribute('aria-label', 'Rate this answer');
   const btns = [[1, 'Helpful'], [-1, 'Not helpful']].map(([v, label]) => {
-    const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'), path = document.createElementNS(ns, 'path');
-    svg.setAttribute('class', 'ic');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('aria-hidden', 'true');
+    const svg = icon(THUMB);
     if (v < 0) svg.style.transform = 'rotate(180deg)';
-    path.setAttribute('d', THUMB);
-    svg.append(path);
     const b = el('button', 'icb rt', null, svg);
     b.type = 'button';
     b.setAttribute('aria-label', label);
@@ -181,6 +186,16 @@ function rateBox(m) {
   paint();
   box.append(...btns.map(([, b]) => b), ...(m.rating ? ['Thanks.'] : []));
   return box;
+}
+
+function icon(d) {
+  const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'), path = document.createElementNS(ns, 'path');
+  svg.setAttribute('class', 'ic');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  path.setAttribute('d', d);
+  svg.append(path);
+  return svg;
 }
 
 function el(tag, cls, css, ...kids) {
