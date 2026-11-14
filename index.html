@@ -97,7 +97,7 @@
 </div>
 <div style="display: flex; gap: 10px; align-items: center">
 <label for="fbo-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%)">Ask the avatar a question</label>
-<input data-ref="askInput" id="fbo-ask" class="ask" data-nofx type="text" autocomplete="off" maxlength="240" placeholder="Ask about my work, tools or AI" value="">
+<input data-ref="askInput" id="fbo-ask" class="ask" data-nofx aria-describedby="fbo-ask-note" type="text" autocomplete="off" maxlength="240" placeholder="Ask about my work, tools or AI" value="">
 <button type="submit" class="btn" data-ref="send" data-scr style="padding: 0 24px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12 20 4l-6 16-3-7z"/></svg>Send</button>
 </div>
 <div style="display: flex; flex-wrap: wrap; gap: 8px">
@@ -106,6 +106,7 @@
 <button type="button" class="btn ghost sm" data-scr data-q="What is your stack?">Stack</button>
 <button type="button" class="btn ghost sm" data-scr data-q="What is Invex?">Invex</button>
 </div>
+<p class="hint" id="fbo-ask-note" data-nofx>Answers come from Grok (xAI). Don't share private info.</p>
 </form>
 </div>
 </div>
