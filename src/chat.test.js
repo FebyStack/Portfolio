@@ -39,6 +39,11 @@ test('localAnswer routes questions to the right fact', () => {
   assert.equal(localAnswer('Do you use Firebase?'), factFor('firebase'));
   assert.equal(localAnswer('What kind of projects do you take on?'), factFor('part-time'));
   assert.equal(localAnswer('qzx vbn'), FALLBACK);
+  // keywords match at word starts, not inside words ('live' in "deliver", 'fun' in "function")
+  assert.equal(localAnswer('Can you deliver a website?'), factFor('service'));
+  assert.equal(localAnswer('Are you alive?'), FALLBACK);
+  assert.equal(localAnswer('Is the site live?'), factFor('service'));
+  assert.equal(localAnswer('What is your function?'), FALLBACK);
 });
 
 test('validate accepts what main.js sends and rejects out-of-bounds payloads', () => {

@@ -69,7 +69,10 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
 - Edge function secrets (Supabase, never in repo): `XAI_API_KEY`, optional `XAI_MODEL`, `ALLOWED_ORIGIN` (comma-separated;
   unset → every browser request gets 403; local dev needs `ALLOWED_ORIGIN=http://localhost:5173`). `SUPABASE_URL` and
   `SUPABASE_SECRET_KEYS` (falls back to legacy `SUPABASE_SERVICE_ROLE_KEY`) are injected by Supabase — don't set them.
-- Deploy: `supabase link --project-ref <ref>` → `supabase db push` (chat_logs migration) → `supabase functions deploy ask`.
+- Deploy (Supabase CLI v3 via `npx --yes supabase@latest`; project ref `lsuqyuelsxcawfvbfbmu`, already linked, link state in
+  gitignored `supabase/.temp`): database commands need `--remote` — `db push --remote` (chat_logs migration),
+  `migration list --remote`, `db query --remote --read-only`. Functions deploy without Docker via `--use-api`:
+  `npx --yes supabase@latest functions deploy ask --no-verify-jwt --use-api`.
   Chat stats: dashboard SQL editor / table editor on the three views. Under `supabase functions serve`, log writes after the
   reply need `[edge_runtime] policy = "per_worker"` in config.toml (hosted runtime doesn't).
 
@@ -86,6 +89,7 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
   Page analytics, if wanted: a cookieless one (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted, set up later by Febriel.
 - Avatar says only what Febriel has shared (his rule): `PROMPT` forbids guessing or filling gaps; new facts come from him,
-  first person, one to three short sentences. `localAnswer` keyword routes are pinned by `src/chat.test.js`.
+  first person, one to three short sentences. `localAnswer` matches keywords at word starts (a trailing space in a keyword =
+  whole word, e.g. `'live '`); routes are pinned by `src/chat.test.js`.
 
-last Claude session: 2026-11-14 12:05 (Asia/Manila)
+last Claude session: 2026-11-14 12:08 (Asia/Manila)
