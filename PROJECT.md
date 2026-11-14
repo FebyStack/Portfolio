@@ -21,10 +21,16 @@ One-page ASCII portfolio. Source of truth for look and behaviour: `design/Main.d
   object the engine expects.
 - `supabase/functions/_shared/facts.js` — `FACTS`, `FALLBACK`, `PROMPT`, `localAnswer`. Single
   source for the avatar's knowledge; imported by both the browser and the edge function.
-- `supabase/functions/_shared/validate.js` — `validate`, `ROLES`, `MAX_HISTORY`/`MAX_TEXT` for the `ask` request; plain JS,
-  imported by the edge function, `main.js` and the tests.
+- `supabase/functions/_shared/validate.js` — `validate` (ask: `q`, `history?`, `sid?` uuid, `ref?` bare hostname; unknown
+  keys refused), `validateRating` (exactly `{ id: uuid, rating: 1|-1 }`), `HOST`, `ROLES`, `MAX_HISTORY`/`MAX_TEXT`; plain JS,
+  imported by the edge function, `main.js` and the tests (`validate.test.js` next to it).
 - `supabase/functions/ask/index.ts` — Grok (xAI) proxy. Key stays server-side. Fails closed on Origin; 411 without
-  content-length; per-IP 10/min + per-isolate 300/hour limits (in memory).
+  content-length; per-IP 10/min + per-isolate 300/hour limits (in memory). One endpoint, two shapes: ask → `{ text, id }`
+  and writes one `chat_logs` row per xAI call; `{ id, rating }` → PATCH that row (only while `rating` is null) → `{ ok: true }`.
+  Writes are plain `fetch` to PostgREST with the injected secret key, after the reply (`EdgeRuntime.waitUntil`); a failed
+  write only logs its status.
+- `supabase/migrations/*_chat_logs.sql` — `chat_logs` (RLS on, no policies, revoked from anon/authenticated), dashboard
+  views `chat_daily` / `chat_review` / `chat_top_questions` (security_invoker), pg_cron job `chat-logs-retention` (180 days).
 
 ## Engine ↔ app contract
 
@@ -44,6 +50,9 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
   inactive `.pb` carries `hidden`. `logic.stage.current` = stage canvas of the active panel.
 - Skills: `button[data-cat="all|build|design|social|video|ai"]`, active gets `.on`.
 - Chat chips: `button[data-q]`. Log shows last 2 messages; rows built by JS, greeting pre-rendered.
+- Rating: built by JS at the end of the latest answer that has a server `id` — `span[role=group][data-nofx]` >
+  `button.icb.rt` ×2 (`aria-label` Helpful / Not helpful, `aria-pressed`, `aria-disabled` + `.on` after the vote, then "Thanks.").
+  `.rt` in styles.css = 32px button with a 44px `::after` hit area. Message objects carry `id` and `rating`.
 - Work cards: `button.wk[data-open="N"]` (N = `PROJECTS` index), canvas `data-cover="shape"`.
 - Modal: `<template data-ref="modalTpl">` (last child of `#work`). Cloned in on open, removed on
   close — engine relies on mount/unmount. While open, `#work .wrap` is `inert`. Inside: `.modal[data-modal]`, `[data-ref="mclose"]`,
@@ -56,14 +65,23 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
 - Env (`.env`, see `.env.example`): `VITE_ASK_URL` = deployed `ask` function URL. Unset → avatar
   answers from `localAnswer` only.
 - Edge function secrets (Supabase, never in repo): `XAI_API_KEY`, optional `XAI_MODEL`, `ALLOWED_ORIGIN` (comma-separated;
-  unset → every browser request gets 403; local dev needs `ALLOWED_ORIGIN=http://localhost:5173`).
+  unset → every browser request gets 403; local dev needs `ALLOWED_ORIGIN=http://localhost:5173`). `SUPABASE_URL` and
+  `SUPABASE_SECRET_KEYS` (falls back to legacy `SUPABASE_SERVICE_ROLE_KEY`) are injected by Supabase — don't set them.
+- Deploy: `supabase link --project-ref <ref>` → `supabase db push` (chat_logs migration) → `supabase functions deploy ask`.
+  Chat stats: dashboard SQL editor / table editor on the three views. Under `supabase functions serve`, log writes after the
+  reply need `[edge_runtime] policy = "per_worker"` in config.toml (hosted runtime doesn't).
 
 ## Decisions / dead-ends
 
-- No canonical / og:url / JSON-LD `url` yet: domain unknown, and an unset `%VITE_SITE_URL%` shipped as a literal.
-  Add them back (hardcoded absolute URL) at deploy.
+- Canonical, `og:url`, JSON-LD `url`, `public/sitemap.xml` and the robots `Sitemap:` line are hardcoded to
+  `https://febrielportfolio.vercel.app/` (an env placeholder once shipped as a literal). Change all five if the domain changes.
 - Palette fixed to Tidal Orchid; the other two palettes stay in CSS (class swap on root) — design tweak, not UI.
 - Design-tool tweak props (glyph, reveal, rain, light, motion) are constants in `main.js`.
 - Chat is non-streamed + typed out client-side: same feel as the design, a fraction of the code.
-- No analytics, no cookies → no consent banner. Add a cookieless one (Plausible / CF Web Analytics) at deploy.
+- No page analytics, no cookies → no consent banner. Chat analytics are server-side rows (question, answer, timing,
+  tokens, referrer domain, rating), disclosed in the note under the chat; the session id is a per-page-load uuid kept in
+  memory only. "Unanswered" = answer contains "on file" (heuristic, matches the system prompt's wording).
+  Page analytics, if wanted: a cookieless one (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted, set up later by Febriel.
+
+last Claude session: 2026-11-14 10:45 (Asia/Manila)

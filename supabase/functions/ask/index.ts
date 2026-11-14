@@ -1,8 +1,10 @@
-// POST { q, history? } -> { text }. Grok (xAI) proxy for the portfolio avatar. The key never leaves this function.
+// POST { q, history?, sid?, ref? } -> { text, id }: Grok (xAI) proxy for the portfolio avatar. The key never leaves this function.
+// POST { id, rating } -> { ok: true }: a visitor's thumbs up (1) / down (-1) on that answer.
+// Every ask that reaches xAI writes one public.chat_logs row (supabase/migrations/*_chat_logs.sql), never blocking the reply.
 // CORS fails closed: a request carrying an Origin not listed in ALLOWED_ORIGIN (comma-separated; unset = none)
 // gets 403. Requests without Origin (curl, servers) pass, subject to the limits. Local dev: ALLOWED_ORIGIN=http://localhost:5173.
 import { FACTS, PROMPT } from '../_shared/facts.js';
-import { ROLES, validate } from '../_shared/validate.js';
+import { ROLES, validate, validateRating } from '../_shared/validate.js';
 
 // Verified 2026-11-13 against https://docs.x.ai/docs/models and https://docs.x.ai/docs/api-reference
 // (Responses API is the recommended endpoint; Chat Completions is marked deprecated).
@@ -12,6 +14,31 @@ const XAI_URL = 'https://api.x.ai/v1/responses';
 const ORIGINS = (Deno.env.get('ALLOWED_ORIGIN') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 const SYSTEM = PROMPT + FACTS.map((f: { a: string }) => '- ' + f.a).join('\n');
 const MAX_BODY = 8192;
+
+// Logging goes straight to PostgREST with the service key (bypasses RLS; the table has no policies).
+// Injected env vars: SUPABASE_URL, SUPABASE_SECRET_KEYS (JSON dictionary, new keys) and the legacy SUPABASE_SERVICE_ROLE_KEY
+// (https://supabase.com/docs/guides/functions/secrets). New secret keys go on `apikey` only, never as a Bearer token; the
+// legacy key is a JWT (`eyJ...`) and also goes on Authorization (https://supabase.com/docs/guides/api/api-keys).
+async function db(method: 'POST' | 'PATCH', query: string, row: Record<string, unknown>) {
+  try { // key lookup inside the try too: nothing here may break the chat
+    const key: string = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}').default ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const headers: Record<string, string> = { apikey: key, 'content-type': 'application/json' };
+    if (key.startsWith('eyJ')) headers.authorization = `Bearer ${key}`;
+    const r = await fetch(`${Deno.env.get('SUPABASE_URL')}/rest/v1/chat_logs${query}`, {
+      method, headers, body: JSON.stringify(row), signal: AbortSignal.timeout(5000)
+    });
+    if (!r.ok) console.error('ask: log status', r.status);
+  } catch (err) {
+    console.error('ask: log failed', (err as Error).name);
+  }
+}
+// Runs the write after the response is sent (https://supabase.com/docs/guides/functions/background-tasks).
+// Outside Supabase's runtime (plain `deno run`) EdgeRuntime is absent and the promise just runs unawaited.
+declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
+const later = (p: Promise<void>) => { if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(p); };
+// xAI Responses `usage.input_tokens` / `usage.output_tokens` are integers
+// (https://docs.x.ai/developers/rest-api-reference/inference/responses); anything else is stored as null.
+const int = (n: unknown) => (Number.isInteger(n) ? n : null);
 
 // ponytail: in-memory limiter: per IP 10 requests/minute, plus a global cap of 300 requests/hour per
 // isolate (bounds xAI spend even if the IP key is spoofed or rotated). Ceiling: per isolate, resets on
@@ -70,10 +97,25 @@ Deno.serve(async (req) => {
     return reply(400, { error: 'Bad request' });
   }
   const input = validate(body);
-  if (!input) return reply(400, { error: 'Bad request' });
+  if (!input) {
+    const vote = validateRating(body);
+    if (!vote) return reply(400, { error: 'Bad request' });
+    // ponytail: no auth on ratings. The row's random uuid, returned only to the visitor who asked, is the capability.
+    // rating=is.null keeps it one vote per answer; the reply is the same whether a row matched or not, so ids can't be probed.
+    later(db('PATCH', `?id=eq.${vote.id}&rating=is.null`, { rating: vote.rating, rated_at: new Date().toISOString() }));
+    return reply(200, { ok: true });
+  }
 
   const key = Deno.env.get('XAI_API_KEY');
   if (!key) { console.error('ask: XAI_API_KEY is not set'); return reply(500, { error: 'Not configured' }); }
+
+  const id = crypto.randomUUID(), t0 = Date.now();
+  const log = (answer: string | null, error_code: number | null, usage?: { input_tokens?: unknown; output_tokens?: unknown }) =>
+    later(db('POST', '', {
+      id, session_id: input.sid ?? null, question: input.q, answer, status: answer ? 'ok' : 'error', error_code, model: MODEL,
+      latency_ms: Date.now() - t0, input_tokens: int(usage?.input_tokens), output_tokens: int(usage?.output_tokens),
+      history_turns: input.history.length, referrer: input.ref ?? null
+    }));
 
   try {
     const r = await fetch(XAI_URL, {
@@ -89,7 +131,7 @@ Deno.serve(async (req) => {
       }),
       signal: AbortSignal.timeout(7000) // under the client's 8s, so the client gets our 502 rather than its own abort
     });
-    if (!r.ok) { console.error('ask: upstream status', r.status); return reply(502, { error: 'Upstream error' }); }
+    if (!r.ok) { console.error('ask: upstream status', r.status); log(null, r.status); return reply(502, { error: 'Upstream error' }); }
     const data = await r.json();
     const text = (data.output ?? [])
       .flatMap((o: { type?: string; content?: unknown[] }) => (o.type === 'message' && Array.isArray(o.content) ? o.content : []))
@@ -97,10 +139,12 @@ Deno.serve(async (req) => {
       .map((c: { text: string }) => c.text)
       .join('')
       .trim();
+    log(text || null, null, data.usage);
     if (!text) return reply(502, { error: 'Upstream error' });
-    return reply(200, { text });
+    return reply(200, { text, id });
   } catch (err) {
     console.error('ask: upstream failed', (err as Error).name);
+    log(null, null);
     return reply(502, { error: 'Upstream error' });
   }
 });

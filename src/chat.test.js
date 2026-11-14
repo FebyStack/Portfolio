@@ -9,6 +9,20 @@ test('localAnswer routes questions to the right fact', () => {
   assert.equal(localAnswer('What is Invex?'), factFor('invex'));
   assert.equal(localAnswer('What is your stack?'), factFor('stack'));
   assert.equal(localAnswer('How do you use AI?'), factFor('claude'));
+  assert.equal(localAnswer('What is your name?'), factFor('who are'));
+  assert.equal(localAnswer('How do you pronounce your name?'), factFor('pronounc'));
+  assert.equal(localAnswer('Where do you study?'), factFor('jrmsu'));
+  assert.equal(localAnswer('Are you available for part-time work?'), factFor('part-time'));
+  assert.equal(localAnswer('Can I call you?'), factFor('contact'));
+  assert.equal(localAnswer('How much do you charge?'), factFor('contact'));
+  assert.equal(localAnswer('What do you do at The Sev Clinic?'), factFor('manpower'));
+  assert.equal(localAnswer('Do you record content for the clinic?'), factFor('record'));
+  assert.equal(localAnswer('What is Invex built with?'), factFor('invex built'));
+  assert.equal(localAnswer('Is PilaPass live?'), factFor('in use'));
+  assert.equal(localAnswer('What is INKWILD?'), factFor('animation'));
+  assert.equal(localAnswer('Where can I watch INKWILD?'), factFor('tiktok'));
+  assert.equal(localAnswer('How do you work with clients?'), factFor('work with'));
+  assert.equal(localAnswer('What happens after launch?'), factFor('after launch'));
   assert.equal(localAnswer('qzx vbn'), FALLBACK);
 });
 

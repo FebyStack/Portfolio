@@ -2,7 +2,7 @@
 import { startEngine } from './engine.js';
 import { SKILLS, GROUPS, PROJECTS } from './data.js';
 import { localAnswer } from '../supabase/functions/_shared/facts.js';
-import { MAX_HISTORY, MAX_TEXT } from '../supabase/functions/_shared/validate.js';
+import { MAX_HISTORY, MAX_TEXT, HOST } from '../supabase/functions/_shared/validate.js';
 
 const root = document.querySelector('[data-ref="root"]');
 const $ = (sel, el = root) => el.querySelector(sel);
@@ -13,6 +13,13 @@ const act = (name) => $(`[data-act="${name}"]`);
 const pans = [...root.querySelectorAll('.pan[data-svc]')];
 const log = ref('log'), askInput = ref('askInput'), work = ref('work'), deck = ref('deck');
 const ASK_URL = import.meta.env.VITE_ASK_URL;
+// Chat analytics context. The session id lives in memory only (new per page load; no cookie, no storage), so no consent
+// banner. randomUUID needs a secure context: on plain http it's undefined and simply left out of the request.
+const SID = crypto.randomUUID?.();
+const refHost = document.referrer && new URL(document.referrer).hostname;
+const REF = refHost !== location.hostname && HOST.test(refHost) ? refHost : undefined;
+// Thumb drawn on the .ic grid (24 box, 1.5 stroke, round caps); thumbs down is the same path turned 180deg.
+const THUMB = 'M3 10h4v10H3zM7 10l3.5-6.5c1.4 0 2.4 1.2 2 2.6L12 10h6.2a1.8 1.8 0 0 1 1.8 2.1l-1.2 6.2a2 2 0 0 1-2 1.7H7';
 
 const state = {
   dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', pin: false, menu: false, modal: -1, busy: false, time: 'UTC+8',
@@ -98,7 +105,7 @@ function renderLog() {
       const cur = el('span', 'cur', null, '_');
       cur.setAttribute('aria-hidden', 'true');
       p.append(cur);
-    }
+    } else if (!you && i === shown.length - 1 && m.id) p.append(rateBox(m));
     return el('div', null, 'display: flex; gap: 12px; align-items: baseline',
       el('span', null, `flex: 0 0 56px; font-family: var(--mono); font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: ${you ? 'var(--mute)' : 'var(--accent)'}`, you ? 'You' : 'Avatar'),
       p);
@@ -137,6 +144,45 @@ function renderModal() {
   }
 }
 
+// Thumbs up/down at the end of the latest Grok answer (local answers have no id, so no rating). Updated in place on
+// a vote, so focus stays on the pressed button and the live log announces only "Thanks.".
+function rateBox(m) {
+  const box = el('span', null, 'display: inline-flex; align-items: center; gap: 12px; margin-left: 12px; vertical-align: middle; font-size: 12px; color: var(--mute)');
+  box.dataset.nofx = '';
+  box.setAttribute('role', 'group');
+  box.setAttribute('aria-label', 'Rate this answer');
+  const btns = [[1, 'Helpful'], [-1, 'Not helpful']].map(([v, label]) => {
+    const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'), path = document.createElementNS(ns, 'path');
+    svg.setAttribute('class', 'ic');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    if (v < 0) svg.style.transform = 'rotate(180deg)';
+    path.setAttribute('d', THUMB);
+    svg.append(path);
+    const b = el('button', 'icb rt', null, svg);
+    b.type = 'button';
+    b.setAttribute('aria-label', label);
+    b.addEventListener('click', () => {
+      if (m.rating) return; // one vote per answer
+      m.rating = v;
+      paint();
+      box.append('Thanks.');
+      log.scrollTop = log.scrollHeight;
+      // fire-and-forget: a lost vote isn't worth an error message
+      fetch(ASK_URL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: m.id, rating: v }) }).catch(() => {});
+    });
+    return [v, b];
+  });
+  const paint = () => btns.forEach(([v, b]) => {
+    b.classList.toggle('on', m.rating === v);
+    b.setAttribute('aria-pressed', String(m.rating === v));
+    if (m.rating) b.setAttribute('aria-disabled', 'true');
+  });
+  paint();
+  box.append(...btns.map(([, b]) => b), ...(m.rating ? ['Thanks.'] : []));
+  return box;
+}
+
 function el(tag, cls, css, ...kids) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -146,18 +192,18 @@ function el(tag, cls, css, ...kids) {
 }
 
 // ---- chat ----
-function setLast(text, busy) {
-  state.msgs[state.msgs.length - 1] = { role: 'bot', text };
+function setLast(text, busy, id) {
+  state.msgs[state.msgs.length - 1] = { role: 'bot', text, id };
   setState({ msgs: state.msgs, busy });
 }
 
-function typeOut(text) {
+function typeOut(text, id) {
   clearInterval(typer);
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setLast(text, false);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return setLast(text, false, id);
   let n = 0;
   typer = setInterval(() => {
     n = Math.min(text.length, n + 3);
-    setLast(text.slice(0, n), n < text.length);
+    setLast(text.slice(0, n), n < text.length, id);
     if (n >= text.length) clearInterval(typer);
   }, 28);
 }
@@ -171,10 +217,11 @@ async function remote(q, history) {
   try {
     const r = await fetch(ASK_URL, {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ q, history }), signal: ctl.signal
+      body: JSON.stringify({ q, history, sid: SID, ref: REF }), signal: ctl.signal
     });
     const j = r.ok ? await r.json() : null;
-    return typeof j?.text === 'string' && j.text.trim() ? j.text.trim() : null;
+    const text = typeof j?.text === 'string' ? j.text.trim() : '';
+    return text ? { text, id: typeof j.id === 'string' ? j.id : undefined } : null;
   } catch {
     return null;
   } finally {
@@ -188,7 +235,8 @@ async function ask(q) {
   const history = state.msgs.slice(-MAX_HISTORY).filter((m) => m.text).map((m) => ({ role: m.role, text: m.text.slice(0, MAX_TEXT) }));
   askInput.value = '';
   setState({ msgs: state.msgs.concat([{ role: 'you', text: q }, { role: 'bot', text: '' }]).slice(-8), busy: true });
-  typeOut((await remote(q, history)) || localAnswer(q));
+  const r = await remote(q, history);
+  typeOut(r?.text || localAnswer(q), r?.id);
 }
 
 function slide(dir) {

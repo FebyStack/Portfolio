@@ -48,6 +48,9 @@ body{margin:0}
 .fbo .icb{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;flex:none;border-radius:999px;border:1px solid var(--line);background:rgba(var(--bgc),.6);color:var(--ink);cursor:pointer;transition:border-color .2s ease,color .2s ease,transform .15s ease}
 .fbo .icb:hover,.fbo .icb.on{border-color:var(--accent);color:var(--accent)}
 .fbo .icb:active{transform:scale(.94)}
+/* chat rating: 32px buttons with a 44px hit area (::after) that takes no layout space */
+.fbo .rt{position:relative;width:32px;height:32px}.fbo .rt::after{content:'';position:absolute;inset:-7px}.fbo .rt .ic{width:16px;height:16px}
+.fbo .rt[aria-disabled=true]{cursor:default;transform:none}.fbo .rt[aria-disabled=true]:not(.on){opacity:.55;border-color:var(--line);color:var(--ink)}
 .fbo .lnk{display:inline-flex;align-items:center;min-height:48px;padding:0 4px;font:500 12px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none;color:var(--mute);background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-repeat:no-repeat;background-position:4px calc(50% + 11px);transition:color .2s ease,background-size .3s ease}
 .fbo .lnk:hover{color:var(--ink);background-size:calc(100% - 8px) 1px}
 .fbo .cut{clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,26px 100%,0 calc(100% - 26px))}
