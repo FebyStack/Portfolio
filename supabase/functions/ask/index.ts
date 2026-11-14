@@ -1,16 +1,19 @@
-// POST { q, history?, sid?, ref? } -> { text, id }: Grok (xAI) proxy for the portfolio avatar. The key never leaves this function.
+// POST { q, history?, sid?, ref? } -> { text, id }: Groq proxy for the portfolio avatar. The key never leaves this function.
 // POST { id, rating } -> { ok: true }: a visitor's thumbs up (1) / down (-1) on that answer.
-// Every ask that reaches xAI writes one public.chat_logs row (supabase/migrations/*_chat_logs.sql), never blocking the reply.
+// Every ask that reaches Groq writes one public.chat_logs row (supabase/migrations/*_chat_logs.sql), never blocking the reply.
 // CORS fails closed: a request carrying an Origin not listed in ALLOWED_ORIGIN (comma-separated; unset = none)
 // gets 403. Requests without Origin (curl, servers) pass, subject to the limits. Local dev: ALLOWED_ORIGIN=http://localhost:5173.
 import { FACTS, PROMPT } from '../_shared/facts.js';
 import { ROLES, validate, validateRating } from '../_shared/validate.js';
 
-// Verified 2026-11-13 against https://docs.x.ai/docs/models and https://docs.x.ai/docs/api-reference
-// (Responses API is the recommended endpoint; Chat Completions is marked deprecated).
-// grok-4.20-0309-non-reasoning: non-reasoning, positioned for speed, cheapest tier of the general chat models.
-const MODEL = Deno.env.get('XAI_MODEL') || 'grok-4.20-0309-non-reasoning';
-const XAI_URL = 'https://api.x.ai/v1/responses';
+// Verified 2026-11-14 against https://console.groq.com/docs/api-reference (Chat Completions; Responses is "beta"),
+// https://console.groq.com/docs/models, https://console.groq.com/docs/deprecations, https://console.groq.com/docs/reasoning,
+// https://console.groq.com/docs/rate-limits (free plan, gpt-oss-120b: 30 RPM, 1K RPD, 8K TPM, 200K TPD; 429 + retry-after)
+// and https://console.groq.com/docs/errors ({ error: { message, type } }).
+// openai/gpt-oss-120b: the larger of the two free-tier production chat models (Llama 3.x was deprecated for free/developer
+// plans 2026-08-16), listed for 81+ languages (MMMLU 81.3%), so it can follow the Bisaya/Tagalog rule in PROMPT.
+const MODEL = Deno.env.get('GROQ_MODEL') || 'openai/gpt-oss-120b';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const ORIGINS = (Deno.env.get('ALLOWED_ORIGIN') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
 const SYSTEM = PROMPT + FACTS.map((f: { a: string }) => '- ' + f.a).join('\n');
 const MAX_BODY = 8192;
@@ -36,14 +39,14 @@ async function db(method: 'POST' | 'PATCH', query: string, row: Record<string, u
 // Outside Supabase's runtime (plain `deno run`) EdgeRuntime is absent and the promise just runs unawaited.
 declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void };
 const later = (p: Promise<void>) => { if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(p); };
-// xAI Responses `usage.input_tokens` / `usage.output_tokens` are integers
-// (https://docs.x.ai/developers/rest-api-reference/inference/responses); anything else is stored as null.
+// Groq Chat Completions `usage.prompt_tokens` / `usage.completion_tokens` are integers
+// (https://console.groq.com/docs/api-reference#chat-create); anything else is stored as null.
 const int = (n: unknown) => (Number.isInteger(n) ? n : null);
 
 // ponytail: in-memory limiter: per IP 10 requests/minute, plus a global cap of 300 requests/hour per
-// isolate (bounds xAI spend even if the IP key is spoofed or rotated). Ceiling: per isolate, resets on
+// isolate (bounds Groq use even if the IP key is spoofed or rotated). Ceiling: per isolate, resets on
 // cold start, so traffic spread across isolates gets more. Upgrade: a Postgres table + RPC
-// (ip, window_start, count) called with the service role before hitting xAI.
+// (ip, window_start, count) called with the service role before hitting Groq.
 const LIMIT = 10, WINDOW_MS = 60_000, MAX_IPS = 5000;
 const GLOBAL_LIMIT = 300, GLOBAL_MS = 3_600_000;
 const hits = new Map<string, { n: number; reset: number }>();
@@ -107,53 +110,58 @@ Deno.serve(async (req) => {
   }
 
   // Trim and drop one pair of wrapping quotes, so a pasted space, newline or "…" can't break the key.
-  const raw = Deno.env.get('XAI_API_KEY') ?? '';
+  const raw = Deno.env.get('GROQ_API_KEY') ?? '';
   let key = raw.trim();
   const trimmed = key !== raw, quoted = /^(["']).*\1$/s.test(key);
   if (quoted) key = key.slice(1, -1).trim();
-  if (!key) { console.error('ask: XAI_API_KEY is not set'); return reply(500, { error: 'Not configured' }); }
+  if (!key) { console.error('ask: GROQ_API_KEY is not set'); return reply(500, { error: 'Not configured' }); }
 
   const id = crypto.randomUUID(), t0 = Date.now();
-  const log = (answer: string | null, error_code: number | null, usage?: { input_tokens?: unknown; output_tokens?: unknown }) =>
+  const log = (answer: string | null, error_code: number | null, data?: { model?: unknown; usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } }) =>
     later(db('POST', '', {
-      id, session_id: input.sid ?? null, question: input.q, answer, status: answer ? 'ok' : 'error', error_code, model: MODEL,
-      latency_ms: Date.now() - t0, input_tokens: int(usage?.input_tokens), output_tokens: int(usage?.output_tokens),
+      id, session_id: input.sid ?? null, question: input.q, answer, status: answer ? 'ok' : 'error', error_code,
+      model: typeof data?.model === 'string' ? data.model : MODEL, // the model Groq says answered
+      latency_ms: Date.now() - t0, input_tokens: int(data?.usage?.prompt_tokens), output_tokens: int(data?.usage?.completion_tokens),
       history_turns: input.history.length, referrer: input.ref ?? null
     }));
 
   try {
-    const r = await fetch(XAI_URL, {
+    const r = await fetch(GROQ_URL, {
       method: 'POST',
       headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
       body: JSON.stringify({
         model: MODEL,
-        instructions: SYSTEM,
-        input: [...input.history.map((m) => ({ role: ROLES[m.role], content: m.text })), { role: 'user', content: input.q }],
-        max_output_tokens: 160,
-        temperature: 0.3,
-        store: false
+        messages: [
+          { role: 'system', content: SYSTEM },
+          ...input.history.map((m) => ({ role: ROLES[m.role], content: m.text })),
+          { role: 'user', content: input.q }
+        ],
+        // gpt-oss always reasons and its reasoning tokens count toward this cap: ~160 for the reply plus headroom for
+        // low-effort reasoning, so a Bisaya/Tagalog answer isn't cut off. include_reasoning false keeps it out of the response.
+        max_completion_tokens: 320,
+        reasoning_effort: 'low',
+        include_reasoning: false,
+        temperature: 0.3
       }),
       signal: AbortSignal.timeout(7000) // under the client's 8s, so the client gets our 502 rather than its own abort
     });
     if (!r.ok) {
-      // xAI's error reason goes to the function logs only (visitor still gets the generic 502): key-like strings redacted, ≤300 chars.
+      // Groq's error reason goes to the function logs only (visitor still gets the generic 502): key-like strings redacted, ≤300 chars.
       let why = '';
-      try { why = (await r.text()).replace(/xai-[A-Za-z0-9*._-]+/g, 'xai-[redacted]').slice(0, 300); } catch { /* logging must not break the reply */ }
+      try {
+        why = (await r.text()).replace(/gsk_[A-Za-z0-9*._-]+/g, 'gsk_[redacted]').replace(/[A-Za-z0-9_-]{32,}/g, '[redacted]').slice(0, 300);
+      } catch { /* logging must not break the reply */ }
       console.error('ask: upstream status', r.status, why);
       // The key's shape only, never its value or any slice of it.
       if (r.status === 400 || r.status === 401) {
-        console.error(`ask: key shape len=${key.length} xai_prefix=${key.startsWith('xai-')} trimmed=${trimmed} quoted=${quoted}`);
+        console.error(`ask: key shape len=${key.length} gsk_prefix=${key.startsWith('gsk_')} trimmed=${trimmed} quoted=${quoted}`);
       }
       log(null, r.status); return reply(502, { error: 'Upstream error' });
     }
     const data = await r.json();
-    const text = (data.output ?? [])
-      .flatMap((o: { type?: string; content?: unknown[] }) => (o.type === 'message' && Array.isArray(o.content) ? o.content : []))
-      .filter((c: { type?: string; text?: unknown }) => c.type === 'output_text' && typeof c.text === 'string')
-      .map((c: { text: string }) => c.text)
-      .join('')
-      .trim();
-    log(text || null, null, data.usage);
+    const content = data.choices?.[0]?.message?.content;
+    const text = typeof content === 'string' ? content.trim() : '';
+    log(text || null, null, data);
     if (!text) return reply(502, { error: 'Upstream error' });
     return reply(200, { text, id });
   } catch (err) {

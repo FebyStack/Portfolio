@@ -25,9 +25,9 @@ create table if not exists public.chat_logs (
 alter table public.chat_logs enable row level security;
 revoke all on public.chat_logs from anon, authenticated;
 
--- ponytail: "unanswered" = the answer contains 'on file' (the system prompt tells Grok to say it does not have that
+-- ponytail: "unanswered" = the answer contains 'on file' (the system prompt tells the model to say it does not have that
 -- on file). Ceiling: a heuristic on wording; misses rephrasings and would flag an answer that quotes the phrase.
--- Upgrade: have the function ask Grok for a structured "answered" flag and store it as a column.
+-- Upgrade: have the function ask the model for a structured "answered" flag and store it as a column.
 
 -- Days are Manila days (UTC+8), the owner's timezone.
 create or replace view public.chat_daily with (security_invoker = true) as

@@ -4,7 +4,7 @@
 // so ties keep the older routes). The question is lowercased and every run of chars other than letters, digits and '-'
 // becomes one space; a keyword matches at a word start ('graduat' hits "graduate", 'live' misses "deliver"), and a
 // trailing space makes it whole-word ('fun ' misses "function"; the space doesn't count toward the >4-char double score).
-// Ceiling: keyword matching, no stemming or synonyms; the Grok path (ask function) is the real answerer.
+// Ceiling: keyword matching, no stemming or synonyms; the model behind the ask function is the real answerer.
 export const FACTS = [
   { k: ['who are', 'yourself', 'introduce', 'your name', 'febriel'], a: 'I’m Febriel B. Otud. I design interfaces, write code, and can run and manage social media. I work out of Dipolog City in the Philippines.' },
   { k: ['febriel', 'your name', 'pronounc', 'nickname', 'bong', 'called bong', 'should i call', 'people call', 'go by'], a: 'People call me Febriel, Feb or Bong. Bong is just a nickname. Febriel is pronounced Feb-real.' },

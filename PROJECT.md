@@ -24,9 +24,9 @@ One-page ASCII portfolio. Source of truth for look and behaviour: `design/Main.d
 - `supabase/functions/_shared/validate.js` — `validate` (ask: `q`, `history?`, `sid?` uuid, `ref?` bare hostname; unknown
   keys refused), `validateRating` (exactly `{ id: uuid, rating: 1|-1 }`), `HOST`, `ROLES`, `MAX_HISTORY`/`MAX_TEXT`; plain JS,
   imported by the edge function, `main.js` and the tests (`validate.test.js` next to it).
-- `supabase/functions/ask/index.ts` — Grok (xAI) proxy. Key stays server-side. Fails closed on Origin; 411 without
+- `supabase/functions/ask/index.ts` — Groq proxy (Chat Completions, `openai/gpt-oss-120b`). Key stays server-side. Fails closed on Origin; 411 without
   content-length; per-IP 10/min + per-isolate 300/hour limits (in memory). One endpoint, two shapes: ask → `{ text, id }`
-  and writes one `chat_logs` row per xAI call; `{ id, rating }` → PATCH that row (only while `rating` is null) → `{ ok: true }`.
+  and writes one `chat_logs` row per Groq call; `{ id, rating }` → PATCH that row (only while `rating` is null) → `{ ok: true }`.
   Writes are plain `fetch` to PostgREST with the injected secret key, after the reply (`EdgeRuntime.waitUntil`); a failed
   write only logs its status.
 - `supabase/migrations/*_chat_logs.sql` — `chat_logs` (RLS on, no policies, revoked from anon/authenticated), dashboard
@@ -66,7 +66,7 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
 - Env: `VITE_ASK_URL` = deployed `ask` function URL. Production builds read it from the committed `.env.production`
   (public config only, never secrets; the one env file un-ignored in `.gitignore`). Dev reads ignored `.env`/`.env.local`
   (see `.env.example`); unset → avatar answers from `localAnswer` only (dev default).
-- Edge function secrets (Supabase, never in repo): `XAI_API_KEY`, optional `XAI_MODEL`, `ALLOWED_ORIGIN` (comma-separated;
+- Edge function secrets (Supabase, never in repo): `GROQ_API_KEY` (`gsk_…`), optional `GROQ_MODEL`, `ALLOWED_ORIGIN` (comma-separated;
   unset → every browser request gets 403; local dev needs `ALLOWED_ORIGIN=http://localhost:5173`). `SUPABASE_URL` and
   `SUPABASE_SECRET_KEYS` (falls back to legacy `SUPABASE_SERVICE_ROLE_KEY`) are injected by Supabase — don't set them.
 - Deploy (Supabase CLI v3 via `npx --yes supabase@latest`; project ref `lsuqyuelsxcawfvbfbmu`, already linked, link state in
@@ -83,6 +83,11 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
 - Palette fixed to Tidal Orchid; the other two palettes stay in CSS (class swap on root) — design tweak, not UI.
 - Design-tool tweak props (glyph, reveal, rain, light, motion) are constants in `main.js`.
 - Chat is non-streamed + typed out client-side: same feel as the design, a fraction of the code.
+- Avatar LLM: Groq, Febriel's choice (he holds a `gsk_` key). Chat Completions, not Responses (beta on Groq). Default
+  `openai/gpt-oss-120b`: Llama 3.x is gone from free/developer plans (2026-08-16), gpt-oss-120b is the larger free-tier
+  production model and multilingual. It always reasons (`reasoning_effort: 'low'`); reasoning counts toward
+  `max_completion_tokens`, hence 320. Free plan: 30 RPM, 1K RPD, 8K TPM, 200K TPD per org; the cached system prompt
+  doesn't count toward them.
 - No page analytics, no cookies → no consent banner. Chat analytics are server-side rows (question, answer, timing,
   tokens, referrer domain, rating), disclosed in the note under the chat; the session id is a per-page-load uuid kept in
   memory only. "Unanswered" = answer contains "on file" (heuristic, matches the system prompt's wording).
@@ -92,4 +97,4 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
   first person, one to three short sentences. `localAnswer` matches keywords at word starts (a trailing space in a keyword =
   whole word, e.g. `'live '`); routes are pinned by `src/chat.test.js`.
 
-last Claude session: 2026-11-14 12:08 (Asia/Manila)
+last Claude session: 2026-11-14 15:28 (Asia/Manila)

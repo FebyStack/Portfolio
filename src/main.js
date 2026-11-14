@@ -154,7 +154,7 @@ function renderModal() {
   }
 }
 
-// Thumbs up/down at the end of the latest Grok answer (local answers have no id, so no rating). Updated in place on
+// Thumbs up/down at the end of the latest Groq answer (local answers have no id, so no rating). Updated in place on
 // a vote, so focus stays on the pressed button and the live log announces only "Thanks.".
 function rateBox(m) {
   const box = el('span', null, 'display: inline-flex; align-items: center; gap: 12px; margin-left: 12px; vertical-align: middle; font-size: 12px; color: var(--mute)');
@@ -224,7 +224,7 @@ function typeOut(text, id) {
 }
 
 // ponytail: non-streaming request, then typed out client-side. Ceiling: no token streaming
-// (the whole reply waits on Grok). Upgrade: SSE from the edge function, setLast per chunk.
+// (the whole reply waits on Groq). Upgrade: SSE from the edge function, setLast per chunk.
 async function remote(q, history) {
   if (!ASK_URL) return null;
   const ctl = new AbortController();
