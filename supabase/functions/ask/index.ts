@@ -131,7 +131,13 @@ Deno.serve(async (req) => {
       }),
       signal: AbortSignal.timeout(7000) // under the client's 8s, so the client gets our 502 rather than its own abort
     });
-    if (!r.ok) { console.error('ask: upstream status', r.status); log(null, r.status); return reply(502, { error: 'Upstream error' }); }
+    if (!r.ok) {
+      // xAI's error reason goes to the function logs only (visitor still gets the generic 502): key-like strings redacted, ≤300 chars.
+      let why = '';
+      try { why = (await r.text()).replace(/xai-[A-Za-z0-9*._-]+/g, 'xai-[redacted]').slice(0, 300); } catch { /* logging must not break the reply */ }
+      console.error('ask: upstream status', r.status, why);
+      log(null, r.status); return reply(502, { error: 'Upstream error' });
+    }
     const data = await r.json();
     const text = (data.output ?? [])
       .flatMap((o: { type?: string; content?: unknown[] }) => (o.type === 'message' && Array.isArray(o.content) ? o.content : []))
