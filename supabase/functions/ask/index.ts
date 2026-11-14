@@ -3,7 +3,7 @@
 // Every ask that reaches Groq writes one public.chat_logs row (supabase/migrations/*_chat_logs.sql), never blocking the reply.
 // CORS fails closed: a request carrying an Origin not listed in ALLOWED_ORIGIN (comma-separated; unset = none)
 // gets 403. Requests without Origin (curl, servers) pass, subject to the limits. Local dev: ALLOWED_ORIGIN=http://localhost:5173.
-import { FACTS, PROMPT } from '../_shared/facts.js';
+import { FACTS, PROMPT, unmark } from '../_shared/facts.js';
 import { ROLES, validate, validateRating } from '../_shared/validate.js';
 
 // Verified 2026-11-14 against https://console.groq.com/docs/api-reference (Chat Completions; Responses is "beta"),
@@ -117,12 +117,12 @@ Deno.serve(async (req) => {
   if (!key) { console.error('ask: GROQ_API_KEY is not set'); return reply(500, { error: 'Not configured' }); }
 
   const id = crypto.randomUUID(), t0 = Date.now();
-  const log = (answer: string | null, error_code: number | null, data?: { model?: unknown; usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } }) =>
+  const log = (answer: string | null, error_code: number | null, data?: { model?: unknown; usage?: { prompt_tokens?: unknown; completion_tokens?: unknown } }, unanswered: boolean | null = null) =>
     later(db('POST', '', {
       id, session_id: input.sid ?? null, question: input.q, answer, status: answer ? 'ok' : 'error', error_code,
       model: typeof data?.model === 'string' ? data.model : MODEL, // the model Groq says answered
       latency_ms: Date.now() - t0, input_tokens: int(data?.usage?.prompt_tokens), output_tokens: int(data?.usage?.completion_tokens),
-      history_turns: input.history.length, referrer: input.ref ?? null
+      history_turns: input.history.length, referrer: input.ref ?? null, unanswered
     }));
 
   try {
@@ -160,8 +160,8 @@ Deno.serve(async (req) => {
     }
     const data = await r.json();
     const content = data.choices?.[0]?.message?.content;
-    const text = typeof content === 'string' ? content.trim() : '';
-    log(text || null, null, data);
+    const { text, unanswered } = unmark(typeof content === 'string' ? content : ''); // [nf] never reaches the visitor
+    log(text || null, null, data, text ? unanswered : null);
     if (!text) return reply(502, { error: 'Upstream error' });
     return reply(200, { text, id });
   } catch (err) {

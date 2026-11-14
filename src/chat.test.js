@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FACTS, FALLBACK, localAnswer } from '../supabase/functions/_shared/facts.js';
+import { FACTS, FALLBACK, localAnswer, unmark } from '../supabase/functions/_shared/facts.js';
 import { validate, MAX_HISTORY, MAX_TEXT } from '../supabase/functions/_shared/validate.js';
 
 const factFor = (word) => FACTS.find((f) => f.k.includes(word)).a;
@@ -87,4 +87,11 @@ test('validate accepts what main.js sends and rejects out-of-bounds payloads', (
   assert.equal(validate({ q: 'hi', history: [{ role: '__proto__', text: 'hi' }] }), null);
   assert.equal(validate({ q: '' }), null);
   assert.equal(validate({ q: 'x'.repeat(241) }), null);
+});
+
+test('unmark strips the [nf] token and flags unanswered replies', () => {
+  assert.deepEqual(unmark(' Wala na sa akong file. [nf] '), { text: 'Wala na sa akong file.', unanswered: true });
+  assert.deepEqual(unmark('Hindi ko alam iyan. [NF]\n'), { text: 'Hindi ko alam iyan.', unanswered: true });
+  assert.deepEqual(unmark('I don’t have that on file.'), { text: 'I don’t have that on file.', unanswered: true });
+  assert.deepEqual(unmark(' Invex is an inventory system. '), { text: 'Invex is an inventory system.', unanswered: false });
 });

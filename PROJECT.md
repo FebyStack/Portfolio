@@ -19,7 +19,7 @@ One-page ASCII portfolio. Source of truth for look and behaviour: `design/Main.d
 - `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (set `video` per project here; optional `links: [[label, url], …]`).
 - `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
   object the engine expects.
-- `supabase/functions/_shared/facts.js` — `FACTS`, `FALLBACK`, `PROMPT`, `localAnswer`. Single
+- `supabase/functions/_shared/facts.js` — `FACTS`, `FALLBACK`, `PROMPT`, `localAnswer`, `unmark`. Single
   source for the avatar's knowledge; imported by both the browser and the edge function.
 - `supabase/functions/_shared/validate.js` — `validate` (ask: `q`, `history?`, `sid?` uuid, `ref?` bare hostname; unknown
   keys refused), `validateRating` (exactly `{ id: uuid, rating: 1|-1 }`), `HOST`, `ROLES`, `MAX_HISTORY`/`MAX_TEXT`; plain JS,
@@ -31,6 +31,7 @@ One-page ASCII portfolio. Source of truth for look and behaviour: `design/Main.d
   write only logs its status.
 - `supabase/migrations/*_chat_logs.sql` — `chat_logs` (RLS on, no policies, revoked from anon/authenticated), dashboard
   views `chat_daily` / `chat_review` / `chat_top_questions` (security_invoker), pg_cron job `chat-logs-retention` (180 days).
+  `*_chat_logs_unanswered.sql` adds the `unanswered` column and repoints the first two views at it.
 
 ## Engine ↔ app contract
 
@@ -90,11 +91,14 @@ and calls `logic.setState({ time })`. App calls `eng.sync()` after every state c
   doesn't count toward them.
 - No page analytics, no cookies → no consent banner. Chat analytics are server-side rows (question, answer, timing,
   tokens, referrer domain, rating), disclosed in the note under the chat; the session id is a per-page-load uuid kept in
-  memory only. "Unanswered" = answer contains "on file" (heuristic, matches the system prompt's wording).
+  memory only. "Unanswered" = `chat_logs.unanswered`: the model ends a reply with `[nf]` when part of the question isn't in
+  the facts (any language); `unmark` strips it before the visitor sees it, with "on file" as fallback (and the views' fallback for
+  older null rows).
   Page analytics, if wanted: a cookieless one (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted, set up later by Febriel.
 - Avatar says only what Febriel has shared (his rule): `PROMPT` forbids guessing or filling gaps; new facts come from him,
-  first person, one to three short sentences. `localAnswer` matches keywords at word starts (a trailing space in a keyword =
+  first person, one to three short sentences. `PROMPT` also pins length (~50 words), voice, all four services, and
+  language by the latest message (Tagalog vs Cebuano hint words; live test had Tagalog answered in Cebuano). `localAnswer` matches keywords at word starts (a trailing space in a keyword =
   whole word, e.g. `'live '`); routes are pinned by `src/chat.test.js`.
 
 last Claude session: 2026-11-14 15:28 (Asia/Manila)
