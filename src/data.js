@@ -32,7 +32,7 @@ export const PROJECTS = [
     links: [['TikTok', 'https://www.tiktok.com/@inkwil0'], ['YouTube', 'https://www.youtube.com/@inkwildanimals']] },
   { id: 'invex', title: 'Invex', shape: 2,
     desc: 'It supports multiple locations, so every branch’s inventory is managed in one dashboard.',
-    role: 'Full-stack', type: 'Inventory system', status: 'School project, team, not live',
+    role: 'Team project', type: 'Full-stack inventory system', status: 'School project, not live',
     more: 'It’s for businesses that keep stock of their products, and it imports and exports Excel and CSV files. We’re looking for businesses to use it.',
     tools: 'Node.js, Express, PostgreSQL with raw SQL (no ORM), JWT, WebSockets, Nodemailer, HTML, CSS, JavaScript and anime.js', image: '', alt: '' },
   { id: 'konsepto', title: 'KONSEPTO Events', shape: 4,

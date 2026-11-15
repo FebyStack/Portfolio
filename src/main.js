@@ -13,15 +13,12 @@ const work = ref('work'), deck = ref('deck');
 const cardLink = (i) => $(`.wkl[href="#work/${PROJECTS[i].id}"]`); // cards carry no id: the browser's own scroll-to-fragment would take focus from the open dialog
 const ARROW = 'M7 17 17 7M8 7h9v9'; // same arrow as the contact section's external links
 
-// The engine reads `busy` (avatar "speaking"; always false since the chat is gone) and pushes `time` every 20 s
-// (nothing displays it, so render() ignores it).
-const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', menu: false, modal: -1, busy: false };
+const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', menu: false, modal: -1 };
 const logic = {
   root: { current: root }, tilt: { current: ref('tilt') }, avatar: { current: ref('avatar') }, stage: { current: null },
   globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') }, skl: { current: ref('skl') }, deck: { current: deck },
   state,
-  props: { mode: 'Dark', glyph: 10, rain: 1, light: 1, motion: 1 },
-  setState
+  props: { mode: 'Dark', glyph: 10, rain: 1, light: 1, motion: 1 }
 };
 let eng = null, dlg = null, shown = -1, copyT = 0;
 let onWork = false; // the history entry under the open project is #work, so a close steps back to it instead of stacking another
@@ -29,7 +26,7 @@ let onWork = false; // the history entry under the open project is #work, so a c
 function setState(patch) {
   Object.assign(state, patch);
   render(Object.keys(patch));
-  eng?.sync(); // engine runs setState({ time }) inside startEngine, before `eng` is assigned
+  eng?.sync(); // null only if startEngine threw: the page still renders without the effects
 }
 
 function render(keys) {
@@ -75,7 +72,7 @@ function renderCat() {
   }
   bind('catKicker').textContent = kicker;
   bind('catTitle').textContent = title;
-  ref('catRows').replaceChildren(...rows.map(([a, b]) => el('div', 'skr', null, el('span', null, null, a), el('span', null, null, b))));
+  ref('catRows').replaceChildren(...rows.map(([a, b]) => el('div', 'skr', el('span', null, a), el('span', null, b))));
 }
 
 /* The project view: a <dialog> cloned in from the template on open and removed on close (the engine reads its mount).
@@ -92,13 +89,14 @@ function renderModal() {
   shown = state.modal;
   if (!m) return;
   const frag = ref('modalTpl').content.cloneNode(true), d = $('[data-modal]', frag), facts = bind('modFacts', frag);
+  d.setAttribute('aria-label', m.title); // not the h3's text: the engine scrambles that while the dialog opens
   bind('modTitle', frag).textContent = m.title;
   bind('modDesc', frag).textContent = m.desc;
   bind('modMore', frag).textContent = m.more;
   facts.append(...[['Role', m.role], ['Type', m.type], ['Tools', m.tools], ['Status', m.status]].filter((f) => f[1])
-    .map(([k, v]) => el('div', null, null, el('dt', null, null, k), el('dd', null, null, v))));
-  if (m.links) facts.after(el('div', 'mlk', null, ...m.links.map(([label, url]) => {
-    const a = el('a', 'btn ghost sm', null, label, icon(ARROW));
+    .map(([k, v]) => el('div', null, el('dt', null, k), el('dd', null, v))));
+  if (m.links) facts.after(el('div', 'mlk', ...m.links.map(([label, url]) => {
+    const a = el('a', 'btn ghost sm', label, icon(ARROW));
     Object.assign(a, { href: url, target: '_blank', rel: 'noopener' });
     a.dataset.scr = '';
     a.setAttribute('aria-describedby', 'nt');
@@ -106,9 +104,11 @@ function renderModal() {
   })));
   const cover = $('canvas[data-cover]', frag);
   if (m.image) cover.replaceWith(img(m)); else cover.dataset.cover = String(m.shape);
-  let downOn = null;
-  d.addEventListener('pointerdown', (e) => { downOn = e.target; });
-  d.addEventListener('click', (e) => { if (e.target === d && downOn === d) d.close(); }); // the backdrop; not a text drag that ends there
+  // the backdrop: pressed and released outside the dialog's box (its own scrollbar is inside it, and so is a text drag's start)
+  const out = (e) => { const r = d.getBoundingClientRect(); return e.target === d && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom); };
+  let downOut = false;
+  d.addEventListener('pointerdown', (e) => { downOut = out(e); });
+  d.addEventListener('click', (e) => { if (downOut && out(e)) d.close(); });
   d.addEventListener('close', () => {
     if (d !== dlg) return;
     if (onWork) history.back(); // the hashchange closes it
@@ -117,7 +117,10 @@ function renderModal() {
   work.append(frag);
   dlg = d;
   d.showModal();
-  work.scrollIntoView({ block: 'start', behavior: 'instant' }); // behind it: the big cover only draws while #work is on screen, and a close lands here
+  // the big cover draws only while #work is on screen: bring it in behind the dialog, but only from off screen (64: the
+  // sticky header), so a card click never moves the page
+  const w = work.getBoundingClientRect();
+  if (w.bottom <= 64 || w.top >= innerHeight) work.scrollIntoView({ block: 'start', behavior: 'instant' });
 }
 
 /* "#work/<id>" opens that project; any other hash (Back, a nav link) closes it */
@@ -142,10 +145,9 @@ function icon(d) {
   return svg;
 }
 
-function el(tag, cls, css, ...kids) {
+function el(tag, cls, ...kids) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
-  if (css) n.style.cssText = css;
   n.append(...kids); // strings become text nodes, never parsed as HTML
   return n;
 }
@@ -167,8 +169,8 @@ const ACTIONS = {
   deckNext: () => slide(1),
   closeModal: () => dlg?.close(),
   copyEmail: () => {
-    const b = act('copyEmail'), a = $('.eml a');
-    const done = () => { b.textContent = 'Copied'; clearTimeout(copyT); copyT = setTimeout(() => { b.textContent = 'Copy'; }, 2000); };
+    const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]'); // the button's text scrambles (reveal, dissolve, hover); this data-nofx span never does
+    const done = () => { b.textContent = live.textContent = 'Copied'; clearTimeout(copyT); copyT = setTimeout(() => { b.textContent = 'Copy'; live.textContent = ''; }, 2000); };
     const pick = () => getSelection().selectAllChildren(a); // clipboard blocked: select it for a manual copy
     try { navigator.clipboard.writeText(a.href.slice(7)).then(done, pick); } catch { pick(); } // href, since the text may be mid-scramble
   }
@@ -195,7 +197,6 @@ pans.forEach((p, i) => {
 PROJECTS.forEach((p, i) => { if (p.image) $('canvas[data-cover]', cardLink(i).closest('.wk')).replaceWith(img(p)); }); // a screenshot replaces the ASCII cover
 render(['dark', 'menu', 'svc', 'cat']);
 eng = startEngine(logic);
-const deep = location.hash;
+// a project link opens on its own entry, with no history writes before the visitor acts (Chrome's Back skips entries
+// pushed without a user gesture, which would take them off the site); closing it then replaces the hash with #work
 route();
-// arrived on a project link: put #work under it, so Back closes the project instead of leaving the site
-if (state.modal >= 0) { history.replaceState(null, '', '#work'); history.pushState(null, '', deep); onWork = true; }

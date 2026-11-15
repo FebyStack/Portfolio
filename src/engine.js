@@ -63,11 +63,6 @@ function sdf(k, x, y, z, t) {
     x2 = x - 0.3; q = Math.sqrt(x2 * x2 + y * y) - 0.5;
     return Math.min(d, Math.sqrt(q * q + z * z) - 0.085);
   }
-  if (k === 5) { /* video: a frame with a play dot */
-    d = Math.max(sdBox(x, y, z, 0.8, 0.5, 0.07, 0.03), -sdBox(x, y, z, 0.62, 0.33, 0.4, 0.02));
-    a = Math.sin(t * 1.1) * 0.06;
-    return Math.min(d, Math.sqrt(x * x + y * y + z * z) - 0.17 - a);
-  }
   /* content and motion: three drops that merge */
   a = t * 0.9;
   x2 = x - 0.38 * Math.cos(a); y2 = y - 0.22 * Math.sin(a * 1.3);
@@ -81,8 +76,8 @@ function sdf(k, x, y, z, t) {
 /* ---------- engine ---------- */
 export function startEngine(logic) {
   var calm = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var E = { t: 0, col: null, dark: true, svc: 0, cat: 'all', modal: -1, speaking: false, speed: 1, rain: 1, light: 1, glyph: 10, themeDirty: true };
-  var raf = 0, last = performance.now(), lastDraw = 0, clockTimer = 0, tick = 0;
+  var E = { t: 0, col: null, dark: true, svc: 0, cat: 'all', modal: -1, speed: 1, rain: 1, light: 1, glyph: 10, themeDirty: true };
+  var raf = 0, last = performance.now(), lastDraw = 0, tick = 0;
   var io = new IntersectionObserver(function (es) {
     for (var i = 0; i < es.length; i++) if (es[i].target.__fboLayer) es[i].target.__fboLayer.vis = es[i].isIntersecting;
   }, { rootMargin: '160px' });
@@ -375,7 +370,7 @@ export function startEngine(logic) {
     if (stamp !== A.stamp) { buildAvatar(); A.stamp = stamp; }
     var g = aGrid, cols = g.cols, rows = g.rows, cw = g.cw, ch = g.ch, x, y, d, idx;
     aIntro = still ? 1 : clamp01(aIntro + (!heroO || heroO.shown ? dt / 1.6 : -dt / 0.75)); /* builds with the hero, scatters as it dissolves */
-    if (!still && now - aBoilAt > (E.speaking ? 70 : 170) / Math.max(0.25, E.speed) && E.speed > 0) { aBoil = (aBoil + 1) % 3; aBoilAt = now; }
+    if (!still && now - aBoilAt > 170 / Math.max(0.25, E.speed) && E.speed > 0) { aBoil = (aBoil + 1) % 3; aBoilAt = now; }
     var tx = A.inside ? A.px / w : 0.5 + 0.2 * Math.cos(E.t * 0.45), ty = A.inside ? A.py / h : 0.42 + 0.14 * Math.sin(E.t * 0.6);
     var k = still ? 1 : 1 - Math.pow(0.0015, dt);
     aSx += (tx - aSx) * k; aSy += (ty - aSy) * k;
@@ -758,7 +753,7 @@ export function startEngine(logic) {
     var st = logic.state, p = logic.props;
     var dark = st.dark == null ? (p.mode ?? 'Dark') !== 'Light' : st.dark;
     if (dark !== E.dark) { E.dark = dark; A.stamp = ''; for (var i = 0; i < covers.length; i++) covers[i].__fboC.drawn = false; }
-    E.svc = st.svc; E.speaking = st.busy;
+    E.svc = st.svc;
     E.speed = p.motion ?? 1; E.rain = p.rain ?? 1; E.light = p.light ?? 1; E.glyph = Math.round(p.glyph ?? 10);
     E.themeDirty = true;
     bind();
@@ -766,13 +761,7 @@ export function startEngine(logic) {
     if (st.cat !== E.cat) { E.cat = st.cat; slotGroup(); decode(logic.skl.current, 520); }
     if (st.modal !== E.modal) { E.modal = st.modal; if (st.modal >= 0 && rootEl) decode(rootEl.querySelector('[data-modal]'), 600); }
   }
-  function clock() {
-    var s = '';
-    try { s = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Manila' }) + ' PHT'; } catch (err) { s = 'UTC+8'; }
-    if (s !== logic.state.time) logic.setState({ time: s });
-  }
-  sync(); clock();
-  clockTimer = setInterval(clock, 20000);
+  sync();
   if (document.fonts && document.fonts.load) {
     document.fonts.load(monoFont(12)).then(function () { A.stamp = ''; }, function () {});
   }
@@ -780,7 +769,7 @@ export function startEngine(logic) {
   return {
     sync: sync,
     stop: function () {
-      cancelAnimationFrame(raf); clearInterval(clockTimer); endFx();
+      cancelAnimationFrame(raf); endFx();
       hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null); io.disconnect(); ro.disconnect(); if (pNear) pNear.disconnect();
       if (rootEl) rootEl.removeEventListener('pointerover', onOver);
       for (var i = 0; i < secs.length; i++) { var o = secs[i]; o.el.removeEventListener('pointermove', o.move); o.el.removeEventListener('pointerleave', o.leave); o.el.removeEventListener('focusin', o.focus); o.el.removeAttribute('data-fx'); clearTimeout(o.pin); o.el.style.height = ''; o.el.__fboSec = null; }

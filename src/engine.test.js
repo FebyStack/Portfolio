@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import { clamp01, smooth, scrChar, sdf, inView } from './engine.js';
 
 test('inView: in at 160px (or a third of a short section or viewport), out under 60% of that', () => {
-  // Work at 1440x900 (785px tall): the 180px that peek into the first screen reveal it
-  assert.equal(inView(false, 180, 900, 785), true);
-  assert.equal(inView(false, 159, 900, 785), false); assert.equal(inView(false, 160, 900, 785), true);
-  assert.equal(inView(true, 96, 900, 785), true); assert.equal(inView(true, 95, 900, 785), false);
+  // Work at 1440x900 (~790px tall): the ~174px that peek into the first screen reveal it
+  assert.equal(inView(false, 174, 900, 790), true);
+  assert.equal(inView(false, 159, 900, 790), false); assert.equal(inView(false, 160, 900, 790), true);
+  assert.equal(inView(true, 96, 900, 790), true); assert.equal(inView(true, 95, 900, 790), false);
   // tall section (3000 > 812): still 160px, not a share of the section
   assert.equal(inView(false, 159, 812, 3000), false); assert.equal(inView(false, 160, 812, 3000), true);
   // short section (300px): a third of it, 100px; out under 60px
@@ -15,11 +15,11 @@ test('inView: in at 160px (or a third of a short section or viewport), out under
   // short viewport (landscape phone, 360px): a third of it, so a tall section can still get there
   assert.equal(inView(false, 119, 360, 3000), false); assert.equal(inView(false, 120, 360, 3000), true);
   // between the two lines the state holds, so the edge can't flicker
-  for (const v of [96, 120, 159]) { assert.equal(inView(true, v, 900, 785), true); assert.equal(inView(false, v, 900, 785), false); }
+  for (const v of [96, 120, 159]) { assert.equal(inView(true, v, 900, 790), true); assert.equal(inView(false, v, 900, 790), false); }
 });
 
 test('sdf: finite, inside at the core of solid shapes, outside far away', () => {
-  for (let k = 0; k <= 5; k++) {
+  for (let k = 0; k <= 4; k++) {
     for (const t of [0, 1.3, 7]) {
       const far = sdf(k, 3, 3, 3, t);
       assert.ok(Number.isFinite(far) && far > 0, `k=${k} t=${t} far=${far}`);
