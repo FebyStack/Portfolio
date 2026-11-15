@@ -2,7 +2,9 @@
 @font-face{font-family:"Gambetta";src:url(/fonts/gambetta-italic.woff2) format("woff2");font-weight:300 700;font-style:italic;font-display:swap}
 @font-face{font-family:"Switzer";src:url(/fonts/switzer.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
 @font-face{font-family:"Geist Mono";src:url(/fonts/geist-mono.woff2) format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
-html{scroll-behavior:smooth}
+/* scroll-padding: anchors and keyboard focus land below the 64px sticky header; the open project view freezes the page behind it */
+html{scroll-behavior:smooth;scroll-padding-top:80px;scrollbar-gutter:stable}
+html:has(.modal[open]){overflow:hidden}
 body{margin:0}
 .fbo{--serif:"Gambetta","Iowan Old Style","Palatino Linotype",Georgia,serif;--sans:"Switzer","Helvetica Neue",Arial,sans-serif;--mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;--pad:clamp(20px,5vw,72px);background-color:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;background-image:radial-gradient(var(--grain) 0.7px,transparent 1px),radial-gradient(var(--grain) 0.6px,transparent 0.9px);background-size:7px 7px,11px 11px;background-position:0 0,3px 5px;transition:background-color .5s ease,color .5s ease}
 .fbo *{box-sizing:border-box}
@@ -12,7 +14,7 @@ body{margin:0}
 .fbo.pal-moss.is-light{--bg:#EAE6D6;--bg2:#DED9C5;--line:#C4BEA6;--ink:#16241A;--mute:#51614F;--accent:#B83A17;--on-accent:#FFF3EC;--shade:22,36,26;--bgc:234,230,214;--grain:rgba(22,36,26,.06);--glow:rgba(184,58,23,.08)}
 .fbo.pal-navy.is-dark{--bg:#0A1428;--bg2:#12203B;--line:#22304F;--ink:#E6E8EC;--mute:#93A0B8;--accent:#7FD4F0;--on-accent:#04202B;--shade:10,20,40;--bgc:10,20,40;--grain:rgba(230,232,236,.045);--glow:rgba(127,212,240,.09)}
 .fbo.pal-navy.is-light{--bg:#ECEEF0;--bg2:#DFE3E8;--line:#C3CAD3;--ink:#0E1A33;--mute:#4E5A72;--accent:#1746C7;--on-accent:#F1F5FF;--shade:14,26,51;--bgc:236,238,240;--grain:rgba(14,26,51,.06);--glow:rgba(23,70,199,.08)}
-.fbo a{color:var(--ink)}
+.fbo a{color:var(--ink);text-decoration-thickness:1px;text-underline-offset:.22em}
 .fbo a:hover{color:var(--accent)}
 .fbo ::selection{background:var(--accent);color:var(--on-accent)}
 .fbo :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
@@ -27,10 +29,11 @@ body{margin:0}
 .fbo .icb.mnb{display:none}
 .fbo .mnu{position:absolute;top:100%;left:0;right:0;display:flex;flex-direction:column;padding:6px var(--pad) 18px;background:rgba(var(--bgc),.97);border-bottom:1px solid var(--line)}
 .fbo .mnu a{display:flex;align-items:center;min-height:54px;border-top:1px solid var(--line);font:500 14px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none}
-.fbo .sec{position:relative;min-height:calc(min(100vh,900px) - 64px);display:flex;align-items:center;scroll-margin-top:64px;overflow:hidden}
+/* sections size to their content; .wrap gives them the same vertical rhythm */
+.fbo .sec{position:relative;overflow:hidden}
 .fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,72%) var(--my,0%),var(--glow),transparent 64%)}
 .fbo .amb{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
-.fbo .wrap{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:30px var(--pad)}
+.fbo .wrap{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:96px var(--pad)}
 .fbo .fxb{transition:opacity .9s cubic-bezier(.16,1,.3,1),filter .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
 /* leaving: the reveal's curve reversed (holds, then goes), so the text is seen scrambling before it fades */
 .fbo [data-fx="wait"] .fxb{opacity:0;filter:blur(10px);transform:translateY(18px);transition-duration:.75s;transition-timing-function:cubic-bezier(.7,0,.84,0)}
@@ -60,8 +63,10 @@ body{margin:0}
 .fbo .hc{container-type:inline-size;display:flex;flex-direction:column;gap:18px;min-width:0}
 .fbo .nm{margin:0 0 8px;font:300 min(8vw,128px,15cqi)/.95 var(--serif);letter-spacing:-.03em;white-space:nowrap}
 .fbo .nm em{color:var(--accent)}
-.fbo .vp{margin:0;max-width:32ch;font:300 clamp(22px,2.1vw,30px)/1.22 var(--serif);letter-spacing:-.01em;text-wrap:balance}
+.fbo .vp{margin:0;max-width:32ch;font:400 clamp(22px,2.1vw,30px)/1.22 var(--serif);letter-spacing:-.01em;text-wrap:balance}
 .fbo .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.fbo .proof{margin:0;font-size:15px;color:var(--mute)}
+.fbo .proof a{white-space:nowrap}
 .fbo .av{position:relative;z-index:3;width:var(--avw);aspect-ratio:1/1}
 /* the portrait map's alpha is its subject mask: this page-coloured plate keeps the ambient rain out of the bust */
 .fbo .plate{position:absolute;inset:0;background:var(--bg);-webkit-mask:url(/img/avatar-map.png) center/100% 100% no-repeat;mask:url(/img/avatar-map.png) center/100% 100% no-repeat;transition:background-color .5s ease}
@@ -102,25 +107,41 @@ from{opacity:0;transform:translateY(10px)}
 /* work: a deck on an arc */
 .fbo .deck{position:relative;display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x proximity;width:100vw;margin:0 calc(50% - 50vw);padding:40px calc(50vw - 50%) 72px;scrollbar-width:none;transform:translate3d(0,calc(var(--sp,0)*-24px),0)}
 .fbo .deck::-webkit-scrollbar{display:none}
-.fbo .wk{flex:0 0 clamp(250px,24vw,326px);scroll-snap-align:center;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer;transform:translateY(calc(var(--o,0)*var(--o,0)*24px)) rotate(calc(var(--o,0)*3deg));will-change:transform}
-.fbo .wki{display:flex;flex-direction:column;height:100%;background:var(--bg2);transition:transform .35s cubic-bezier(.16,1,.3,1)}
-.fbo .wk:hover .wki,.fbo .wk:focus-visible .wki{transform:translateY(-10px)}
+/* a card is an article whose one link ("View …") covers it, so the whole card opens the project; its focus ring is the card's */
+.fbo .wk{flex:0 0 clamp(250px,24vw,326px);scroll-snap-align:center;transform:translateY(calc(var(--o,0)*var(--o,0)*24px)) rotate(calc(var(--o,0)*3deg));will-change:transform}
+.fbo .wk:has(.wkl:focus-visible){outline:2px solid var(--accent);outline-offset:3px}
+.fbo .wki{position:relative;display:flex;flex-direction:column;height:100%;background:var(--bg2);transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.fbo .wk:hover .wki,.fbo .wk:focus-within .wki{transform:translateY(-10px)}
 .fbo .wkc{position:relative;height:168px;border-bottom:1px solid var(--line)}
-.fbo .wkc canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.fbo .ply{position:absolute;right:16px;bottom:14px;display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px 0 10px;border-radius:999px;background:var(--ink);color:var(--bg);font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;transition:background-color .2s ease,color .2s ease}
-.fbo .wk:hover .ply{background:var(--accent);color:var(--on-accent)}
-.fbo .ply .ic{width:16px;height:16px;fill:currentColor;stroke:none}
+.fbo .wkc canvas,.fbo .wkc img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
+.fbo .wkl{display:inline-flex;align-items:center;gap:8px;margin-top:4px;font:500 12px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none;transition:color .2s ease}
+.fbo .wkl::after{content:"";position:absolute;inset:0}
+.fbo .wkl:focus-visible{outline:0}
+.fbo .wk:hover .wkl{color:var(--accent)}
+.fbo .wkl .ic{width:16px;height:16px}
 .fbo .wkb{display:flex;flex-direction:column;gap:10px;padding:20px 24px 24px;flex:1}
 .fbo .wkb h3{margin:0;font-family:var(--serif);font-weight:400;font-size:clamp(24px,2.1vw,30px);line-height:1.1;letter-spacing:-.02em}
 .fbo .wkb p{margin:0;font-size:15.5px;line-height:1.5;color:var(--mute);flex:1}
 .fbo .tg{font-family:var(--mono);font-size:12px;letter-spacing:.04em}
-.fbo .modal{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:20px;animation:fbo-in .35s both}
-.fbo .mbg{position:absolute;inset:0;border:0;padding:0;background:rgba(var(--bgc),.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);cursor:pointer}
-.fbo .mbox{position:relative;width:min(1080px,100%);max-height:100%;overflow:auto;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);background:var(--bg2)}
+/* project view: a native modal <dialog> (top layer, focus trap, Escape); the page behind shows through ::backdrop */
+.fbo .modal{width:min(1080px,calc(100% - 40px));max-width:none;max-height:calc(100% - 40px);padding:0;border:0;background:none;color:var(--ink);animation:fbo-in .35s both}
+.fbo .modal::backdrop{background:rgba(var(--bgc),.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.fbo .mbox{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);background:var(--bg2)}
 .fbo .mvid{position:relative;aspect-ratio:16/9;background:var(--bg);margin:14px}
-.fbo .mvid canvas,.fbo .mvid video{position:absolute;inset:0;width:100%;height:100%;display:block}
-.fbo .mvid video{object-fit:contain;background:#000}
+.fbo .mvid canvas,.fbo .mvid img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain}
 .fbo .minf{display:flex;flex-direction:column;gap:14px;padding:30px 30px 30px 14px}
+.fbo .minf p{margin:0}
+.fbo .mtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.fbo .mdl{display:flex;flex-direction:column;gap:10px;margin:4px 0 0;padding-top:16px;border-top:1px solid var(--line)}
+.fbo .mdl div{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px}
+.fbo .mdl dt{font:500 12px/1.9 var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.fbo .mdl dd{margin:0;font-size:15.5px;line-height:1.45}
+.fbo .mlk{display:flex;flex-wrap:wrap;gap:12px}
+/* contact: Messenger alone as the primary, then email (text + copy), LinkedIn, Instagram, GitHub */
+.fbo .ctm{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.fbo .ctm p{margin:0;color:var(--mute)}
+.fbo .cta{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.fbo .eml{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-right:12px}
 /* about */
 .fbo .abp{--abh:min(560px,68vh);position:relative;height:var(--abh);min-height:320px}
 .fbo .abg{position:absolute;z-index:3;left:50%;top:0;font-family:var(--serif);font-style:italic;font-weight:300;font-size:calc(var(--abh) * .26);line-height:.9;letter-spacing:-.03em;color:transparent;-webkit-text-stroke:1px var(--mute);white-space:nowrap;pointer-events:none;transform:translate3d(calc(-50% + var(--px,0)*-10px),calc(var(--sp,0)*24px),0)}
@@ -146,13 +167,14 @@ from{opacity:0;transform:translateY(10px)}
 @media (max-width:820px){
 .fbo .navl{display:none}
 .fbo .icb.mnb{display:inline-flex}
-.fbo .sec{min-height:0}
 .fbo .wrap{padding:56px var(--pad)}
 .fbo .stg{--avw:min(100%,320px);grid-template-columns:minmax(0,1fr)}
 .fbo .nm{font-size:clamp(56px,8vw,128px)}
 .fbo .nm em{display:block}
 .fbo .av{justify-self:center}
-.fbo .hero-cta .btn,.fbo .cta .btn{flex:1 1 100%;padding:0 16px}
+.fbo .hero-cta .btn{flex:1 1 100%;padding:0 16px}
+.fbo .ctm{align-items:stretch}
+.fbo .cta>.btn{flex:1 1 auto}
 .fbo .pans{flex-direction:column;height:auto;min-height:0}
 .fbo .pan,.fbo .pan.on{flex:none}
 .fbo .pan:not(.on) .ph{height:auto;flex-direction:row;justify-content:flex-start;gap:16px;padding:20px 22px}
@@ -167,7 +189,7 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .deck{transform:none}
 .fbo .dnav{display:none}
 .fbo .abp{--abh:calc(min(100vw - 2 * var(--pad), 440px) * 1.2);height:var(--abh)}
-.fbo .modal{padding:10px;align-items:flex-start}
+.fbo .modal{width:calc(100% - 20px);max-height:calc(100% - 20px)}
 }
 /* 320px phones: the theme pill drops its word (its aria-label still names the action) so the header CTA fits */
 @media (max-width:360px){
