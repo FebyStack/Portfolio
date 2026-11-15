@@ -38,7 +38,7 @@ function render(keys) {
     root.classList.toggle('is-dark', state.dark);
     root.classList.toggle('is-light', !state.dark);
     bind('modeLabel').textContent = state.dark ? 'Dark' : 'Light';
-    act('toggleMode').setAttribute('aria-label', state.dark ? 'Switch to light mode' : 'Switch to dark mode');
+    act('toggleMode').setAttribute('aria-label', state.dark ? 'Dark mode, switch to light' : 'Light mode, switch to dark'); // starts with the visible word (WCAG 2.5.3)
     document.querySelector('meta[name="theme-color"]').content = getComputedStyle(root).getPropertyValue('--bg').trim();
   }
   if (has('menu')) {

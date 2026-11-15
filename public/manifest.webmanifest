@@ -1,0 +1,11 @@
+{
+  "name": "Febriel B. Otud",
+  "short_name": "Febriel",
+  "start_url": "/",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "theme_color": "#08191D",
+  "background_color": "#08191D"
+}

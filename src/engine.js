@@ -24,10 +24,9 @@ function scrChar(c, r) {
   if (c.toLowerCase() !== c.toUpperCase()) return 'clodxk'.charAt(Math.floor(r * 6));
   return ".',;:".charAt(Math.floor(r * 5));
 }
-/* a section reveals once more than a third of what can be on screen of it is visible (the shorter of the
-   viewport and the section, so tall sections count in viewport heights and short ones can't get stuck),
-   and dissolves again under a quarter; the gap between the two keeps it from flickering at the edge */
-function inView(shown, seen, vh, h) { var m = Math.min(vh, h); return shown ? seen >= m / 4 : seen > m / 3; }
+/* a section reveals once 160px of it is on screen (a third of it, or of the viewport, when that is less, so it can
+   always get there) and dissolves only when clearly less is left, under 60% of that; the gap stops edge flicker */
+function inView(shown, seen, vh, h) { var r = Math.min(160, Math.min(vh, h) / 3); return seen >= (shown ? 0.6 * r : r); }
 
 /* ---------- 3D shapes (signed distance) ---------- */
 function sdBox(x, y, z, bx, by, bz, r) {
@@ -182,7 +181,7 @@ export function startEngine(logic) {
   function endFx() { for (var i = 0; i < fx.length; i++) if (fx[i].node.nodeValue === fx[i].last) fx[i].node.nodeValue = fx[i].orig; fx.length = 0; }
 
   /* ----- sections: ghost reveal (and dissolve, so it replays), ASCII rain, ASCII light, scroll and pointer parallax ----- */
-  var secs = [];
+  var secs = [], hdr = logic.root.current && logic.root.current.querySelector('header');
   var ro = new IntersectionObserver(function (es) {
     for (var i = 0; i < es.length; i++) {
       var e = es[i], o = e.target.__fboSec; if (!o) continue;
@@ -195,7 +194,7 @@ export function startEngine(logic) {
       if (!o.vis && o.q < 1) { o.q = 1; o.veil = 0; if (o.cv) o.cv.width = 0; }
     }
   /* ponytail: 1% steps fire the rule within ~1% of a section's height (≈30px on a 3000px one); exact edges would need per-section rootMargin observers */
-  }, { threshold: Array.from({ length: 101 }, function (_, j) { return j / 100; }) });
+  }, { threshold: Array.from({ length: 101 }, function (_, j) { return j / 100; }), rootMargin: -(hdr ? hdr.offsetHeight : 0) + 'px 0px 0px 0px' }); /* what sits under the sticky header isn't on screen */
   function show(o) {
     o.shown = true; o.q = 1;
     o.el.removeAttribute('data-fx');
@@ -528,7 +527,12 @@ export function startEngine(logic) {
 
   /* ----- about: the real photo; its edges dissolve into ASCII ----- */
   var Ph = makeLayer(false), pImg = null, pGrid = null, pBuf = document.createElement('canvas'), pIntro = 0, pHov = 0, pCx = 0.5, pCy = 0.5, aboutO = null;
-  loadImage(PHOTO_URL, function (im) { pImg = im; Ph.stamp = ''; });
+  /* the photo is fetched once it comes within a screen of the viewport, not at startup (bind() observes it) */
+  var pNear = new IntersectionObserver(function (es) {
+    if (!es.some(function (e) { return e.isIntersecting; })) return;
+    pNear.disconnect(); pNear = null;
+    loadImage(PHOTO_URL, function (im) { pImg = im; Ph.stamp = ''; });
+  }, { rootMargin: '0px 0px 100% 0px' });
   function buildPhotoGrid() {
     var fs = Math.max(8, E.glyph - 1), ctx = Ph.ctx, i, x, y, j, k;
     ctx.font = monoFont(fs);
@@ -723,10 +727,14 @@ export function startEngine(logic) {
   }
   function bind() {
     hold(A, logic.avatar.current); hold(S, logic.stage.current); hold(Gl, logic.globe.current); hold(Td, logic.tide.current); hold(Ph, logic.photo.current);
+    if (pNear && Ph.el) pNear.observe(Ph.el);
     var r = logic.root.current;
     if (r !== rootEl) { if (rootEl) rootEl.removeEventListener('pointerover', onOver); rootEl = r; if (rootEl) rootEl.addEventListener('pointerover', onOver); }
     scan(); scanCovers();
   }
+  /* ponytail: every layer draws with fillText on the main thread (whole rows where it can). Ceiling: about 3-7 ms per
+     draw on a fast Mac, so several times that on a mid-range phone. Upgrade path: a glyph atlas (RAMP pre-rendered per
+     colour, blitted with drawImage), or this loop in an OffscreenCanvas worker. */
   function frame(now) {
     raf = requestAnimationFrame(frame);
     if (fx.length) stepFx(now);
@@ -773,7 +781,7 @@ export function startEngine(logic) {
     sync: sync,
     stop: function () {
       cancelAnimationFrame(raf); clearInterval(clockTimer); endFx();
-      hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null); io.disconnect(); ro.disconnect();
+      hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null); io.disconnect(); ro.disconnect(); if (pNear) pNear.disconnect();
       if (rootEl) rootEl.removeEventListener('pointerover', onOver);
       for (var i = 0; i < secs.length; i++) { var o = secs[i]; o.el.removeEventListener('pointermove', o.move); o.el.removeEventListener('pointerleave', o.leave); o.el.removeEventListener('focusin', o.focus); o.el.removeAttribute('data-fx'); clearTimeout(o.pin); o.el.style.height = ''; o.el.__fboSec = null; }
       secs.length = 0;

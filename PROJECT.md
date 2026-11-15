@@ -18,10 +18,22 @@ numbers, dates, results or quotes.
   (diffable against the design); the 2026-11-15 hero uses classes in `styles.css` instead.
 - `src/styles.css` — the design's `<helmet><style>`, verbatim, fonts/images repointed to `/fonts`, `/img`, plus the
   2026-11-15 rules (hero, header CTA, section padding, work cards, project dialog, contact rows).
+  - Type scale (2026-11-15, P2-11): every text size is a token on `.fbo`, used by the CSS and by `index.html`'s inline
+    styles. `--fs-xs` 12px (Geist Mono labels, tags, links, buttons, marquee) · `--fs-sm` 14px (mono notes: logo, menu,
+    hints, tool rows; the proof line) · `--fs-md` 17px (Switzer reading text, line-height 1.5; closed service tabs) ·
+    `--fs-lg` `clamp(22px,2.1vw,30px)` (offer line, About statement, card, panel and project titles) · `--fs-xl`
+    `clamp(36px,4vw,60px)` (section headings) · `--fs-2xl` `clamp(40px,5.6vw,84px)` (the contact line) · `--fs-name`
+    `min(8vw,128px,15cqi)`, ≤820px `clamp(56px,8vw,128px)` (the name). `--measure: 40ch` caps Switzer paragraphs at about
+    46–52 characters, the brand plan's line length (`ch` is the width of "0", so 52ch rendered 59–73). Light 300 only for
+    the name; headings and the About statement are Gambetta 400. The outlined "Febriel" behind the About photo (`.abg`) is
+    artwork sized to the photo, outside the scale. `text-wrap: balance` on h1–h3, `pretty` on paragraphs (`.vp` balance).
 - `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal and the portrait below.
   Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
-  - Section reveals replay (2026-11-15, owner): `inView()` (tested) reveals a `[data-sec]` once over 1/3 of
-    min(viewport, section height) is on screen and dissolves it under 1/4 (hysteresis, so no flicker). Dissolve =
+  - Section reveals replay (2026-11-15, owner): `inView()` (tested) reveals a `[data-sec]` once 160px of it is on
+    screen (a third of the section or of the viewport when that is less, so it can always get there) and dissolves it
+    under 60% of that, 96px (hysteresis, so no flicker). The section observer's `rootMargin` drops the strip under the
+    sticky header (its height, read once at start), so "on screen" means below the header and a section leaving upward
+    still shows its dissolve. Dissolve =
     the reveal in reverse: text scrambles back (`decode(el, 800, true)`; an opposite effect on a node is replaced and hands
     over its original text), the ambient veil swells and clears (sin envelope, 0.75 s) while rain/light fade, the hero
     portrait and about photo intros run backwards, content fades via `[data-fx=wait]` (0.75 s, the reveal's curve reversed).
@@ -29,10 +41,14 @@ numbers, dates, results or quotes.
     while its text plays (scrambled glyphs rewrap on phones); `sync()` drops pins since app changes win. No dissolve
     while the work modal is open or keyboard focus (`:focus-visible`) is inside; `focusin` reveals a hidden section.
     Reduced motion: unchanged (content always visible, no veil/decode/dissolve).
-    Re-checked after sections became content-sized (2026-11-15): still no flicker, dissolve and replay work. Side effect:
-    at 1440×900 the top ~180px of Work peeks under the marquee and stays blank until ~80px more is scrolled (785px section,
-    reveal at >1/3). Fix if wanted: cap m at ~480px in `inView` (reveal at 160px, dissolve under 120px), which also
-    makes sections dissolve later, so it was left for the owner to decide.
+    Checked 2026-11-15 after the 160px rule (headless Chrome, 1440×900 and 375×812): at 1440×900 the 173px of Work under
+    the marquee reveal on the first screen; every section reveals and dissolves once per pass down and up; a 12× jiggle
+    across a reveal line toggles once; no console errors.
+  - About photo (2026-11-15, P1-10): fetched by a one-shot IntersectionObserver once the photo canvas is within one
+    viewport of the screen (`rootMargin` 100% at the bottom), not at startup (first request at scrollY 1440 of 3880 on
+    1440×900).
+  - `ponytail:` note in `frame()`: every layer draws with `fillText`; ceiling about 3–7 ms per draw on a fast Mac.
+    Upgrade path: a glyph atlas or an OffscreenCanvas worker (not done).
   - Hero portrait (2026-11-15, owner): ASCII only, a head-and-shoulders bust. The hover/tap ink reveal and its
     "Show the drawing" pin are gone; the 3D tilt and the pointer accent (a small accent-glyph cloud at the pointer,
     drifting on its own when nobody points) stay.
@@ -70,7 +86,10 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
   follow that order). `footer` sits after `main`, still inside the root. Skip link targets `#main`. Sections size to their
   content: `.wrap` padding 96px (56px ≤820px), no min-height. `html{scroll-padding-top:80px}` keeps anchors and keyboard
   focus clear of the 64px sticky header (so `.sec` has no scroll-margin).
-  Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint.
+  Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint,
+  and with nothing stored follows the OS (`prefers-color-scheme: light` → light, otherwise the markup's dark default).
+  `state.dark` reads that class, so script and app agree; `render` then sets `theme-color`. The theme pill's `aria-label`
+  starts with its visible word (WCAG 2.5.3): "Dark mode, switch to light" / "Light mode, switch to dark".
 - Refs: `[data-ref="…"]` — `tilt avatar globe tide photo skl deck work menu catRows modalTpl`.
 - Text bindings: `[data-bind="…"]` — `modeLabel catKicker catTitle`; in the project view: `modTitle modDesc modMore modFacts`.
 - Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu deckPrev deckNext closeModal copyEmail`.
@@ -123,7 +142,7 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
 
 ## Decisions / dead-ends
 
-- Canonical, `og:url`, JSON-LD `url`, `public/sitemap.xml` and the robots `Sitemap:` line are hardcoded to
+- Canonical, `og:url`, `og:image`, JSON-LD `url` (ProfilePage and its Person), `public/sitemap.xml` and the robots `Sitemap:` line are hardcoded to
   `https://febrielportfolio.vercel.app/` (an env placeholder once shipped as a literal). Change all five if the domain changes.
 - Palette fixed to Tidal Orchid; the other two palettes stay in CSS (class swap on root) — design tweak, not UI.
 - Design-tool tweak props (glyph, rain, light, motion) are constants in `main.js`.
@@ -147,7 +166,7 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
   owner (set `image` in `data.js`). No prices on the site.
 - Hero (2026-11-15, second pass): 5 text elements (name, offer line in Gambetta 400, supporting line "Taking freelance
   and part-time projects now. Remote, or on-site in Dipolog and Dapitan. I reply within two hours.", both buttons, proof
-  line under them). Messenger button measured at y 462–518 on 375×812 (fold 812).
+  line under them). Messenger button measured at y 462–518 on 375×812 (fold 812); 443–499 after the type scale.
 - Copy pass (2026-11-15, P2-12): each fact once. "Dipolog City" only in the About "Based in" tile (the hero says the
   Dipolog and Dapitan area); student status (third-year BS Information Systems, JRMSU Main Campus, Dapitan City,
   graduating 2028) only in the About paragraph; The Sev Clinic only in Work (About's "Currently" and "Studying" tiles
@@ -157,5 +176,23 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
 - No analytics (owner's decision): no page analytics, no cookies → no consent banner. If ever wanted: a cookieless one
   (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted.
+- Caching (2026-11-15, P1-10): `vercel.json` headers. `/assets/(.*)` (Vite-hashed) `public, max-age=31536000, immutable`;
+  `/fonts/(.*)` and `/img/(.*)` (not hashed, replaced in place) `public, max-age=86400, stale-while-revalidate=604800`;
+  everything else Vercel's default. Format: https://vercel.com/docs/project-configuration/vercel-json#headers (`$schema`
+  set). A changed font or image can stay cached for a day; rename the file if it must show at once.
+- Font preloads: the four faces the first screen paints with (Gambetta roman and italic, Geist Mono, Switzer), each href
+  identical to its `@font-face` src (checked on the build: one request per font, no unused-preload warning).
+- Share image and icons (2026-11-15, P2-13): `public/og.png` 1200×630, 138 KB (logo, name with the orchid italic surname,
+  offer line, the ASCII bust drawn by `engine.js`); `og:image` with width/height/alt, `twitter:card` summary_large_image.
+  `favicon.svg` kept; `favicon.ico` (16 + 32 PNG entries), `apple-touch-icon.png` (180, full bleed),
+  `manifest.webmanifest` (name, short_name, start_url, the SVG and 180 icons, theme/background #08191D). The PNGs were
+  rendered with headless Chrome in Geist Mono (the SVG falls back to the system mono); og.png from a scratch page that runs
+  `startEngine` with only `avatar` set, under `--force-prefers-reduced-motion` (still bust). Regenerate the same way if
+  the hero or the mark changes. JSON-LD is a ProfilePage around the Person; Facebook in `sameAs` is
+  https://www.facebook.com/febriel.otud.186.
+- Hero spacing (2026-11-15): at 40ch the supporting line takes three lines on desktop, so `.nm` lost its 8px bottom margin
+  and `.hero-cta` its top margin went 14px → 6px; 1440×900 keeps 173px of Work on the first screen (reveal needs 160px).
+- Still open from P1-10: `avatar-map.png` is fetched twice on a first visit (CSS mask and engine image use different
+  request modes; cached afterwards); glyph atlas or OffscreenCanvas; a Lighthouse run and a mid-range Android check.
 
-last Claude session: 2026-11-15 11:43
+last Claude session: 2026-11-15 15:37

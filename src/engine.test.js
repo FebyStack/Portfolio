@@ -2,15 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { clamp01, smooth, scrChar, sdf, inView } from './engine.js';
 
-test('inView: in above a third, out below a quarter, of the shorter of viewport and section', () => {
-  // short section (600 < 900): its own height counts
-  assert.equal(inView(false, 199, 900, 600), false); assert.equal(inView(false, 201, 900, 600), true);
-  assert.equal(inView(true, 151, 900, 600), true); assert.equal(inView(true, 149, 900, 600), false);
-  // tall section (3000 > 812): the viewport counts, not the section's ratio
-  assert.equal(inView(false, 270, 812, 3000), false); assert.equal(inView(false, 272, 812, 3000), true);
-  assert.equal(inView(true, 204, 812, 3000), true); assert.equal(inView(true, 202, 812, 3000), false);
+test('inView: in at 160px (or a third of a short section or viewport), out under 60% of that', () => {
+  // Work at 1440x900 (785px tall): the 180px that peek into the first screen reveal it
+  assert.equal(inView(false, 180, 900, 785), true);
+  assert.equal(inView(false, 159, 900, 785), false); assert.equal(inView(false, 160, 900, 785), true);
+  assert.equal(inView(true, 96, 900, 785), true); assert.equal(inView(true, 95, 900, 785), false);
+  // tall section (3000 > 812): still 160px, not a share of the section
+  assert.equal(inView(false, 159, 812, 3000), false); assert.equal(inView(false, 160, 812, 3000), true);
+  // short section (300px): a third of it, 100px; out under 60px
+  assert.equal(inView(false, 99, 900, 300), false); assert.equal(inView(false, 100, 900, 300), true);
+  assert.equal(inView(true, 60, 900, 300), true); assert.equal(inView(true, 59, 900, 300), false);
+  // short viewport (landscape phone, 360px): a third of it, so a tall section can still get there
+  assert.equal(inView(false, 119, 360, 3000), false); assert.equal(inView(false, 120, 360, 3000), true);
   // between the two lines the state holds, so the edge can't flicker
-  for (const v of [205, 240, 270]) { assert.equal(inView(true, v, 812, 3000), true); assert.equal(inView(false, v, 812, 3000), false); }
+  for (const v of [96, 120, 159]) { assert.equal(inView(true, v, 900, 785), true); assert.equal(inView(false, v, 900, 785), false); }
 });
 
 test('sdf: finite, inside at the core of solid shapes, outside far away', () => {
