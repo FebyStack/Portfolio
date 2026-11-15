@@ -147,8 +147,8 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Supabase (CLI v3 via `npx --yes supabase@latest`; project ref `lsuqyuelsxcawfvbfbmu`, linked, link state in gitignored
   `supabase/.temp`) now only holds `chat_logs` + its views and cron job. Database commands need `--remote`
   (`migration list --remote`, `db query --remote --read-only`).
-- Pending outside the repo (owner/conductor, after this version is live): delete the deployed `ask` edge function and its
-  secrets (`GROQ_API_KEY`, `GROQ_MODEL`, `ALLOWED_ORIGIN`) — e.g. `functions delete ask`, `secrets unset …`. Not done here.
+- Supabase backend for the chat removed 2026-11-15: `ask` edge function deleted, `GROQ_API_KEY` and `ALLOWED_ORIGIN`
+  unset (no custom secrets left). `chat_logs` + its views and 180-day cron job stay by the owner's choice.
 
 ## Decisions / dead-ends
 
