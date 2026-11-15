@@ -25,6 +25,10 @@ function scrChar(c, r) {
   if (c.toLowerCase() !== c.toUpperCase()) return 'clodxk'.charAt(Math.floor(r * 6));
   return ".',;:".charAt(Math.floor(r * 5));
 }
+/* a section reveals once more than a third of what can be on screen of it is visible (the shorter of the
+   viewport and the section, so tall sections count in viewport heights and short ones can't get stuck),
+   and dissolves again under a quarter; the gap between the two keeps it from flickering at the edge */
+function inView(shown, seen, vh, h) { var m = Math.min(vh, h); return shown ? seen >= m / 4 : seen > m / 3; }
 
 /* ---------- 3D shapes (signed distance) ---------- */
 function sdBox(x, y, z, bx, by, bz, r) {
@@ -136,22 +140,27 @@ export function startEngine(logic) {
     im.src = url;
   }
 
-  /* ----- text that resolves out of ASCII ----- */
+  /* ----- text that resolves out of ASCII (rev: dissolves back into it) ----- */
   var fx = [];
-  function decode(el, dur) {
+  function decode(el, dur, rev) {
     if (!el || calm.matches) return;
+    rev = !!rev;
     var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n, k = 0, now = performance.now();
     while ((n = tw.nextNode())) {
       var s = n.nodeValue;
       if (!s || !s.trim()) continue;
       var p = n.parentNode;
       if (!p || !p.closest || p.closest('[data-nofx]')) continue;
-      var busy = false;
-      for (var i = 0; i < fx.length; i++) if (fx[i].node === n) { busy = true; break; }
-      if (busy) continue;
+      var f = null;
+      for (var i = 0; i < fx.length; i++) if (fx[i].node === n) { f = fx[i]; break; }
+      if (f) {
+        if (f.rev === rev) continue;
+        fx.splice(i, 1); /* the opposite effect gives way and hands over the real text */
+        if (s === f.last) s = f.orig;
+      }
       var rnd = new Float32Array(s.length);
       for (var j = 0; j < s.length; j++) rnd[j] = Math.random();
-      fx.push({ node: n, orig: s, last: s, rnd: rnd, t0: now + Math.min(k, 16) * 30, dur: dur });
+      fx.push({ node: n, orig: s, last: n.nodeValue, rnd: rnd, t0: now + Math.min(k, 16) * 30, dur: dur, rev: rev });
       k++;
     }
   }
@@ -166,34 +175,52 @@ export function startEngine(logic) {
       var out = '', len = f.orig.length;
       for (var j = 0; j < len; j++) {
         var c = f.orig.charAt(j);
-        out += p > f.rnd[j] * 0.75 + (j / len) * 0.25 ? c : scrChar(c, hash2(j + flick * 7.3, f.rnd[j] * 91));
+        out += (p > f.rnd[j] * 0.75 + (j / len) * 0.25) !== f.rev ? c : scrChar(c, hash2(j + flick * 7.3, f.rnd[j] * 91));
       }
-      f.node.nodeValue = out; f.last = out;
+      if (out !== f.last) f.node.nodeValue = f.last = out;
     }
   }
   function endFx() { for (var i = 0; i < fx.length; i++) if (fx[i].node.nodeValue === fx[i].last) fx[i].node.nodeValue = fx[i].orig; fx.length = 0; }
 
-  /* ----- sections: ghost reveal, ASCII rain, ASCII light, scroll and pointer parallax ----- */
+  /* ----- sections: ghost reveal (and dissolve, so it replays), ASCII rain, ASCII light, scroll and pointer parallax ----- */
   var secs = [];
   var ro = new IntersectionObserver(function (es) {
     for (var i = 0; i < es.length; i++) {
-      var o = es[i].target.__fboSec; if (!o) continue;
-      o.vis = es[i].isIntersecting;
-      if (es[i].isIntersecting && !o.shown && (es[i].intersectionRatio > 0.16 || es[i].intersectionRect.height > 260)) show(o);
+      var e = es[i], o = e.target.__fboSec; if (!o) continue;
+      o.vis = e.isIntersecting;
+      var on = inView(o.shown, e.intersectionRect.height, e.rootBounds ? e.rootBounds.height : innerHeight, e.boundingClientRect.height);
+      if (on && !o.shown) show(o);
+      /* an open modal, or keyboard focus, keeps its section on screen */
+      else if (!on && o.shown && !calm.matches && !o.el.querySelector('[data-modal], :focus-visible')) hide(o);
+      /* gone before the dissolve finished: drop the rest, so coming back looks like the first time */
+      if (!o.vis && o.q < 1) { o.q = 1; o.veil = 0; if (o.cv) o.cv.width = 0; }
     }
-  }, { threshold: [0, 0.08, 0.18, 0.4] });
+  /* ponytail: 1% steps fire the rule within ~1% of a section's height (≈30px on a 3000px one); exact edges would need per-section rootMargin observers */
+  }, { threshold: Array.from({ length: 101 }, function (_, j) { return j / 100; }) });
   function show(o) {
-    o.shown = true;
+    o.shown = true; o.q = 1;
     o.el.removeAttribute('data-fx');
-    if (!calm.matches) { o.veil = 1; decode(o.el, 950); }
+    if (!calm.matches) { pin(o); o.veil = 1; decode(o.el, 950); if (o === heroO) aIntro = 0; if (o === aboutO) pIntro = 0; }
+  }
+  /* the reveal in reverse: text scrambles, the veil swells over it, the content fades (styles.css) */
+  function hide(o) {
+    o.shown = false; o.q = 0;
+    o.el.setAttribute('data-fx', 'wait');
+    pin(o); decode(o.el, 800, true);
+  }
+  /* scrambled glyphs wrap differently (phones), so the section keeps its height while its text plays and nothing below jumps */
+  function pin(o) {
+    if (!o.el.style.height) o.el.style.height = o.el.getBoundingClientRect().height + 'px';
+    clearTimeout(o.pin); o.pin = setTimeout(function () { o.el.style.height = ''; }, 1500);
   }
   function scan() {
     var r = logic.root.current; if (!r) return;
     var list = r.querySelectorAll('[data-sec]');
     for (var i = 0; i < list.length; i++) {
       var el = list[i]; if (el.__fboSec) continue;
-      var o = { el: el, cv: el.querySelector('canvas[data-amb]'), hero: el.getAttribute('data-sec') === 'hero', px: 0, py: 0, sx: 0, sy: 0, inside: false, li: 0, veil: 0, shown: false, vis: false, drops: [], spS: '' };
+      var o = { el: el, cv: el.querySelector('canvas[data-amb]'), hero: el.getAttribute('data-sec') === 'hero', px: 0, py: 0, sx: 0, sy: 0, inside: false, li: 0, veil: 0, q: 1, shown: false, vis: false, drops: [], spS: '' };
       el.__fboSec = o; secs.push(o);
+      if (o.hero) heroO = o;
       if (el.getAttribute('data-sec') === 'about') aboutO = o;
       o.move = (function (o) { return function (e) {
         var b = o.el.getBoundingClientRect();
@@ -209,7 +236,8 @@ export function startEngine(logic) {
         }
       }; })(o);
       o.leave = (function (o) { return function () { o.inside = false; var tl = logic.tilt.current; if (o.hero && tl) tl.style.transform = ''; }; })(o);
-      el.addEventListener('pointermove', o.move); el.addEventListener('pointerleave', o.leave);
+      o.focus = (function (o) { return function () { if (!o.shown) show(o); }; })(o);
+      el.addEventListener('pointermove', o.move); el.addEventListener('pointerleave', o.leave); el.addEventListener('focusin', o.focus);
       if (!calm.matches) el.setAttribute('data-fx', 'wait');
       ro.observe(el);
     }
@@ -240,6 +268,9 @@ export function startEngine(logic) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
     ctx.font = monoFont(13, 450); ctx.textBaseline = 'top';
     var cw = ctx.measureText('M').width || 7.8, ch = 19, cols = Math.ceil(w / cw), rows = Math.ceil(h / ch);
+    /* dissolving: the veil swells and clears again while rain and light fade out with the section */
+    if (!o.shown) { o.q = Math.min(1, o.q + dt / 0.75); o.veil = o.q < 1 ? Math.sin(Math.PI * o.q) : 0; }
+    var fo = o.shown ? 1 : 1 - o.q;
     if (!still && E.rain > 0) {
       var want = Math.round(cols / 5.5 * E.rain);
       while (o.drops.length < want) o.drops.push({ c: Math.floor(Math.random() * cols), y: Math.random() * h, v: 22 + Math.random() * 64, n: 2 + Math.floor(Math.random() * 7), s: Math.random() * 100 });
@@ -252,7 +283,7 @@ export function startEngine(logic) {
         var head = Math.floor(d.y / ch);
         for (k = 0; k < d.n; k++) {
           var r = head - k; if (r < 0 || r >= rows) continue;
-          ctx.globalAlpha = 0.26 * (1 - k / d.n);
+          ctx.globalAlpha = 0.26 * (1 - k / d.n) * fo;
           ctx.fillText(RAMP.charAt(1 + Math.floor(hash2(d.s + r * 3.1, d.c + Math.floor(E.t * 2 + k)) * 9)), d.c * cw, r * ch);
         }
       }
@@ -262,7 +293,7 @@ export function startEngine(logic) {
     var kk = still ? 1 : 1 - Math.pow(0.002, dt);
     o.sx += (o.px - o.sx) * kk; o.sy += (o.py - o.sy) * kk;
     if (o.li > 0.02 && E.light > 0) {
-      var R = 120, c0 = Math.max(0, Math.floor((o.sx - R) / cw)), c1 = Math.min(cols - 1, Math.ceil((o.sx + R) / cw));
+      var R = 64, c0 = Math.max(0, Math.floor((o.sx - R) / cw)), c1 = Math.min(cols - 1, Math.ceil((o.sx + R) / cw));
       var r0 = Math.max(0, Math.floor((o.sy - R) / ch)), r1 = Math.min(rows - 1, Math.ceil((o.sy + R) / ch));
       ctx.fillStyle = E.col.accent;
       for (y = r0; y <= r1; y++) for (x = c0; x <= c1; x++) {
@@ -270,12 +301,12 @@ export function startEngine(logic) {
         if (a <= 0) continue;
         var v = a * (0.3 + 0.7 * vnoise(x * 0.33 + E.t * 0.7, y * 0.33 - E.t * 0.5));
         if (v < 0.16) continue;
-        ctx.globalAlpha = Math.min(0.4, (0.02 + 0.1 * a) * o.li * E.light);
+        ctx.globalAlpha = Math.min(0.4, (0.02 + 0.1 * a) * o.li * E.light) * fo;
         ctx.fillText(RAMP.charAt(1 + Math.floor(v * (RL - 2))), x * cw, y * ch);
       }
     }
     if (o.veil > 0) {
-      o.veil = Math.max(0, o.veil - dt / 1.2);
+      if (o.shown) o.veil = Math.max(0, o.veil - dt / 1.2);
       ctx.fillStyle = E.col.ink; ctx.globalAlpha = 0.34 * o.veil;
       for (y = 0; y < rows; y++) {
         var s = '';
@@ -288,7 +319,7 @@ export function startEngine(logic) {
 
   /* ----- avatar: ASCII over the INKWILD drawing ----- */
   var A = makeLayer(false), aImg = null, aMap = null, aGrid = null, aBuf = document.createElement('canvas');
-  var aRev = 0, aIntro = 0, aBoil = 0, aBoilAt = 0, aSx = 0.5, aSy = 0.4;
+  var aRev = 0, aIntro = 0, aBoil = 0, aBoilAt = 0, aSx = 0.5, aSy = 0.4, heroO = null;
   loadImage(IMG_URL, function (im) { aImg = im; });
   loadImage(MAP_URL, function (im) {
     if (!im) return;
@@ -346,7 +377,7 @@ export function startEngine(logic) {
     var stamp = w + 'x' + h + (E.dark ? 'd' : 'l') + E.glyph;
     if (stamp !== A.stamp) { buildAvatar(); A.stamp = stamp; }
     var g = aGrid, cols = g.cols, rows = g.rows, cw = g.cw, ch = g.ch, x, y, d, idx;
-    aIntro = still ? 1 : Math.min(1, aIntro + dt / 1.6);
+    aIntro = still ? 1 : clamp01(aIntro + (!heroO || heroO.shown ? dt / 1.6 : -dt / 0.75)); /* builds with the hero, scatters as it dissolves */
     if (!still && now - aBoilAt > (E.speaking ? 70 : 170) / Math.max(0.25, E.speed) && E.speed > 0) { aBoil = (aBoil + 1) % 3; aBoilAt = now; }
     var tx = A.inside ? A.px / w : 0.5 + 0.2 * Math.cos(E.t * 0.45), ty = A.inside ? A.py / h : 0.42 + 0.14 * Math.sin(E.t * 0.6);
     var k = still ? 1 : 1 - Math.pow(0.0015, dt);
@@ -563,7 +594,7 @@ export function startEngine(logic) {
     var stamp = w + 'x' + h + 'g' + E.glyph;
     if (stamp !== Ph.stamp) { buildPhotoGrid(); Ph.stamp = stamp; }
     var g = pGrid, shown = !aboutO || aboutO.shown;
-    pIntro = still ? 1 : shown ? Math.min(1, pIntro + dt / 1.6) : 0;
+    pIntro = still ? 1 : clamp01(pIntro + (shown ? dt / 1.6 : -dt / 0.75));
     pHov += ((Ph.inside ? 1 : 0) - pHov) * (still ? 1 : 1 - Math.pow(0.03, dt));
     var kk = still ? 1 : 1 - Math.pow(0.01, dt);
     var tx = Ph.inside ? 0.5 + (Ph.px / w - 0.5) * 0.16 : 0.5, ty = Ph.inside ? 0.56 + (Ph.py / h - 0.5) * 0.1 : 0.56;
@@ -738,13 +769,13 @@ export function startEngine(logic) {
     if (E.themeDirty || !E.col) readTheme();
     if (!E.col) return;
     try {
-      if (A.el && A.vis) drawAvatar(now, dt);
+      if (A.el && A.vis && (calm.matches || aIntro > 0 || !heroO || heroO.shown)) drawAvatar(now, dt); /* a dissolved hero's portrait rests */
       if (S.el && S.vis) drawStage(now, dt);
       if (Gl.el && Gl.vis) drawGlobe(now, dt);
       if (Td.el && Td.vis && tick % 2 === 0) drawTide();
       if (Ph.el && Ph.vis) drawPhoto(now, dt);
       drawCovers(dt);
-      for (var i = 0; i < secs.length; i++) if (secs[i].vis && secs[i].shown) drawAmbient(secs[i], dt);
+      for (var i = 0; i < secs.length; i++) if (secs[i].vis && (secs[i].shown || secs[i].q < 1)) drawAmbient(secs[i], dt);
     } catch (err) { if (!E.failed) { E.failed = true; console.error('fbo engine', err); } }
   }
   function sync() {
@@ -755,6 +786,7 @@ export function startEngine(logic) {
     E.speed = p.motion ?? 1; E.rain = p.rain ?? 1; E.light = p.light ?? 1; E.glyph = Math.round(p.glyph ?? 10); E.revealR = p.reveal ?? 0.38;
     E.themeDirty = true;
     bind();
+    for (var j = 0; j < secs.length; j++) secs[j].el.style.height = ''; /* the app may have changed a section's content: its real height wins over a pin */
     if (st.cat !== E.cat) { E.cat = st.cat; slotGroup(); decode(logic.skl.current, 520); }
     if (st.modal !== E.modal) { E.modal = st.modal; if (st.modal >= 0 && rootEl) decode(rootEl.querySelector('[data-modal]'), 600); }
   }
@@ -775,10 +807,10 @@ export function startEngine(logic) {
       cancelAnimationFrame(raf); clearInterval(clockTimer); endFx();
       hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null); io.disconnect(); ro.disconnect();
       if (rootEl) rootEl.removeEventListener('pointerover', onOver);
-      for (var i = 0; i < secs.length; i++) { var o = secs[i]; o.el.removeEventListener('pointermove', o.move); o.el.removeEventListener('pointerleave', o.leave); o.el.removeAttribute('data-fx'); o.el.__fboSec = null; }
+      for (var i = 0; i < secs.length; i++) { var o = secs[i]; o.el.removeEventListener('pointermove', o.move); o.el.removeEventListener('pointerleave', o.leave); o.el.removeEventListener('focusin', o.focus); o.el.removeAttribute('data-fx'); clearTimeout(o.pin); o.el.style.height = ''; o.el.__fboSec = null; }
       secs.length = 0;
     }
   };
 }
 
-export { clamp01, smooth, scrChar, sdf };
+export { clamp01, smooth, scrChar, sdf, inView };

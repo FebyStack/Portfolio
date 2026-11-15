@@ -16,8 +16,17 @@ buttons, redesigned 2026-11-15 (see Decisions). `design/Brand.dc.html` = brand p
   (diffable against the design); the 2026-11-15 hero uses classes in `styles.css` instead.
 - `src/styles.css` — the design's `<helmet><style>`, verbatim, fonts/images repointed to `/fonts`, `/img`, plus the
   2026-11-15 hero / header-CTA rules.
-- `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim. Do not restyle it;
-  port fixes only. `startEngine(logic)` → `{ sync, stop }`.
+- `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal below.
+  Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
+  - Section reveals replay (2026-11-15, owner): `inView()` (tested) reveals a `[data-sec]` once over 1/3 of
+    min(viewport, section height) is on screen and dissolves it under 1/4 (hysteresis, so no flicker). Dissolve =
+    the reveal in reverse: text scrambles back (`decode(el, 800, true)`; an opposite effect on a node is replaced and hands
+    over its original text), the ambient veil swells and clears (sin envelope, 0.75 s) while rain/light fade, the hero
+    portrait and about photo intros run backwards, content fades via `[data-fx=wait]` (0.75 s, the reveal's curve reversed).
+    Coming back replays the first reveal exactly (veil 1 → 0, decode, intros from 0). A section's height is pinned for 1.5 s
+    while its text plays (scrambled glyphs rewrap on phones); `sync()` drops pins since app changes win. No dissolve
+    while the work modal is open or keyboard focus (`:focus-visible`) is inside; `focusin` reveals a hidden section.
+    Reduced motion: unchanged (content always visible, no veil/decode/dissolve).
 - `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (set `video` per project here; optional `links: [[label, url], …]`).
 - `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
   object the engine expects.
@@ -86,9 +95,10 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
   two buttons — plus the portrait. Coordinates + live clock line dropped. Name: Gambetta 300, one line on desktop sized
   `min(8vw,128px,15cqi)` (container query on `.hc`) so the ASCII decode can't rewrap it (no CLS); two lines at
   `clamp(56px,8vw,128px)` ≤820px. Name parallax removed; portrait tilt, hover reveal and pin kept.
+  Pointer ASCII light radius 64px and section glow 280px (2026-11-15, owner: smaller).
   Portrait `min(400px,42vh,34vw)`, 320px max ≤820px.
 - No analytics (owner's decision): no page analytics, no cookies → no consent banner. If ever wanted: a cookieless one
   (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted.
 
-last Claude session: 2026-11-15 01:06
+last Claude session: 2026-11-15 10:37

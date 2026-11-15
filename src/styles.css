@@ -28,11 +28,12 @@ body{margin:0}
 .fbo .mnu{position:absolute;top:100%;left:0;right:0;display:flex;flex-direction:column;padding:6px var(--pad) 18px;background:rgba(var(--bgc),.97);border-bottom:1px solid var(--line)}
 .fbo .mnu a{display:flex;align-items:center;min-height:54px;border-top:1px solid var(--line);font:500 14px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none}
 .fbo .sec{position:relative;min-height:calc(min(100vh,900px) - 64px);display:flex;align-items:center;scroll-margin-top:64px;overflow:hidden}
-.fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(520px circle at var(--mx,72%) var(--my,-30%),var(--glow),transparent 64%)}
+.fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,72%) var(--my,-30%),var(--glow),transparent 64%)}
 .fbo .amb{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 .fbo .wrap{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:30px var(--pad)}
 .fbo .fxb{transition:opacity .9s cubic-bezier(.16,1,.3,1),filter .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
-.fbo [data-fx="wait"] .fxb{opacity:0;filter:blur(10px);transform:translateY(18px)}
+/* leaving: the reveal's curve reversed (holds, then goes), so the text is seen scrambling before it fades */
+.fbo [data-fx="wait"] .fxb{opacity:0;filter:blur(10px);transform:translateY(18px);transition-duration:.75s;transition-timing-function:cubic-bezier(.7,0,.84,0)}
 .fbo .h2{margin:0;font-family:var(--serif);font-weight:300;font-size:clamp(36px,4vw,60px);line-height:1;letter-spacing:-.025em}
 .fbo .lab{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
 .fbo .hint{margin:0;font-family:var(--mono);font-size:13px;letter-spacing:.02em;color:var(--mute)}

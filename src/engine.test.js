@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp01, smooth, scrChar, sdf } from './engine.js';
+import { clamp01, smooth, scrChar, sdf, inView } from './engine.js';
+
+test('inView: in above a third, out below a quarter, of the shorter of viewport and section', () => {
+  // short section (600 < 900): its own height counts
+  assert.equal(inView(false, 199, 900, 600), false); assert.equal(inView(false, 201, 900, 600), true);
+  assert.equal(inView(true, 151, 900, 600), true); assert.equal(inView(true, 149, 900, 600), false);
+  // tall section (3000 > 812): the viewport counts, not the section's ratio
+  assert.equal(inView(false, 270, 812, 3000), false); assert.equal(inView(false, 272, 812, 3000), true);
+  assert.equal(inView(true, 204, 812, 3000), true); assert.equal(inView(true, 202, 812, 3000), false);
+  // between the two lines the state holds, so the edge can't flicker
+  for (const v of [205, 240, 270]) { assert.equal(inView(true, v, 812, 3000), true); assert.equal(inView(false, v, 812, 3000), false); }
+});
 
 test('sdf: finite, inside at the core of solid shapes, outside far away', () => {
   for (let k = 0; k <= 5; k++) {
