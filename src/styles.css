@@ -28,7 +28,7 @@ body{margin:0}
 .fbo .mnu{position:absolute;top:100%;left:0;right:0;display:flex;flex-direction:column;padding:6px var(--pad) 18px;background:rgba(var(--bgc),.97);border-bottom:1px solid var(--line)}
 .fbo .mnu a{display:flex;align-items:center;min-height:54px;border-top:1px solid var(--line);font:500 14px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none}
 .fbo .sec{position:relative;min-height:calc(min(100vh,900px) - 64px);display:flex;align-items:center;scroll-margin-top:64px;overflow:hidden}
-.fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,72%) var(--my,-30%),var(--glow),transparent 64%)}
+.fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,72%) var(--my,0%),var(--glow),transparent 64%)}
 .fbo .amb{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 .fbo .wrap{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:30px var(--pad)}
 .fbo .fxb{transition:opacity .9s cubic-bezier(.16,1,.3,1),filter .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
@@ -48,7 +48,7 @@ body{margin:0}
 /* header CTA: same Messenger link as the hero, sized like the theme pill; icon only where the nav gets tight (≤1000px) */
 .fbo .hcta{min-height:44px;padding:0 16px;gap:9px}
 .fbo .icb{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;flex:none;border-radius:999px;border:1px solid var(--line);background:rgba(var(--bgc),.6);color:var(--ink);cursor:pointer;transition:border-color .2s ease,color .2s ease,transform .15s ease}
-.fbo .icb:hover,.fbo .icb.on{border-color:var(--accent);color:var(--accent)}
+.fbo .icb:hover{border-color:var(--accent);color:var(--accent)}
 .fbo .icb:active{transform:scale(.94)}
 .fbo .lnk{display:inline-flex;align-items:center;min-height:48px;padding:0 4px;font:500 12px/1 var(--mono);letter-spacing:.09em;text-transform:uppercase;text-decoration:none;color:var(--mute);background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-repeat:no-repeat;background-position:4px calc(50% + 11px);transition:color .2s ease,background-size .3s ease}
 .fbo .lnk:hover{color:var(--ink);background-size:calc(100% - 8px) 1px}
@@ -63,7 +63,8 @@ body{margin:0}
 .fbo .vp{margin:0;max-width:32ch;font:300 clamp(22px,2.1vw,30px)/1.22 var(--serif);letter-spacing:-.01em;text-wrap:balance}
 .fbo .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
 .fbo .av{position:relative;z-index:3;width:var(--avw);aspect-ratio:1/1}
-.fbo .plate{position:absolute;inset:0;background:var(--bg);-webkit-mask:url(/img/avatar-ink.webp) center/100% 100% no-repeat;mask:url(/img/avatar-ink.webp) center/100% 100% no-repeat;transition:background-color .5s ease}
+/* the portrait map's alpha is its subject mask: this page-coloured plate keeps the ambient rain out of the bust */
+.fbo .plate{position:absolute;inset:0;background:var(--bg);-webkit-mask:url(/img/avatar-map.png) center/100% 100% no-repeat;mask:url(/img/avatar-map.png) center/100% 100% no-repeat;transition:background-color .5s ease}
 /* marquee */
 .fbo .mq{position:relative;z-index:1;overflow:hidden;height:56px;display:flex;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .fbo .mqt{display:flex;flex:none;white-space:nowrap;animation:fbo-mq 48s linear infinite;font:500 13px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}

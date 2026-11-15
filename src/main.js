@@ -14,12 +14,12 @@ const ARROW = 'M7 17 17 7M8 7h9v9'; // same arrow as the contact section's exter
 
 // The engine reads `busy` (avatar "speaking"; always false since the chat is gone) and pushes `time` every 20 s
 // (nothing displays it, so render() ignores it).
-const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', pin: false, menu: false, modal: -1, busy: false };
+const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', menu: false, modal: -1, busy: false };
 const logic = {
   root: { current: root }, tilt: { current: ref('tilt') }, avatar: { current: ref('avatar') }, stage: { current: null },
   globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') }, skl: { current: ref('skl') }, deck: { current: deck },
   state,
-  props: { mode: 'Dark', glyph: 10, reveal: 0.38, rain: 1, light: 1, motion: 1 },
+  props: { mode: 'Dark', glyph: 10, rain: 1, light: 1, motion: 1 },
   setState
 };
 let eng = null, modalEl = null, opener = null;
@@ -53,13 +53,6 @@ function render(keys) {
     });
   }
   if (has('cat')) renderCat();
-  if (has('pin')) {
-    const b = act('togglePin'), label = state.pin ? 'Back to ASCII' : 'Show the drawing';
-    b.classList.toggle('on', state.pin);
-    b.setAttribute('aria-pressed', String(state.pin));
-    b.setAttribute('aria-label', label);
-    b.title = label;
-  }
   if (has('modal')) renderModal();
 }
 
@@ -154,7 +147,6 @@ const ACTIONS = {
   },
   toggleMenu: () => setState({ menu: !state.menu }),
   closeMenu: () => setState({ menu: false }),
-  togglePin: () => setState({ pin: !state.pin }),
   deckPrev: () => slide(-1),
   deckNext: () => slide(1),
   closeModal: () => setState({ modal: -1 })
@@ -175,5 +167,5 @@ pans.forEach((p, i) => {
   $('.ph', p).addEventListener('focus', pick);
 });
 
-render(['dark', 'menu', 'svc', 'cat', 'pin']);
+render(['dark', 'menu', 'svc', 'cat']);
 eng = startEngine(logic);

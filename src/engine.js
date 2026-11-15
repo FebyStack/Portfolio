@@ -3,7 +3,6 @@ import { SKILLS } from './data.js';
 /* ---------- constants ---------- */
 var RAMP = " .',;:clodxkO0KXNWM";
 var RL = RAMP.length;
-var IMG_URL = '/img/avatar-ink.webp';
 var PHOTO_URL = '/img/photo.webp';
 var MAP_URL = '/img/avatar-map.png';
 
@@ -83,7 +82,7 @@ function sdf(k, x, y, z, t) {
 /* ---------- engine ---------- */
 export function startEngine(logic) {
   var calm = window.matchMedia('(prefers-reduced-motion: reduce)');
-  var E = { t: 0, col: null, dark: true, svc: 0, cat: 'all', modal: -1, pin: false, speaking: false, speed: 1, rain: 1, light: 1, glyph: 10, revealR: 0.38, themeDirty: true };
+  var E = { t: 0, col: null, dark: true, svc: 0, cat: 'all', modal: -1, speaking: false, speed: 1, rain: 1, light: 1, glyph: 10, themeDirty: true };
   var raf = 0, last = performance.now(), lastDraw = 0, clockTimer = 0, tick = 0;
   var io = new IntersectionObserver(function (es) {
     for (var i = 0; i < es.length; i++) if (es[i].target.__fboLayer) es[i].target.__fboLayer.vis = es[i].isIntersecting;
@@ -317,10 +316,9 @@ export function startEngine(logic) {
     ctx.globalAlpha = 1;
   }
 
-  /* ----- avatar: ASCII over the INKWILD drawing ----- */
-  var A = makeLayer(false), aImg = null, aMap = null, aGrid = null, aBuf = document.createElement('canvas');
-  var aRev = 0, aIntro = 0, aBoil = 0, aBoilAt = 0, aSx = 0.5, aSy = 0.4, heroO = null;
-  loadImage(IMG_URL, function (im) { aImg = im; });
+  /* ----- avatar: the INKWILD portrait, head and shoulders, set in ASCII ----- */
+  var A = makeLayer(false), aMap = null, aGrid = null;
+  var aIntro = 0, aBoil = 0, aBoilAt = 0, aSx = 0.5, aSy = 0.4, heroO = null;
   loadImage(MAP_URL, function (im) {
     if (!im) return;
     try {
@@ -382,10 +380,7 @@ export function startEngine(logic) {
     var tx = A.inside ? A.px / w : 0.5 + 0.2 * Math.cos(E.t * 0.45), ty = A.inside ? A.py / h : 0.42 + 0.14 * Math.sin(E.t * 0.6);
     var k = still ? 1 : 1 - Math.pow(0.0015, dt);
     aSx += (tx - aSx) * k; aSy += (ty - aSy) * k;
-    var want = (A.inside || E.pin) ? 1 : 0;
-    aRev = still ? want : aRev + (want - aRev) * (1 - Math.pow(0.02, dt));
-    var cx = E.pin && !A.inside ? w * 0.5 : aSx * w, cy = E.pin && !A.inside ? h * 0.44 : aSy * h;
-    var R = aRev * E.revealR * w * (E.pin && !A.inside ? 1.7 : 1);
+    var cx = aSx * w, cy = aSy * h;
 
     ctx.font = monoFont(g.fs); ctx.textBaseline = 'top'; ctx.fillStyle = E.col.ink;
     var tiers = g.frames[aBoil], alphas = [0.5, 0.78, 1];
@@ -401,50 +396,23 @@ export function startEngine(logic) {
       for (var tr = 0; tr < 3; tr++) { ctx.globalAlpha = alphas[tr]; for (y = 0; y < rows; y++) ctx.fillText(tiers[tr][y], g.ox, g.oy + y * ch); }
     }
     ctx.globalAlpha = 1;
-    if (R > 2 && aImg) {
-      ctx.globalCompositeOperation = 'destination-out';
-      var hole = ctx.createRadialGradient(cx, cy, R * 0.3, cx, cy, R * 0.95);
-      hole.addColorStop(0, 'rgba(0,0,0,1)'); hole.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = hole; ctx.fillRect(0, 0, w, h);
-      ctx.globalCompositeOperation = 'source-over';
-    }
-    var band = 0.25 * R + 0.12 * w, mid = 0.85 * R, reach = mid + band;
-    var c0 = Math.max(0, Math.floor((cx - reach - g.ox) / cw)), c1 = Math.min(cols - 1, Math.ceil((cx + reach - g.ox) / cw));
-    var r0 = Math.max(0, Math.floor((cy - reach - g.oy) / ch)), r1 = Math.min(rows - 1, Math.ceil((cy + reach - g.oy) / ch));
+    /* accent: brighter glyphs only where the pointer is (it drifts on its own when nobody points) */
+    var band = 0.12 * w;
+    var c0 = Math.max(0, Math.floor((cx - band - g.ox) / cw)), c1 = Math.min(cols - 1, Math.ceil((cx + band - g.ox) / cw));
+    var r0 = Math.max(0, Math.floor((cy - band - g.oy) / ch)), r1 = Math.min(rows - 1, Math.ceil((cy + band - g.oy) / ch));
     ctx.fillStyle = E.col.accent;
     for (y = r0; y <= r1; y++) for (x = c0; x <= c1; x++) {
       d = g.dens[y * cols + x]; if (d < 0.03) continue;
       var gx = g.ox + (x + 0.5) * cw - cx, gy = g.oy + (y + 0.5) * ch - cy;
-      var bd = 1 - Math.abs(Math.sqrt(gx * gx + gy * gy) - mid) / band;
+      var bd = 1 - Math.sqrt(gx * gx + gy * gy) / band;
       if (bd <= 0) continue;
       idx = Math.floor(d * (RL - 0.01)) + Math.round(bd * 3);
-      if (!still && hash2(x + tick * 0.37, y - tick * 0.11) < 0.3 * aRev + 0.04) idx = 1 + Math.floor(hash2(x - tick, y + tick) * (RL - 1));
+      if (!still && hash2(x + tick * 0.37, y - tick * 0.11) < 0.04) idx = 1 + Math.floor(hash2(x - tick, y + tick) * (RL - 1));
       if (idx > RL - 1) idx = RL - 1;
       ctx.globalAlpha = Math.pow(bd, 1.4) * 0.95;
       ctx.fillText(RAMP.charAt(idx), g.ox + x * cw, g.oy + y * ch);
     }
     ctx.globalAlpha = 1;
-    if (R > 2 && aImg) {
-      if (aBuf.width !== A.el.width || aBuf.height !== A.el.height) { aBuf.width = A.el.width; aBuf.height = A.el.height; }
-      var b = aBuf.getContext('2d');
-      b.setTransform(A.dpr, 0, 0, A.dpr, 0, 0);
-      b.globalCompositeOperation = 'source-over'; b.clearRect(0, 0, w, h);
-      b.drawImage(aImg, g.ox, g.oy, cols * cw, rows * ch);
-      b.globalCompositeOperation = 'source-atop';
-      var sh = b.createRadialGradient(cx, cy, R * 0.34, cx, cy, R);
-      sh.addColorStop(0, 'rgba(' + E.col.shade + ',0)'); sh.addColorStop(1, 'rgba(' + E.col.shade + ',' + (E.dark ? 0.82 : 0.6) + ')');
-      b.fillStyle = sh; b.fillRect(0, 0, w, h);
-      b.globalCompositeOperation = 'destination-in';
-      var mk = b.createRadialGradient(cx, cy, R * 0.46, cx, cy, R);
-      mk.addColorStop(0, 'rgba(0,0,0,1)'); mk.addColorStop(1, 'rgba(0,0,0,0)');
-      b.fillStyle = mk; b.fillRect(0, 0, w, h);
-      b.globalCompositeOperation = 'source-over';
-      ctx.globalCompositeOperation = 'destination-over';
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.drawImage(aBuf, 0, 0);
-      ctx.setTransform(A.dpr, 0, 0, A.dpr, 0, 0);
-      ctx.globalCompositeOperation = 'source-over';
-    }
   }
 
   /* ----- one raymarched ASCII object, used by the service stage and the work covers ----- */
@@ -782,8 +750,8 @@ export function startEngine(logic) {
     var st = logic.state, p = logic.props;
     var dark = st.dark == null ? (p.mode ?? 'Dark') !== 'Light' : st.dark;
     if (dark !== E.dark) { E.dark = dark; A.stamp = ''; for (var i = 0; i < covers.length; i++) covers[i].__fboC.drawn = false; }
-    E.svc = st.svc; E.pin = st.pin; E.speaking = st.busy;
-    E.speed = p.motion ?? 1; E.rain = p.rain ?? 1; E.light = p.light ?? 1; E.glyph = Math.round(p.glyph ?? 10); E.revealR = p.reveal ?? 0.38;
+    E.svc = st.svc; E.speaking = st.busy;
+    E.speed = p.motion ?? 1; E.rain = p.rain ?? 1; E.light = p.light ?? 1; E.glyph = Math.round(p.glyph ?? 10);
     E.themeDirty = true;
     bind();
     for (var j = 0; j < secs.length; j++) secs[j].el.style.height = ''; /* the app may have changed a section's content: its real height wins over a pin */

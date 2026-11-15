@@ -16,7 +16,7 @@ buttons, redesigned 2026-11-15 (see Decisions). `design/Brand.dc.html` = brand p
   (diffable against the design); the 2026-11-15 hero uses classes in `styles.css` instead.
 - `src/styles.css` — the design's `<helmet><style>`, verbatim, fonts/images repointed to `/fonts`, `/img`, plus the
   2026-11-15 hero / header-CTA rules.
-- `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal below.
+- `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal and the portrait below.
   Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
   - Section reveals replay (2026-11-15, owner): `inView()` (tested) reveals a `[data-sec]` once over 1/3 of
     min(viewport, section height) is on screen and dissolves it under 1/4 (hysteresis, so no flicker). Dissolve =
@@ -27,6 +27,18 @@ buttons, redesigned 2026-11-15 (see Decisions). `design/Brand.dc.html` = brand p
     while its text plays (scrambled glyphs rewrap on phones); `sync()` drops pins since app changes win. No dissolve
     while the work modal is open or keyboard focus (`:focus-visible`) is inside; `focusin` reveals a hidden section.
     Reduced motion: unchanged (content always visible, no veil/decode/dissolve).
+  - Hero portrait (2026-11-15, owner): ASCII only, a head-and-shoulders bust. The hover/tap ink reveal and its
+    "Show the drawing" pin are gone; the 3D tilt and the pointer accent (a small accent-glyph cloud at the pointer,
+    drifting on its own when nobody points) stay.
+- `public/img/avatar-map.png` — the portrait's density map, 264×264 RGBA read by `buildAvatar`: channel 0 = tone,
+  1 = accents (only hair uses them, dark mode), 2 = hair flag (low = hair: dark mode gives it a minimum density),
+  alpha = subject mask. `.plate` (page colour, behind the canvas, keeps the ambient rain out of the portrait) masks with
+  the same file's alpha, so its silhouette always matches. Built once (scratch script, not in the repo) from the
+  head-only map of `26a4b8f` (traced from the INKWILD ink drawing): head scaled 0.75 into the top two-thirds, neck
+  continued from its row 238, shoulders and V-neck t-shirt from `photo.webp`'s alpha (skin = warm pixels), shirt tone
+  ≈0.5 from the photo's luminance (lighter mass than the face in dark mode, darker in light mode), 6px soft edges, a
+  rounded vignette fading shoulders and bottom to dots. `public/img` also holds `photo.webp` (About photo);
+  `avatar-ink.webp` was deleted with the reveal.
 - `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (set `video` per project here; optional `links: [[label, url], …]`).
 - `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
   object the engine expects.
@@ -38,7 +50,7 @@ buttons, redesigned 2026-11-15 (see Decisions). `design/Brand.dc.html` = brand p
 ## Engine ↔ app contract
 
 Engine reads only: `logic.{root,tilt,avatar,stage,globe,tide,photo,skl,deck}.current`,
-`logic.state.{dark,svc,pin,busy,cat,modal,time}`, `logic.props.{mode,motion,rain,light,glyph,reveal}`,
+`logic.state.{dark,svc,busy,cat,modal,time}`, `logic.props.{mode,motion,rain,light,glyph}`,
 and calls `logic.setState({ time })` every 20 s. App calls `eng.sync()` after every state change.
 Since the chatbot's removal `busy` (avatar "speaking") is always false and `time` is stored but not rendered.
 
@@ -49,9 +61,9 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
   Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint.
 - Refs: `[data-ref="…"]` — `tilt avatar globe tide photo skl deck work menu catRows modalTpl`.
 - Text bindings: `[data-bind="…"]` — `modeLabel catKicker catTitle`; in modal: `modTitle modDesc modTags`.
-- Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu togglePin deckPrev deckNext closeModal`.
+- Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu deckPrev deckNext closeModal`.
 - Hero: `.wrap.stg` grid = `.hc` text column (`h1.nm` "Febriel <em>B. Otud</em>", `p.vp`, supporting `p`, `.hero-cta` with
-  the Messenger `a.btn` + ghost "See my work") and `.av` (tilt → plate, avatar canvas, pin button) on the right / below ≤820px.
+  the Messenger `a.btn` + ghost "See my work") and `.av` (tilt → plate, avatar canvas) on the right / below ≤820px.
   No hero text is bound by JS.
 - Header CTA: `a.btn.hcta` (same Messenger link) between the theme pill and the menu button; `aria-label` carries the name,
   its `span` label is `display:none` ≤1000px (icon only). ≤360px the theme pill hides its `modeLabel` word so the header fits 320px.
@@ -84,7 +96,7 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
 - Canonical, `og:url`, JSON-LD `url`, `public/sitemap.xml` and the robots `Sitemap:` line are hardcoded to
   `https://febrielportfolio.vercel.app/` (an env placeholder once shipped as a literal). Change all five if the domain changes.
 - Palette fixed to Tidal Orchid; the other two palettes stay in CSS (class swap on root) — design tweak, not UI.
-- Design-tool tweak props (glyph, reveal, rain, light, motion) are constants in `main.js`.
+- Design-tool tweak props (glyph, rain, light, motion) are constants in `main.js`.
 - 2026-11-15: AI chatbot ("Ask my avatar", Groq via the Supabase `ask` function, rating thumbs) removed from the site and
   the code (owner's decision). The avatar's knowledge is kept outside the repo. The `chat_logs` table stays in Supabase by
   the owner's choice; the migration files are its record.
@@ -94,11 +106,12 @@ Since the chatbot's removal `busy` (avatar "speaking") is always false and `time
 - Hero (2026-11-15, "cluttered" before): 4 elements — name, value line (brand-plan positioning), one supporting line,
   two buttons — plus the portrait. Coordinates + live clock line dropped. Name: Gambetta 300, one line on desktop sized
   `min(8vw,128px,15cqi)` (container query on `.hc`) so the ASCII decode can't rewrap it (no CLS); two lines at
-  `clamp(56px,8vw,128px)` ≤820px. Name parallax removed; portrait tilt, hover reveal and pin kept.
-  Pointer ASCII light radius 64px and section glow 280px (2026-11-15, owner: smaller).
+  `clamp(56px,8vw,128px)` ≤820px. Name parallax removed; portrait tilt kept (hover reveal and pin removed later the same day, see `engine.js`).
+  Pointer ASCII light radius 64px and section glow 280px (2026-11-15, owner: smaller); the glow rests at the section's
+  top edge (`--my` 0%) until the pointer moves it, so untouched sections and phones keep a faint top glow.
   Portrait `min(400px,42vh,34vw)`, 320px max ≤820px.
 - No analytics (owner's decision): no page analytics, no cookies → no consent banner. If ever wanted: a cookieless one
   (Plausible / CF Web Analytics).
 - Docker not needed: Supabase is hosted.
 
-last Claude session: 2026-11-15 10:37
+last Claude session: 2026-11-15 11:06
