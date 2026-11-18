@@ -484,7 +484,7 @@ export function startEngine(logic) {
     if (!S.down) { S.yaw += S.vyaw; S.vyaw *= 0.93; if (!still) S.yaw += dt * 0.32 * E.speed; }
     renderObject(S.ctx, S.w, S.h, Math.max(9, E.glyph + 2), S.yaw, S.pitch, sFrom, sTo, sMix * sMix * (3 - 2 * sMix), E.t, S.inside && !S.down, S.px, S.py, 0.6);
   }
-  /* covers: each project card gets its own slowly turning object */
+  /* covers: each project card gets its own slowly turning object (hover doesn't change it: the card's hover is the scramble) */
   var covers = [], coverAt = 0;
   function scanCovers() {
     var r = logic.root.current; if (!r) return;
@@ -499,12 +499,12 @@ export function startEngine(logic) {
   function drawCover(cv, dt, force) {
     var st = cv.__fboC, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
     var sec = cv.closest('[data-sec]'); if (sec && sec.__fboSec && !sec.__fboSec.vis) return;
-    var big = cv.hasAttribute('data-big'), host = cv.closest('.wk'), hot = big || (host && host.matches(':hover'));
-    if (!force && !hot && st.drawn && calm.matches) return;
+    var big = cv.hasAttribute('data-big');
+    if (!force && !big && st.drawn && calm.matches) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 1.5), W = Math.round(w * dpr), H = Math.round(h * dpr);
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (!calm.matches) st.yaw += dt * (hot ? 1.1 : 0.35) * E.speed;
+    if (!calm.matches) st.yaw += dt * (big ? 1.1 : 0.35) * E.speed;
     var k = parseInt(cv.getAttribute('data-cover'), 10) || 0;
     renderObject(ctx, w, h, big ? 11 : 9, st.yaw, -0.34, k, k, 1, E.t, false, 0, 0, big ? 0.5 : 0.52);
     st.drawn = true;
@@ -515,8 +515,8 @@ export function startEngine(logic) {
     coverAt = (coverAt + 1) % n; drawCover(covers[coverAt], dt * n, false); done = coverAt;
     for (var i = 0; i < n; i++) {
       if (i === done) continue;
-      var cv = covers[i], host = cv.closest('.wk');
-      if (cv.hasAttribute('data-big') || !cv.__fboC.drawn || (host && host.matches(':hover'))) drawCover(cv, dt, true);
+      var cv = covers[i];
+      if (cv.hasAttribute('data-big') || !cv.__fboC.drawn) drawCover(cv, dt, true);
     }
   }
 

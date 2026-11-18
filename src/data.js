@@ -9,8 +9,8 @@ export const SKILLS = [
 export const GROUPS = [['build', 'Build'], ['design', 'Design'], ['social', 'Social'], ['video', 'Video'], ['ai', 'AI']];
 /* Projects, in card order.
    id: the project's address, #work/<id> (shared links use it, so keep it once it's out).
-   Its card in index.html (the article whose link is #work/<id>) repeats title, desc and "role · type · status";
-   change both (data.test.js checks).
+   Its card in index.html (the article whose link is #work/<id>) repeats title, desc and role, type and status (one
+   <span> each, empty ones left out); change both (data.test.js checks).
    image: a screenshot path or URL, e.g. '/img/work/pilapass.webp'; once set it replaces the ASCII cover on the card and
    in the project view. alt: what the screenshot shows. links (optional): [label, url] pairs shown in the project view. */
 export const PROJECTS = [

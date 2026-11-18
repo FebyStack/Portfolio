@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { clamp01, smooth, scrChar, sdf, inView } from './engine.js';
 
 test('inView: in at 160px (or a third of a short section or viewport), out under 60% of that', () => {
-  // Work at 1440x900 (~790px tall): the ~174px that peek into the first screen reveal it
+  // a 790px section (Work at 1440x900): in at 160px, out under 96px
   assert.equal(inView(false, 174, 900, 790), true);
   assert.equal(inView(false, 159, 900, 790), false); assert.equal(inView(false, 160, 900, 790), true);
   assert.equal(inView(true, 96, 900, 790), true); assert.equal(inView(true, 95, 900, 790), false);

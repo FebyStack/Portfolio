@@ -1,8 +1,10 @@
 # Portfolio — Febriel B. Otud
 
-One-page ASCII portfolio. Source of truth for look and behaviour: `design/Main.dc.html`
-(Claude Design canvas export, artifact `6NeXsueHHaZ59dNx7zeXTw`), except the hero, header CTA, contact, section order and
-sizing, work cards and project view, redesigned 2026-11-15 (see Decisions). `design/Brand.dc.html` = brand plan.
+One-page ASCII portfolio. The design system is locked in `DESIGN.md` (2026-11-18: palette, type and spacing scales,
+radii, motion budget, the owner's decisions and the Hallmark waivers); read it before any visual change. The original
+look is `design/Main.dc.html` (Claude Design canvas export, artifact `6NeXsueHHaZ59dNx7zeXTw`), except the hero, header
+CTA, contact, section order and sizing, work cards and project view, redesigned 2026-11-15, and the 2026-11-18 Hallmark
+pass (see Decisions). `design/Brand.dc.html` = brand plan.
 Copy comes only from the owner's own words (`Obsidian/Astro/Claude Code/Febriel Avatar Facts.md`); never invent clients,
 numbers, dates, results or quotes.
 
@@ -15,18 +17,25 @@ numbers, dates, results or quotes.
 - **Coding rules: ponytail** (`~/.claude/plugins/marketplaces/greenpt/bench/variants/ponytail.md`).
   Stdlib/native first, fewest files, `ponytail:` comment on every intentional shortcut.
 - `index.html` — all markup, copied from the design template. Inline styles kept verbatim on purpose
-  (diffable against the design); the 2026-11-15 hero uses classes in `styles.css` instead.
-- `src/styles.css` — the design's `<helmet><style>`, verbatim, fonts/images repointed to `/fonts`, `/img`, plus the
-  2026-11-15 rules (hero, header CTA, section padding, work cards, project dialog, contact rows).
-  - Type scale (2026-11-15, P2-11): every text size is a token on `.fbo`, used by the CSS and by `index.html`'s inline
-    styles. `--fs-xs` 12px (Geist Mono labels, tags, links, buttons, marquee) · `--fs-sm` 14px (mono notes: logo, menu,
-    hints, tool rows; the proof line) · `--fs-md` 17px (Switzer reading text, line-height 1.5; closed service tabs) ·
+  (diffable against the design; their gaps snapped to the 4px scale on 2026-11-18); the 2026-11-15 hero uses classes in
+  `styles.css` instead.
+- `src/styles.css` — the design's `<helmet><style>`, fonts/images repointed to `/fonts`, `/img`, plus the 2026-11-15
+  rules (hero, header CTA, section padding, work cards, project dialog, contact rows) and the 2026-11-18 Hallmark pass:
+  `:root` holds the colours `html` paints itself (page background, `scrollbar-color`) and the Tidal blocks reuse them;
+  `html, body` clip overflow-x; `.fbo` is an inline-size container, so `100cqw` (not `100vw`) makes the deck and the
+  phone skill-group row full bleed; spacing on a 4px scale; labels and controls in sentence case; print shows every
+  section.
+  - Type scale (2026-11-15, P2-11; 2026-11-18): every text size is a token on `.fbo`, used by the CSS and by
+    `index.html`'s inline styles. `--fs-xs` 12px (Geist Mono labels, tags, small links, `dt`s, marquee) · `--fs-sm` 14px
+    (buttons, nav and menu links, mono notes: logo, hints, tool rows; the proof line) · `--fs-md` 17px (Switzer reading text, line-height 1.5; closed service tabs) ·
     `--fs-lg` `clamp(22px,2.1vw,30px)` (offer line, About statement, card, panel and project titles) · `--fs-xl`
     `clamp(36px,4vw,60px)` (section headings) · `--fs-2xl` `clamp(40px,5.6vw,84px)` (the contact line) · `--fs-name`
-    `min(8vw,128px,15cqi)`, ≤820px `clamp(56px,8vw,128px)` (the name). `--measure: 40ch` caps Switzer paragraphs at about
+    `clamp(56px,8vw,128px)` (the name, two lines at every width). `--measure: 40ch` caps Switzer paragraphs at about
     46–52 characters, the brand plan's line length (`ch` is the width of "0", so 52ch rendered 59–73). Light 300 only for
     the name; headings and the About statement are Gambetta 400. The outlined "Febriel" behind the About photo (`.abg`) is
-    artwork sized to the photo, outside the scale. `text-wrap: balance` on h1–h3, `pretty` on paragraphs (`.vp` balance).
+    artwork sized to the photo, outside the scale. `text-wrap: balance` on h1–h3 and on short blocks (tags, card blurbs,
+    `dd`s, footer lines), `pretty` on paragraphs (`.vp` balance), so nothing ends on a lone word at 375 or 1280.
+    Labels and controls are sentence case, tracked 0–0.03em (owner, 2026-11-18); only the marquee keeps its capitals.
 - `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal and the portrait below.
   Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
   - Section reveals replay (2026-11-15, owner): `inView()` (tested) reveals a `[data-sec]` once 160px of it is on
@@ -41,9 +50,10 @@ numbers, dates, results or quotes.
     while its text plays (scrambled glyphs rewrap on phones); `sync()` drops pins since app changes win. No dissolve
     while the work modal is open or keyboard focus (`:focus-visible`) is inside; `focusin` reveals a hidden section.
     Reduced motion: unchanged (content always visible, no veil/decode/dissolve).
-    Checked 2026-11-15 after the 160px rule (headless Chrome, 1440×900 and 375×812): at 1440×900 the 174px of Work under
-    the marquee reveal on the first screen; every section reveals and dissolves once per pass down and up; a 12× jiggle
-    across a reveal line toggles once; no console errors.
+    Checked 2026-11-15 after the 160px rule (headless Chrome, 1440×900 and 375×812): every section reveals and dissolves
+    once per pass down and up; a 12× jiggle across a reveal line toggles once; no console errors. Since 2026-11-18 the
+    first screen at 1440×900 ends on the marquee: 66px of Work's empty top padding show under it, so nothing sits
+    half-revealed (at 1920×1080, 208px of Work show and it reveals).
   - About photo (2026-11-15, P1-10): fetched by a one-shot IntersectionObserver once the photo canvas is within one
     viewport of the screen (`rootMargin` 100% at the bottom), not at startup (first request at scrollY 1440 of 3880 on
     1440×900).
@@ -52,6 +62,8 @@ numbers, dates, results or quotes.
   - Hero portrait (2026-11-15, owner): ASCII only, a head-and-shoulders bust. The hover/tap ink reveal and its
     "Show the drawing" pin are gone; the 3D tilt and the pointer accent (a small accent-glyph cloud at the pointer,
     drifting on its own when nobody points) stay.
+  - Work covers (2026-11-18, owner: one hover effect per card): hovering a card no longer speeds its cover up or draws it
+    every frame; the card's hover is the text scramble. Only the project view's big cover turns faster.
 - `public/img/avatar-map.png` — the portrait's density map, 264×264 RGBA read by `buildAvatar`: channel 0 = tone,
   1 = accents (only hair uses them, dark mode), 2 = hair flag (low = hair: dark mode gives it a minimum density),
   alpha = subject mask. `.plate` (page colour, behind the canvas, keeps the ambient rain out of the portrait) masks with
@@ -64,7 +76,8 @@ numbers, dates, results or quotes.
 - `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (card order; fields `id title shape desc role type status more tools
   image alt`, optional `links: [[label, url], …]`) and `projectAt(hash)` (`#work/<id>` → index, else -1).
   Screenshots later = set `image` (+ `alt`) here only: it replaces the ASCII cover on the card and in the project view.
-  `src/data.test.js` checks the hash mapping and that each card in `index.html` repeats its title, desc and meta line.
+  `src/data.test.js` checks the hash mapping, that each card in `index.html` repeats its title, desc and tag spans, and
+  that the skills card's static kicker is `SKILLS.length` tools.
 - `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
   object the engine expects.
 - `supabase/migrations/*_chat_logs.sql` — record of the `chat_logs` table that stays in the hosted database after the
@@ -84,7 +97,8 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Root `div#top.fbo.pal-tidal.is-dark[data-ref="root"]`; mode = swap `is-dark`/`is-light` (also sets `meta[name=theme-color]` to `--bg`).
   `main#main` holds, in order: hero, marquee, `#work`, `#services`, `#skills`, `#about`, `#contact` (nav and mobile menu
   follow that order). `footer` sits after `main`, still inside the root. Skip link targets `#main`. Sections size to their
-  content: `.wrap` padding 96px (56px ≤820px), no min-height. `html{scroll-padding-top:80px}` keeps anchors and keyboard
+  content, no min-height: `.wrap` padding 96px (56px ≤820px), `#services` 144/72 (88/40), the About band
+  (`section.band`, background `--band`) 120/120 (72/72), so the seams vary. `html{scroll-padding-top:80px}` keeps anchors and keyboard
   focus clear of the 64px sticky header (so `.sec` has no scroll-margin).
   Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint,
   and with nothing stored follows the OS (`prefers-color-scheme: light` → light, otherwise the markup's dark default).
@@ -94,19 +108,23 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Text bindings: `[data-bind="…"]` — `modeLabel catKicker catTitle`; in the project view: `modTitle modDesc modMore modFacts`.
 - Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu deckPrev deckNext closeModal copyEmail`.
   Escape with the mobile menu open closes it and focuses the menu button.
-- Hero: `.wrap.stg` grid = `.hc` text column (`h1.nm` "Febriel <em>B. Otud</em>", `p.vp` (Gambetta 400), supporting `p`,
-  `.hero-cta` with the Messenger `a.btn` + ghost "See my work", then `p.proof` "Recent work:" with plain underlined links
-  to `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `.av` (tilt → plate, avatar canvas) on the right / below
-  ≤820px. No hero text is bound by JS. Inline text links keep the UA underline (accent vs body text is only 1.57:1).
+- Hero: `.wrap.stg` grid = `.hc` text column (`h1.nm` "Febriel <span>B. Otud</span>", the span a block line: the orchid
+  italic surname under "Febriel" at every width; `p.vp` (Gambetta 400), supporting `p`, `.hero-cta` with the Messenger
+  `a.btn` + ghost "See my work", then `p.proof` "Recent work: PilaPass, The Sev Clinic and INKWILD" with plain underlined
+  links to `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `.av` (tilt → plate, avatar canvas) on the right /
+  below ≤820px. No hero text is bound by JS. Inline text links keep the UA underline (accent vs body text is only 1.57:1).
 - Header CTA: `a.btn.hcta` (same Messenger link) between the theme pill and the menu button; `aria-label` carries the name,
   its `span` label is `display:none` ≤1000px (icon only). ≤360px the theme pill hides its `modeLabel` word so the header fits 320px.
 - New-tab hint: hidden `span#nt` ("Opens in a new tab") right after the skip link; every `target=_blank` link (also the
   project view's JS-built `links`) has `aria-describedby="nt"`.
 - Services: `.pan[data-svc="0..3"]` > `button.ph` + `.pb` > `canvas[data-stage]`. Active = `.pan.on`;
   inactive `.pb` carries `hidden`. `logic.stage.current` = stage canvas of the active panel.
-- Skills: `button[data-cat="all|build|design|social|video|ai"]`, active gets `.on`.
+- Skills: `button[data-cat="all|build|design|social|video|ai"]`, active gets `.on`. The card's kicker is a count over its
+  title: `SKILLS.length` tools ("26 tools", also the static text) over "Everything", "N in this group" over a group.
+  ≤820px the group buttons are one sideways-scrolling row with a faded right edge.
 - Work cards (static, in `PROJECTS` order): `article.wk[data-scr]` > `.wki.cut` > `.wkc` > `canvas[data-cover="shape"]`
-  (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc), `span.tg` ("role · type · status"), `a.wkl[href="#work/<id>"]`
+  (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc), `span.tg` > one `span` per fact (role, type, status; empty
+  ones left out), one per line, `a.wkl[href="#work/<id>"]`
   "View <title>", the card's one control; its `::after` covers the card, so the whole card opens it, and the card gets the
   focus ring (`.wk:has(.wkl:focus-visible)`). Cards carry no `id`: the browser's own scroll-to-fragment on a
   `#work/<id>` load would move focus off the open dialog. JS finds a card by its link's `href`.
@@ -136,7 +154,8 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   `.eml` (mailto link showing the address + ghost `Copy` button, `copyEmail`: clipboard, else selects the address; the
   button's text scrambles like any `[data-scr]`, so it isn't the live region: `span.vh[data-nofx][aria-live=polite]`
   after it gets "Copied", cleared with the button's label after 2 s) then
-  ghost `.sm` LinkedIn, Instagram, GitHub; `p.lab` "Follow INKWILD" + `a.lnk` TikTok / YouTube (`.lab .lnk` = ink).
+  ghost `.sm` LinkedIn, Instagram, GitHub (≤1000px the email row stands alone and the three share the next row; ≤520px
+  one row each, so none is left alone); `p.lab` "Follow INKWILD" + `a.lnk` TikTok / YouTube (`.lab .lnk` = ink).
   The tide canvas stays at the bottom of `#contact`; the copyright/back-to-top row is the `footer` after `main`.
 - `.fbo [hidden]{display:none!important}` exists because layout rules out-rank the UA `[hidden]` rule.
 
@@ -164,12 +183,13 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   because Philippine visitors prefer chat (research in the untracked `research_notes/`, excluded via `.git/info/exclude`). Email, Instagram, LinkedIn,
   GitHub are secondary; INKWILD follow links (TikTok, YouTube) tertiary. "I reply within two hours" sits next to both CTAs.
 - Hero (2026-11-15, "cluttered" before): 4 elements — name, value line (brand-plan positioning), one supporting line,
-  two buttons — plus the portrait. Coordinates + live clock line dropped. Name: Gambetta 300, one line on desktop sized
-  `min(8vw,128px,15cqi)` (container query on `.hc`) so the ASCII decode can't rewrap it (no CLS); two lines at
-  `clamp(56px,8vw,128px)` ≤820px. Name parallax removed; portrait tilt kept (hover reveal and pin removed later the same day, see `engine.js`).
+  two buttons — plus the portrait. Coordinates + live clock line dropped. Name: Gambetta 300, two lines at every width
+  since 2026-11-18 (owner: "Febriel" over the orchid italic "B. Otud"), `clamp(56px,8vw,128px)`, `nowrap` so the ASCII
+  decode can't rewrap a line (no CLS). Name parallax removed; portrait tilt kept (hover reveal and pin removed later the same day, see `engine.js`).
   Pointer ASCII light radius 64px and section glow 280px (2026-11-15, owner: smaller); the glow rests at the section's
   top edge (`--my` 0%) until the pointer moves it, so untouched sections and phones keep a faint top glow.
-  Portrait `min(400px,42vh,34vw)`, 320px max ≤820px.
+  Portrait `min(560px,58vh,40vw)` since 2026-11-18 (owner: bigger; 522px at 1440×900, was `min(400px,42vh,34vw)`),
+  320px max ≤820px.
 - Work as proof (2026-11-15, owner + research report P0-4): five projects, brand plan's three first: PilaPass, The Sev
   Clinic, INKWILD, Invex, KONSEPTO Events. The "Private client" card is folded into the content/motion service text
   ("…including ongoing video editing for a private client"). No "Play" anywhere and no `video` field (removed with the
@@ -177,10 +197,12 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   owner (set `image` in `data.js`). No prices on the site. Card meta stays inside the owner's words: INKWILD's role
   "Animation, narration and sound" is his own design copy ("Design system, animation, narration, sound" in
   `design/Main.dc.html`); Invex is "Team project · Full-stack inventory system · School project, not live", since his
-  own role on it isn't stated (full-stack describes the system, the team built it).
+  own role on it isn't stated (full-stack describes the system, the team built it). On the cards each fact is its own
+  line (2026-11-18, Hallmark 63: no middle-dot strings).
 - Hero (2026-11-15, second pass): 5 text elements (name, offer line in Gambetta 400, supporting line "Taking freelance
   and part-time projects now. Remote, or on-site in Dipolog and Dapitan. I reply within two hours.", both buttons, proof
-  line under them). Messenger button measured at y 462–518 on 375×812 (fold 812); 443–499 after the type scale.
+  line under them). Messenger button measured at y 462–518 on 375×812 (fold 812); 443–499 after the type scale;
+  439–491 after 2026-11-18 (52px buttons).
 - Copy pass (2026-11-15, P2-12): each fact once. "Dipolog City" only in the About "Based in" tile (the hero says the
   Dipolog and Dapitan area); student status (third-year BS Information Systems, JRMSU Main Campus, Dapitan City,
   graduating 2028) only in the About paragraph; The Sev Clinic only in Work (About's "Currently" and "Studying" tiles
@@ -205,9 +227,32 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   `startEngine` with only `avatar` set, under `--force-prefers-reduced-motion` (still bust). Regenerate the same way if
   the hero or the mark changes. JSON-LD is a ProfilePage around the Person; Facebook in `sameAs` is
   https://www.facebook.com/febriel.otud.186.
-- Hero spacing (2026-11-15): at 40ch the supporting line takes three lines on desktop, so `.nm` lost its 8px bottom margin
-  and `.hero-cta` its top margin went 14px → 6px; 1440×900 keeps 174px of Work on the first screen (reveal needs 160px).
+- Hero spacing (2026-11-15; 2026-11-18): `.nm` has no bottom margin, `.hc` gap 16px, `.hero-cta` margin-top 8px. With
+  the two-line name and the 522px bust the hero is 714px tall at 1440×900, centred on the bust; the marquee starts at
+  y 778 and Work below the first screen (owner accepted losing the Work peek).
+- Hallmark pass (2026-11-18): every [SAFE] item of `reports/Hallmark audit.md` except the copy trims (a proposal in
+  `reports/copy-trim.md`, waiting for the owner) and the stamp, plus the owner's six [IDENTITY] picks: sentence-case
+  labels, the orchid italic only in the surname ("all three." and "building?" roman; the About statement is now the
+  section's `h2`), one hover effect per work card, the bigger bust, the surname on its own line, About on the band
+  (`--band` = `color-mix(in oklab, --bg, --bg2)`: #0A2025 dark, #E6E1D1 light; lowest text contrast on it 5.03:1).
+  Also: em dashes out of the titles, marquee pauses on hover, caret stops after five blinks, solid phone menu, no hover
+  lift on buttons, 52px buttons, curly apostrophes. The waivers and what stays open (Floor 18 / WCAG 2.2.2 by the owner's
+  no-pause decision) are in `DESIGN.md`. sloplint static: 77 FAIL / 30 REFLEX / 8 WARN → 53 / 1 / 7 (50 of the 53 are
+  the palette blocks, which sloplint can't read as a theme block).
 - Still open from P1-10: `avatar-map.png` is fetched twice on a first visit (CSS mask and engine image use different
   request modes; cached afterwards); glyph atlas or OffscreenCanvas; a Lighthouse run and a mid-range Android check.
 
-last Claude session: 2026-11-15 16:23
+## Hallmark (design skill, local)
+
+- Installed for this project only at `.claude/skills/hallmark/` (Hallmark v2.0.0, MIT, `github.com/Nutlope/hallmark` at
+  `04977e15`), kept out of git by `.git/info/exclude`; no hooks. It runs here only when named: `/hallmark audit
+  index.html` (a report), `/hallmark redesign index.html polish`. It reads `DESIGN.md` first, which locks the system, so
+  a run keeps the ASCII identity and the waivers. Never run its `install*.mjs`, `lint-hook.mjs` or `imagegen.mjs` (global
+  settings, a hook, a paid image API).
+- Static lint: copy `index.html` and `src/styles.css` into one scratch folder, change the stylesheet link to
+  `href="styles.css"` (sloplint resolves `/src/...` against the filesystem root), then
+  `node .claude/skills/hallmark/scripts/sloplint.mjs <copy>/index.html <copy>/styles.css --genre atmospheric`. The
+  render tier (`--render`, `--url http://localhost:5173/`) needs `puppeteer-core`, which is not installed.
+- The last audit and its evidence: `reports/Hallmark audit.md`, `reports/hallmark-audit/` (git-ignored).
+
+last Claude session: 2026-11-18 16:21

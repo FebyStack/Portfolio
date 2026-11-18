@@ -57,7 +57,7 @@ function render(keys) {
 
 function renderCat() {
   const c = state.cat;
-  let rows, title = 'Everything', kicker = 'All groups';
+  let rows, title = 'Everything', kicker = SKILLS.length + ' tools'; // a fact over the title, not a name for it
   if (c === 'all') {
     rows = GROUPS.map(([id, name]) => [name, SKILLS.filter((s) => s[1] === id).length + ' tools']);
   } else {
@@ -153,7 +153,7 @@ function el(tag, cls, ...kids) {
 }
 
 function slide(dir) {
-  const first = deck.children[0], step = first ? first.offsetWidth + 18 : 320;
+  const first = deck.children[0], step = first ? first.offsetWidth + 16 : 320; // 16: the deck's gap
   deck.scrollBy({ left: dir * step * 2, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 
