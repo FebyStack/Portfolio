@@ -76,8 +76,8 @@ Owner's decisions and waivers below bind like the rest: a Hallmark run reports t
 - 42 (nav): the sticky bar (wordmark, five section links, theme pill, Messenger) is the hire anatomy's nav.
 - 62: `data-fx="wait"` is only ever set by `engine.js`, so the page is complete with scripting off; print shows
   every section.
-- 58 (copy): the hero's 13-word offer line is baked into `public/og.png`. Copy trims wait for the owner
-  (`reports/copy-trim.md`, a proposal).
+- 58 (copy): the hero's 13-word offer line is baked into `public/og.png`. The copy trims are applied
+  (`reports/copy-trim.md`, approved as proposed 2026-11-18).
 
 ## Exports
 None. Tokens live in `src/styles.css`; a Tailwind, DTCG or shadcn block goes here on request.

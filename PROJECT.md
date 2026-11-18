@@ -76,8 +76,8 @@ numbers, dates, results or quotes.
 - `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (card order; fields `id title shape desc role type status more tools
   image alt`, optional `links: [[label, url], …]`) and `projectAt(hash)` (`#work/<id>` → index, else -1).
   Screenshots later = set `image` (+ `alt`) here only: it replaces the ASCII cover on the card and in the project view.
-  `src/data.test.js` checks the hash mapping, that each card in `index.html` repeats its title, desc and tag spans, and
-  that the skills card's static kicker is `SKILLS.length` tools.
+  `src/data.test.js` checks the hash mapping, that each card in `index.html` repeats its title and desc, and that the
+  skills card's static kicker is `SKILLS.length` tools.
 - `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
   object the engine expects.
 - `supabase/migrations/*_chat_logs.sql` — record of the `chat_logs` table that stays in the hosted database after the
@@ -109,8 +109,9 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu deckPrev deckNext closeModal copyEmail`.
   Escape with the mobile menu open closes it and focuses the menu button.
 - Hero: `.wrap.stg` grid = `.hc` text column (`h1.nm` "Febriel <span>B. Otud</span>", the span a block line: the orchid
-  italic surname under "Febriel" at every width; `p.vp` (Gambetta 400), supporting `p`, `.hero-cta` with the Messenger
-  `a.btn` + ghost "See my work", then `p.proof` "Recent work: PilaPass, The Sev Clinic and INKWILD" with plain underlined
+  italic surname under "Febriel" at every width; `p.vp` (Gambetta 400), `.hero-cta` with the Messenger `a.btn` + ghost
+  "See my work", then the supporting `p` "Taking freelance and part-time projects now. I reply within two hours." and
+  `p.proof` "Recent work: PilaPass, The Sev Clinic and INKWILD" with plain underlined
   links to `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `.av` (tilt → plate, avatar canvas) on the right /
   below ≤820px. No hero text is bound by JS. Inline text links keep the UA underline (accent vs body text is only 1.57:1).
 - Header CTA: `a.btn.hcta` (same Messenger link) between the theme pill and the menu button; `aria-label` carries the name,
@@ -123,8 +124,8 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   title: `SKILLS.length` tools ("26 tools", also the static text) over "Everything", "N in this group" over a group.
   ≤820px the group buttons are one sideways-scrolling row with a faded right edge.
 - Work cards (static, in `PROJECTS` order): `article.wk[data-scr]` > `.wki.cut` > `.wkc` > `canvas[data-cover="shape"]`
-  (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc), `span.tg` > one `span` per fact (role, type, status; empty
-  ones left out), one per line, `a.wkl[href="#work/<id>"]`
+  (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc, one line; role, type and status show only in the project
+  view), `a.wkl[href="#work/<id>"]`
   "View <title>", the card's one control; its `::after` covers the card, so the whole card opens it, and the card gets the
   focus ring (`.wk:has(.wkl:focus-visible)`). Cards carry no `id`: the browser's own scroll-to-fragment on a
   `#work/<id>` load would move focus off the open dialog. JS finds a card by its link's `href`.
@@ -194,19 +195,22 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   Clinic, INKWILD, Invex, KONSEPTO Events. The "Private client" card is folded into the content/motion service text
   ("…including ongoing video editing for a private client"). No "Play" anywhere and no `video` field (removed with the
   "[VIDEO GOES HERE]" placeholder; if a reel comes, add it as a field like `image`). Project images come later from the
-  owner (set `image` in `data.js`). No prices on the site. Card meta stays inside the owner's words: INKWILD's role
+  owner (set `image` in `data.js`). No prices on the site. Project meta stays inside the owner's words: INKWILD's role
   "Animation, narration and sound" is his own design copy ("Design system, animation, narration, sound" in
   `design/Main.dc.html`); Invex is "Team project · Full-stack inventory system · School project, not live", since his
-  own role on it isn't stated (full-stack describes the system, the team built it). On the cards each fact is its own
-  line (2026-11-18, Hallmark 63: no middle-dot strings).
-- Hero (2026-11-15, second pass): 5 text elements (name, offer line in Gambetta 400, supporting line "Taking freelance
-  and part-time projects now. Remote, or on-site in Dipolog and Dapitan. I reply within two hours.", both buttons, proof
-  line under them). Messenger button measured at y 462–518 on 375×812 (fold 812); 443–499 after the type scale;
-  439–491 after 2026-11-18 (52px buttons).
-- Copy pass (2026-11-15, P2-12): each fact once. "Dipolog City" only in the About "Based in" tile (the hero says the
-  Dipolog and Dapitan area); student status (third-year BS Information Systems, JRMSU Main Campus, Dapitan City,
-  graduating 2028) only in the About paragraph; The Sev Clinic only in Work (About's "Currently" and "Studying" tiles
-  dropped); AI stated in the About tile, the Skills group, and inside INKWILD's project view (marquee keeps its word).
+  own role on it isn't stated (full-stack describes the system, the team built it). Since the copy trim (2026-11-18,
+  owner approved `reports/copy-trim.md` as proposed) a card is its title, a one-line `desc` and its link; role, type
+  and status are only the project view's rows, each its own line (Hallmark 63: no middle-dot strings).
+- Hero (2026-11-15, second pass; copy trim 2026-11-18): 5 text elements (name, offer line in Gambetta 400, both
+  buttons, then the supporting line "Taking freelance and part-time projects now. I reply within two hours." and the
+  proof line under them; "Remote, or on-site in Dipolog and Dapitan." moved to the About "Based in" tile). Messenger
+  button measured at y 462–518 on 375×812 (fold 812); 443–499 after the type scale; 439–491 after 2026-11-18 (52px
+  buttons); 347–399 after the copy trim.
+- Copy pass (2026-11-15, P2-12): each fact once. "Dipolog City" only in the About "Based in" tile ("Dipolog City,
+  Philippines. Remote, or on-site in Dipolog and Dapitan." since the 2026-11-18 copy trim); student status (third-year
+  BS Information Systems, JRMSU Main Campus, Dapitan City, graduating 2028) only in the About paragraph; The Sev Clinic
+  only in Work (About's "Currently" and "Studying" tiles dropped); AI stated in the About tile, the Skills group, and
+  inside INKWILD's project view (marquee keeps its word).
   Hints describe content: "Four things. Most projects end up needing two or three of them." / "Pick a group to see its
   tools." / "Open a project for the details." "Taking freelance and part-time projects now." and the two-hour reply sit
   beside both Messenger buttons.
@@ -230,10 +234,10 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Hero spacing (2026-11-15; 2026-11-18): `.nm` has no bottom margin, `.hc` gap 16px, `.hero-cta` margin-top 8px. With
   the two-line name and the 522px bust the hero is 714px tall at 1440×900, centred on the bust; the marquee starts at
   y 778 and Work below the first screen (owner accepted losing the Work peek).
-- Hallmark pass (2026-11-18): every [SAFE] item of `reports/Hallmark audit.md` except the copy trims (a proposal in
-  `reports/copy-trim.md`, waiting for the owner) and the stamp, plus the owner's six [IDENTITY] picks: sentence-case
-  labels, the orchid italic only in the surname ("all three." and "building?" roman; the About statement is now the
-  section's `h2`), one hover effect per work card, the bigger bust, the surname on its own line, About on the band
+- Hallmark pass (2026-11-18): every [SAFE] item of `reports/Hallmark audit.md` except the copy trims (applied later the
+  same day: `reports/copy-trim.md`, approved as proposed) and the stamp, plus the owner's six [IDENTITY] picks:
+  sentence-case labels, the orchid italic only in the surname ("all three." and "building?" roman; the About statement
+  is now the section's `h2`), one hover effect per work card, the bigger bust, the surname on its own line, About on the band
   (`--band` = `color-mix(in oklab, --bg, --bg2)`: #0A2025 dark, #E6E1D1 light; lowest text contrast on it 5.03:1).
   Also: em dashes out of the titles, marquee pauses on hover, caret stops after five blinks, solid phone menu, no hover
   lift on buttons, 52px buttons, curly apostrophes. The waivers and what stays open (Floor 18 / WCAG 2.2.2 by the owner's

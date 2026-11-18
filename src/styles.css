@@ -83,7 +83,7 @@ body{margin:0}
 .fbo .lnk:hover{color:var(--ink);background-size:calc(100% - 8px) 1px}
 .fbo .lab .lnk{color:var(--ink)}
 .fbo .cut{clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,26px 100%,0 calc(100% - 26px))}
-/* hero: name on two lines, value line, supporting line, two buttons; portrait right (below on small screens).
+/* hero: name on two lines, value line, two buttons, supporting line; portrait right (below on small screens).
    The name never wraps inside a line (nowrap), so the ASCII decode can't rewrap it. */
 .fbo .stg{--avw:min(560px,58vh,40vw);display:grid;grid-template-columns:minmax(0,1fr) var(--avw);gap:44px clamp(24px,5vw,72px);align-items:center}
 .fbo .hc{display:flex;flex-direction:column;gap:16px;min-width:0}
@@ -148,9 +148,8 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .wkb{display:flex;flex-direction:column;gap:12px;padding:20px 24px 24px;flex:1}
 .fbo .wkb h3{margin:0;font-family:var(--serif);font-weight:400;font-size:var(--fs-lg);line-height:1.1;letter-spacing:-.02em}
 .fbo .wkb p{margin:0;color:var(--mute);flex:1}
-/* tags: one fact per line on the cards; the service panels' tags are one line */
+/* tags: the service panels' one-line tag rows */
 .fbo .tg{font-family:var(--mono);font-size:var(--fs-xs)}
-.fbo .tg span{display:block}
 /* project view: a native modal <dialog> (top layer, focus trap, Escape); the page behind shows through ::backdrop */
 .fbo .modal{width:min(1080px,calc(100% - 40px));max-width:none;max-height:calc(100% - 40px);padding:0;border:0;background:none;color:var(--ink);animation:fbo-in .35s both}
 .fbo .modal::backdrop{background:rgba(var(--bgc),.86);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}

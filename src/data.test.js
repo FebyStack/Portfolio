@@ -12,8 +12,7 @@ test('projectAt: #work/<id> opens that project, any other hash none', () => {
 test('each static card in index.html matches data.js', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   for (const p of PROJECTS) {
-    const tags = [p.role, p.type, p.status].filter(Boolean).map((t) => `<span>${t}</span>`).join(' ');
-    for (const s of [`href="#work/${p.id}"`, `<h3>${p.title}</h3>`, `<p>${p.desc}</p>`, `<span class="tg">${tags}</span>`]) assert.ok(html.includes(s), `${p.id}: ${s}`);
+    for (const s of [`href="#work/${p.id}"`, `<h3>${p.title}</h3>`, `<p>${p.desc}</p>`]) assert.ok(html.includes(s), `${p.id}: ${s}`);
   }
   // the skills card's static kicker is the count main.js renders for "All"
   assert.ok(html.includes(`data-bind="catKicker">${SKILLS.length} tools<`), 'catKicker');
