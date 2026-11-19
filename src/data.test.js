@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { SKILLS, PROJECTS, projectAt } from './data.js';
+import { SKILLS, GROUPS, PROJECTS, projectAt } from './data.js';
 
 test('projectAt: #work/<id> opens that project, any other hash none', () => {
   PROJECTS.forEach((p, i) => assert.equal(projectAt('#work/' + p.id), i));
@@ -16,4 +16,10 @@ test('each static card in index.html matches data.js', () => {
   }
   // the skills card's static kicker is the count main.js renders for "All"
   assert.ok(html.includes(`data-bind="catKicker">${SKILLS.length} tools<`), 'catKicker');
+  // the skills index lists every tool of a group, in data.js order, in that group's row
+  for (const [id, name] of GROUPS) {
+    const row = html.match(new RegExp(`<div data-g="${id}"><dt>${name}</dt><dd>(.*?)</dd></div>`));
+    assert.ok(row, `index row ${id}`);
+    assert.deepEqual(row[1].replace(/ <span class="lab">specialty<\/span>/, '').split(', '), SKILLS.filter((s) => s[1] === id).map((s) => s[0]), id);
+  }
 });
