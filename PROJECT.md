@@ -41,8 +41,8 @@ numbers, dates, results or quotes.
     `@media print,(prefers-reduced-motion:reduce)` rule shows sections still waiting. Checked 2026-11-19 (headless Chrome, 1440×900 and 375×812): each section reveals once on
     the first pass down; two more round trips keep every section at opacity 1 with its original text; nothing stuck
     after fast scrolling or `#contact` / `#work/invex` loads; no console errors. Since 2026-11-18 the
-    first screen ends exactly on the marquee at both 1440×900 and 1920×1080, so nothing sits half-revealed; Work
-    reveals on the first scroll.
+    first screen at 1440×900 ends on the marquee: 66px of Work's empty top padding show under it, so nothing sits
+    half-revealed (at 1920×1080, 208px of Work show and it reveals).
   - About photo (2026-11-15, P1-10): fetched by a one-shot IntersectionObserver once the photo canvas is within one
     viewport of the screen (`rootMargin` 100% at the bottom), not at startup (first request at scrollY 1440 of 3880 on
     1440×900).
@@ -107,7 +107,7 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu closeModal copyEmail`.
   Escape with the mobile menu open closes it and focuses the menu button; widening past 820px (where the menu button
   hides) closes it too (`matchMedia`, `data.test.js` checks the JS and CSS numbers match).
-- Hero: `.wrap.fxb.g12` = `.hc` (columns 1–7: `h1.nm` "Febriel <span>B. Otud</span>", the span a block line, the
+- Hero: `.wrap.fxb.g12.stg` = `.hc` (columns 1–7: `h1.nm` "Febriel <span>B. Otud</span>", the span a block line, the
   orchid italic surname under "Febriel" at every width; `p.vp`; `.hero-cta` with the Messenger `a.btn` + ghost "See my
   work"; `.dateline` = the availability `p` and `p.proof` "Recent work: …" with plain underlined links to
   `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `figure.fig.avf` (columns 8–12: `.av` > tilt > plate +
@@ -126,7 +126,7 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   video|ai"]` (active `.on`, `aria-pressed`), `dl.ix[data-ref=catRows]` > `div[data-g]` > `dt` group + `dd` its tools,
   static, in `SKILLS` order (`data.test.js` checks). A picked group: `.ix.f`, its row `.on`. ≤820px the group buttons
   are one sideways-scrolling row with a faded right edge.
-- Work entries (static, in `PROJECTS` order): a plain `div` > `article.wk.g12[data-scr]` > `.wkc` > `canvas[data-cover="shape"]`
+- Work entries (static, in `PROJECTS` order): `.wks` > `article.wk.g12[data-scr]` > `.wkc` > `canvas[data-cover="shape"]`
   (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc, one line; role, type and status show only in the project
   view), `a.wkl[href="#work/<id>"]` "View <title>", the entry's one control; its `::after` covers the entry, so the whole
   entry opens it, and the entry gets the focus ring (`.wk:has(.wkl:focus-visible)`). Entries carry no `id`: the

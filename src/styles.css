@@ -91,7 +91,7 @@ body{margin:0}
 /* reveal: once per section (engine.js); opacity and a short rise only */
 .fbo .fxb{transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
 .fbo [data-fx="wait"] .fxb{opacity:0;transform:translateY(18px)}
-/* head block: the head on nine columns, the hint in the margin on the last three */
+/* head block: the opening rule and number, the head on nine columns, the hint in the margin on the last three */
 .fbo .hd{margin-bottom:64px;align-items:end}
 .fbo .h2{grid-column:1/10;margin:0;font:400 var(--fs-display)/.95 var(--serif);letter-spacing:-.03em}
 .fbo .hd .hint{grid-column:10/13;padding-bottom:.5em}
@@ -165,7 +165,7 @@ to{transform:translateX(-33.333%)}
 .fbo .wk:nth-child(5) .wkc{grid-column:8/13;aspect-ratio:3/2}
 /* tags: the service panels' one-line tag rows */
 .fbo .tg{font-family:var(--mono);font-size:var(--fs-xs)}
-/* ---- services: a list on columns 1–6; the open entry's object and text on 8–12 (the panels are
+/* ---- services: a numbered list on columns 1–6; the open entry's object and text on 7–12 (the panels are
    display: contents, so their parts sit on the list's grid; the list's rows never move when another opens) ---- */
 .fbo .pans{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(4,auto) 1fr;column-gap:var(--gap)}
 .fbo .pan{display:contents}
@@ -185,7 +185,7 @@ to{transform:translateX(-33.333%)}
 @keyframes fbo-in{
 from{opacity:0;transform:translateY(10px)}
 }
-/* ---- skills: the globe and its caption on columns 1–6, a typographic index of every tool on 7–12 ---- */
+/* ---- skills: the globe and its caption on columns 1–7, a typographic index of every tool on 8–12 ---- */
 .fbo .glf{grid-column:1/7}
 .fbo .glb{position:relative;height:min(520px,60vh);min-height:300px}
 .fbo .glb canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
@@ -198,7 +198,7 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .ix div:last-child{border-bottom:1px solid var(--line)}
 .fbo .ix dt{font:500 var(--fs-xs)/1.9 var(--mono);color:var(--mute)}
 .fbo .ix dd{margin:0;transition:color .2s ease}
-/* a picked group: its row in ink, the vermilion mark on its label; the others step back to the muted ink */
+/* a picked group: its row in ink, its number-mark colour on the label; the others step back to the muted ink */
 .fbo .ix.f div:not(.on) dd{color:var(--mute)}
 .fbo .ix div.on dt{color:var(--mark)}
 /* ---- about (on the band): the statement as a pull quote, the photo with its caption, the facts as a ruled list ---- */
@@ -320,5 +320,3 @@ html{scroll-behavior:auto}
 @media print,(prefers-reduced-motion:reduce){
 .fbo [data-fx] .fxb{opacity:1!important;transform:none!important;transition:none!important}
 }
-/* print: every service description, not just the open one */
-@media print{.fbo .pb[hidden]{display:flex!important}}
