@@ -24,9 +24,9 @@ function scrChar(c, r) {
   if (c.toLowerCase() !== c.toUpperCase()) return 'clodxk'.charAt(Math.floor(r * 6));
   return ".',;:".charAt(Math.floor(r * 5));
 }
-/* a section reveals, once, when 160px of it is on screen (a third of it, or of the viewport, when that is less, so it can
-   always get there) */
-function inView(seen, vh, h) { return seen >= Math.min(160, Math.min(vh, h) / 3); }
+/* a section reveals once 160px of it is on screen (a third of it, or of the viewport, when that is less, so it can
+   always get there) and dissolves only when clearly less is left, under 60% of that; the gap stops edge flicker */
+function inView(shown, seen, vh, h) { var r = Math.min(160, Math.min(vh, h) / 3); return seen >= (shown ? 0.6 * r : r); }
 
 /* ---------- 3D shapes (signed distance) ---------- */
 function sdBox(x, y, z, bx, by, bz, r) {
@@ -133,20 +133,27 @@ export function startEngine(logic) {
     im.src = url;
   }
 
-  /* ----- text that resolves out of ASCII ----- */
+  /* ----- text that resolves out of ASCII (rev: dissolves back into it) ----- */
   var fx = [];
-  function decode(el, dur) {
+  function decode(el, dur, rev) {
     if (!el || calm.matches) return;
+    rev = !!rev;
     var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n, k = 0, now = performance.now();
     while ((n = tw.nextNode())) {
       var s = n.nodeValue;
       if (!s || !s.trim()) continue;
       var p = n.parentNode;
       if (!p || !p.closest || p.closest('[data-nofx]')) continue;
-      if (fx.some(function (f) { return f.node === n; })) continue;
+      var f = null;
+      for (var i = 0; i < fx.length; i++) if (fx[i].node === n) { f = fx[i]; break; }
+      if (f) {
+        if (f.rev === rev) continue;
+        fx.splice(i, 1); /* the opposite effect gives way and hands over the real text */
+        if (s === f.last) s = f.orig;
+      }
       var rnd = new Float32Array(s.length);
       for (var j = 0; j < s.length; j++) rnd[j] = Math.random();
-      fx.push({ node: n, orig: s, last: n.nodeValue, rnd: rnd, t0: now + Math.min(k, 16) * 30, dur: dur });
+      fx.push({ node: n, orig: s, last: n.nodeValue, rnd: rnd, t0: now + Math.min(k, 16) * 30, dur: dur, rev: rev });
       k++;
     }
   }
@@ -161,27 +168,38 @@ export function startEngine(logic) {
       var out = '', len = f.orig.length;
       for (var j = 0; j < len; j++) {
         var c = f.orig.charAt(j);
-        out += p > f.rnd[j] * 0.75 + (j / len) * 0.25 ? c : scrChar(c, hash2(j + flick * 7.3, f.rnd[j] * 91));
+        out += (p > f.rnd[j] * 0.75 + (j / len) * 0.25) !== f.rev ? c : scrChar(c, hash2(j + flick * 7.3, f.rnd[j] * 91));
       }
       if (out !== f.last) f.node.nodeValue = f.last = out;
     }
   }
   function endFx() { for (var i = 0; i < fx.length; i++) if (fx[i].node.nodeValue === fx[i].last) fx[i].node.nodeValue = fx[i].orig; fx.length = 0; }
 
-  /* ----- sections: ghost reveal (once), ASCII rain, ASCII light, scroll and pointer parallax ----- */
+  /* ----- sections: ghost reveal (and dissolve, so it replays), ASCII rain, ASCII light, scroll and pointer parallax ----- */
   var secs = [], hdr = logic.root.current && logic.root.current.querySelector('header');
   var ro = new IntersectionObserver(function (es) {
     for (var i = 0; i < es.length; i++) {
       var e = es[i], o = e.target.__fboSec; if (!o) continue;
       o.vis = e.isIntersecting;
-      if (!o.shown && inView(e.intersectionRect.height, e.rootBounds ? e.rootBounds.height : innerHeight, e.boundingClientRect.height)) show(o);
+      var on = inView(o.shown, e.intersectionRect.height, e.rootBounds ? e.rootBounds.height : innerHeight, e.boundingClientRect.height);
+      if (on && !o.shown) show(o);
+      /* an open modal, or keyboard focus, keeps its section on screen */
+      else if (!on && o.shown && !calm.matches && !o.el.querySelector('[data-modal], :focus-visible')) hide(o);
+      /* gone before the dissolve finished: drop the rest, so coming back looks like the first time */
+      if (!o.vis && o.q < 1) { o.q = 1; o.veil = 0; if (o.cv) o.cv.width = 0; }
     }
   /* ponytail: 1% steps fire the rule within ~1% of a section's height (≈30px on a 3000px one); exact edges would need per-section rootMargin observers */
   }, { threshold: Array.from({ length: 101 }, function (_, j) { return j / 100; }), rootMargin: -(hdr ? hdr.offsetHeight : 0) + 'px 0px 0px 0px' }); /* what sits under the sticky header isn't on screen */
   function show(o) {
-    o.shown = true;
+    o.shown = true; o.q = 1;
     o.el.removeAttribute('data-fx');
-    if (!calm.matches) { pin(o); o.veil = 1; decode(o.el, 950); }
+    if (!calm.matches) { pin(o); o.veil = 1; decode(o.el, 950); if (o === heroO) aIntro = 0; if (o === aboutO) pIntro = 0; }
+  }
+  /* the reveal in reverse: text scrambles, the veil swells over it, the content fades (styles.css) */
+  function hide(o) {
+    o.shown = false; o.q = 0;
+    o.el.setAttribute('data-fx', 'wait');
+    pin(o); decode(o.el, 800, true);
   }
   /* scrambled glyphs wrap differently (phones), so the section keeps its height while its text plays and nothing below jumps */
   function pin(o) {
@@ -193,7 +211,7 @@ export function startEngine(logic) {
     var list = r.querySelectorAll('[data-sec]');
     for (var i = 0; i < list.length; i++) {
       var el = list[i]; if (el.__fboSec) continue;
-      var o = { el: el, cv: el.querySelector('canvas[data-amb]'), hero: el.getAttribute('data-sec') === 'hero', px: 0, py: 0, sx: 0, sy: 0, inside: false, li: 0, veil: 0, shown: false, vis: false, drops: [], spS: '' };
+      var o = { el: el, cv: el.querySelector('canvas[data-amb]'), hero: el.getAttribute('data-sec') === 'hero', px: 0, py: 0, sx: 0, sy: 0, inside: false, li: 0, veil: 0, q: 1, shown: false, vis: false, drops: [], spS: '' };
       el.__fboSec = o; secs.push(o);
       if (o.hero) heroO = o;
       if (el.getAttribute('data-sec') === 'about') aboutO = o;
@@ -243,6 +261,9 @@ export function startEngine(logic) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
     ctx.font = monoFont(13, 450); ctx.textBaseline = 'top';
     var cw = ctx.measureText('M').width || 7.8, ch = 19, cols = Math.ceil(w / cw), rows = Math.ceil(h / ch);
+    /* dissolving: the veil swells and clears again while rain and light fade out with the section */
+    if (!o.shown) { o.q = Math.min(1, o.q + dt / 0.75); o.veil = o.q < 1 ? Math.sin(Math.PI * o.q) : 0; }
+    var fo = o.shown ? 1 : 1 - o.q;
     if (!still && E.rain > 0) {
       var want = Math.round(cols / 5.5 * E.rain);
       while (o.drops.length < want) o.drops.push({ c: Math.floor(Math.random() * cols), y: Math.random() * h, v: 22 + Math.random() * 64, n: 2 + Math.floor(Math.random() * 7), s: Math.random() * 100 });
@@ -255,7 +276,7 @@ export function startEngine(logic) {
         var head = Math.floor(d.y / ch);
         for (k = 0; k < d.n; k++) {
           var r = head - k; if (r < 0 || r >= rows) continue;
-          ctx.globalAlpha = 0.26 * (1 - k / d.n);
+          ctx.globalAlpha = 0.26 * (1 - k / d.n) * fo;
           ctx.fillText(RAMP.charAt(1 + Math.floor(hash2(d.s + r * 3.1, d.c + Math.floor(E.t * 2 + k)) * 9)), d.c * cw, r * ch);
         }
       }
@@ -273,12 +294,12 @@ export function startEngine(logic) {
         if (a <= 0) continue;
         var v = a * (0.3 + 0.7 * vnoise(x * 0.33 + E.t * 0.7, y * 0.33 - E.t * 0.5));
         if (v < 0.16) continue;
-        ctx.globalAlpha = Math.min(0.4, (0.02 + 0.1 * a) * o.li * E.light);
+        ctx.globalAlpha = Math.min(0.4, (0.02 + 0.1 * a) * o.li * E.light) * fo;
         ctx.fillText(RAMP.charAt(1 + Math.floor(v * (RL - 2))), x * cw, y * ch);
       }
     }
     if (o.veil > 0) {
-      o.veil = Math.max(0, o.veil - dt / 1.2);
+      if (o.shown) o.veil = Math.max(0, o.veil - dt / 1.2);
       ctx.fillStyle = E.col.ink; ctx.globalAlpha = 0.34 * o.veil;
       for (y = 0; y < rows; y++) {
         var s = '';
@@ -348,7 +369,7 @@ export function startEngine(logic) {
     var stamp = w + 'x' + h + (E.dark ? 'd' : 'l') + E.glyph;
     if (stamp !== A.stamp) { buildAvatar(); A.stamp = stamp; }
     var g = aGrid, cols = g.cols, rows = g.rows, cw = g.cw, ch = g.ch, x, y, d, idx;
-    aIntro = still ? 1 : clamp01(aIntro + (!heroO || heroO.shown ? dt / 1.6 : 0)); /* builds with the hero's reveal */
+    aIntro = still ? 1 : clamp01(aIntro + (!heroO || heroO.shown ? dt / 1.6 : -dt / 0.75)); /* builds with the hero, scatters as it dissolves */
     if (!still && now - aBoilAt > 170 / Math.max(0.25, E.speed) && E.speed > 0) { aBoil = (aBoil + 1) % 3; aBoilAt = now; }
     var tx = A.inside ? A.px / w : 0.5 + 0.2 * Math.cos(E.t * 0.45), ty = A.inside ? A.py / h : 0.42 + 0.14 * Math.sin(E.t * 0.6);
     var k = still ? 1 : 1 - Math.pow(0.0015, dt);
@@ -540,7 +561,7 @@ export function startEngine(logic) {
     var stamp = w + 'x' + h + 'g' + E.glyph;
     if (stamp !== Ph.stamp) { buildPhotoGrid(); Ph.stamp = stamp; }
     var g = pGrid, shown = !aboutO || aboutO.shown;
-    pIntro = still ? 1 : clamp01(pIntro + (shown ? dt / 1.6 : 0));
+    pIntro = still ? 1 : clamp01(pIntro + (shown ? dt / 1.6 : -dt / 0.75));
     pHov += ((Ph.inside ? 1 : 0) - pHov) * (still ? 1 : 1 - Math.pow(0.03, dt));
     var kk = still ? 1 : 1 - Math.pow(0.01, dt);
     var tx = Ph.inside ? 0.5 + (Ph.px / w - 0.5) * 0.16 : 0.5, ty = Ph.inside ? 0.56 + (Ph.py / h - 0.5) * 0.1 : 0.56;
@@ -719,13 +740,13 @@ export function startEngine(logic) {
     if (E.themeDirty || !E.col) readTheme();
     if (!E.col) return;
     try {
-      if (A.el && A.vis && (calm.matches || !heroO || heroO.shown)) drawAvatar(now, dt); /* waits for the hero's reveal */
+      if (A.el && A.vis && (calm.matches || aIntro > 0 || !heroO || heroO.shown)) drawAvatar(now, dt); /* a dissolved hero's portrait rests */
       if (S.el && S.vis) drawStage(now, dt);
       if (Gl.el && Gl.vis) drawGlobe(now, dt);
       if (Td.el && Td.vis && tick % 2 === 0) drawTide();
       if (Ph.el && Ph.vis) drawPhoto(now, dt);
       drawCovers(dt);
-      for (var i = 0; i < secs.length; i++) if (secs[i].vis && secs[i].shown) drawAmbient(secs[i], dt);
+      for (var i = 0; i < secs.length; i++) if (secs[i].vis && (secs[i].shown || secs[i].q < 1)) drawAmbient(secs[i], dt);
     } catch (err) { if (!E.failed) { E.failed = true; console.error('fbo engine', err); } }
   }
   function sync() {

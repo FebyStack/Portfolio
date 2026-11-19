@@ -169,7 +169,7 @@ const ACTIONS = {
   deckNext: () => slide(1),
   closeModal: () => dlg?.close(),
   copyEmail: () => {
-    const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]'); // the button's text scrambles (reveal, hover); this data-nofx span never does
+    const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]'); // the button's text scrambles (reveal, dissolve, hover); this data-nofx span never does
     const done = () => { b.textContent = live.textContent = 'Copied'; clearTimeout(copyT); copyT = setTimeout(() => { b.textContent = 'Copy'; live.textContent = ''; }, 2000); };
     const pick = () => getSelection().selectAllChildren(a); // clipboard blocked: select it for a manual copy
     try { navigator.clipboard.writeText(a.href.slice(7)).then(done, pick); } catch { pick(); } // href, since the text may be mid-scramble
