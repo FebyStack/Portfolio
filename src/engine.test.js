@@ -2,20 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { clamp01, smooth, scrChar, sdf, inView } from './engine.js';
 
-test('inView: in at 160px (or a third of a short section or viewport), out under 60% of that', () => {
-  // a 790px section (Work at 1440x900): in at 160px, out under 96px
-  assert.equal(inView(false, 174, 900, 790), true);
-  assert.equal(inView(false, 159, 900, 790), false); assert.equal(inView(false, 160, 900, 790), true);
-  assert.equal(inView(true, 96, 900, 790), true); assert.equal(inView(true, 95, 900, 790), false);
+test('inView: at 160px, or a third of a short section or viewport', () => {
+  // a 790px section (Work at 1440x900)
+  assert.equal(inView(159, 900, 790), false); assert.equal(inView(160, 900, 790), true);
   // tall section (3000 > 812): still 160px, not a share of the section
-  assert.equal(inView(false, 159, 812, 3000), false); assert.equal(inView(false, 160, 812, 3000), true);
-  // short section (300px): a third of it, 100px; out under 60px
-  assert.equal(inView(false, 99, 900, 300), false); assert.equal(inView(false, 100, 900, 300), true);
-  assert.equal(inView(true, 60, 900, 300), true); assert.equal(inView(true, 59, 900, 300), false);
+  assert.equal(inView(159, 812, 3000), false); assert.equal(inView(160, 812, 3000), true);
+  // short section (300px): a third of it, 100px
+  assert.equal(inView(99, 900, 300), false); assert.equal(inView(100, 900, 300), true);
   // short viewport (landscape phone, 360px): a third of it, so a tall section can still get there
-  assert.equal(inView(false, 119, 360, 3000), false); assert.equal(inView(false, 120, 360, 3000), true);
-  // between the two lines the state holds, so the edge can't flicker
-  for (const v of [96, 120, 159]) { assert.equal(inView(true, v, 900, 790), true); assert.equal(inView(false, v, 900, 790), false); }
+  assert.equal(inView(119, 360, 3000), false); assert.equal(inView(120, 360, 3000), true);
 });
 
 test('sdf: finite, inside at the core of solid shapes, outside far away', () => {
