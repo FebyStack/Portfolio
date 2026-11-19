@@ -51,12 +51,12 @@ Owner's decisions and waivers below bind like the rest: a Hallmark run reports t
 ## Motion
 - Character: atmospheric ASCII, always on while on screen. The budget below is waived on the record (owner).
 - Engine (`src/engine.js`): ambient ASCII rain per section, the pointer's ASCII light (64px) and section glow (280px),
-  the bust (boil, accent cloud, tilt), section reveal with decode, and the dissolve that replays it, the text
+  the bust (boil, accent cloud, tilt), section reveal with decode (once per section, first time in view), the text
   scramble on hover (`data-scr`), the globe, the service objects, the deck arc with turning covers, the about photo,
   the tide. Layers draw only on screen.
-- CSS: reveal 0.9s, dissolve 0.75s, panels 0.6s, project view 0.35s, colour 0.2s, press 0.15s; the marquee loops 48s
+- CSS: reveal 0.9s, panels 0.6s, project view 0.35s, colour 0.2s, press 0.15s; the marquee loops 48s
   and pauses under the pointer; the logo caret blinks five times and stays.
-- Reduced motion: no veil, decode, dissolve, scramble, loop or transition; content always visible.
+- Reduced motion: no veil, decode, scramble, loop or transition; content always visible.
 
 ## Owner's decisions (2026-11-18)
 - Labels, buttons, nav links, tags and `dt`s in sentence case, Geist Mono kept, tracking at most 0.03em (gate 67).
@@ -69,7 +69,7 @@ Owner's decisions and waivers below bind like the rest: a Hallmark run reports t
 ## Waivers and open items (on the record)
 - Floor 18 / WCAG 2.2.2, open by decision: moving content past 5s without a pause control. The owner declined a
   control; reduced motion stops everything, the marquee pauses on hover, the caret stops, layers stop off screen.
-- 28 / F8 / craft § 5, the ASCII motion budget: replaying reveals, decode, parallax, tilt, cursor followers; the
+- 28 / F8 / craft § 5, the ASCII motion budget: reveals, decode, parallax, tilt, cursor followers; the
   ASCII is the identity, not decoration.
 - 66 (marquee): the mono-caps strip under the hero stays, with its capitals (67 stays open for it alone).
 - 29 (glow): the accent glow that follows the pointer in each section stays, with the ASCII light.

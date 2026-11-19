@@ -38,20 +38,17 @@ numbers, dates, results or quotes.
     Labels and controls are sentence case, tracked 0–0.03em (owner, 2026-11-18); only the marquee keeps its capitals.
 - `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal and the portrait below.
   Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
-  - Section reveals replay (2026-11-15, owner): `inView()` (tested) reveals a `[data-sec]` once 160px of it is on
-    screen (a third of the section or of the viewport when that is less, so it can always get there) and dissolves it
-    under 60% of that, 96px (hysteresis, so no flicker). The section observer's `rootMargin` drops the strip under the
-    sticky header (its height, read once at start), so "on screen" means below the header and a section leaving upward
-    still shows its dissolve. Dissolve =
-    the reveal in reverse: text scrambles back (`decode(el, 800, true)`; an opposite effect on a node is replaced and hands
-    over its original text), the ambient veil swells and clears (sin envelope, 0.75 s) while rain/light fade, the hero
-    portrait and about photo intros run backwards, content fades via `[data-fx=wait]` (0.75 s, the reveal's curve reversed).
-    Coming back replays the first reveal exactly (veil 1 → 0, decode, intros from 0). A section's height is pinned for 1.5 s
-    while its text plays (scrambled glyphs rewrap on phones); `sync()` drops pins since app changes win. No dissolve
-    while the work modal is open or keyboard focus (`:focus-visible`) is inside; `focusin` reveals a hidden section.
-    Reduced motion: unchanged (content always visible, no veil/decode/dissolve).
-    Checked 2026-11-15 after the 160px rule (headless Chrome, 1440×900 and 375×812): every section reveals and dissolves
-    once per pass down and up; a 12× jiggle across a reveal line toggles once; no console errors. Since 2026-11-18 the
+  - Section reveals play once (2026-11-19, owner; replaced the 2026-11-15 dissolve/replay): `inView()` (tested)
+    reveals a `[data-sec]` the first time 160px of it is on screen (a third of the section or of the viewport when that
+    is less, so it can always get there): veil 1 → 0, text decode (`decode(el, 950)`), hero portrait and about photo
+    intros from 0. After that the section stays as it is in both scroll directions: no dissolve, no replay (the exit
+    hysteresis, `hide()`, reversed decode and reversed intros were deleted). The section observer's `rootMargin` drops
+    the strip under the sticky header (its height, read once at start), so "on screen" means below the header. A
+    section's height is pinned for 1.5 s while its text decodes (scrambled glyphs rewrap on phones); `sync()` drops pins
+    since app changes win. `focusin` reveals a not-yet-revealed section. Reduced motion: unchanged (content always
+    visible, no veil/decode). Checked 2026-11-19 (headless Chrome, 1440×900 and 375×812): each section reveals once on
+    the first pass down; two more round trips keep every section at opacity 1 with its original text; nothing stuck
+    after fast scrolling or `#contact` / `#work/invex` loads; no console errors. Since 2026-11-18 the
     first screen at 1440×900 ends on the marquee: 66px of Work's empty top padding show under it, so nothing sits
     half-revealed (at 1920×1080, 208px of Work show and it reveals).
   - About photo (2026-11-15, P1-10): fetched by a one-shot IntersectionObserver once the photo canvas is within one
@@ -132,7 +129,7 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Project view: `<template data-ref="modalTpl">` (last child of `#work`, outside `.fxb`) holds `dialog.modal[data-modal]`;
   JS sets its `aria-label` to the project title (not `aria-labelledby` the `h3`, whose text the engine scrambles while the
   dialog opens, so screen readers would hear the glyphs). Cloned into `#work` and `showModal()`ed on open, closed and
-  removed on close: the engine reads the mount (`[data-modal]` stops `#work` dissolving, `canvas[data-cover][data-big]` is
+  removed on close: the engine reads the mount (`canvas[data-cover][data-big]` is
   its big cover, drawn only while `#work` is on screen, so opening scrolls `#work` into view instantly behind the dialog,
   but only when it is off screen: above the 64px header or below the viewport; a card click never moves the page).
   Native focus trap, Escape, `::backdrop` (tint + blur); a press and release both outside the dialog's box close it (the
@@ -207,8 +204,9 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   button measured at y 462–518 on 375×812 (fold 812); 443–499 after the type scale; 439–491 after 2026-11-18 (52px
   buttons); 347–399 after the copy trim.
 - Copy pass (2026-11-15, P2-12): each fact once. "Dipolog City" only in the About "Based in" tile ("Dipolog City,
-  Philippines. Remote, or on-site in Dipolog and Dapitan." since the 2026-11-18 copy trim); student status (third-year
-  BS Information Systems, JRMSU Main Campus, Dapitan City, graduating 2028) only in the About paragraph; The Sev Clinic
+  Philippines. Remote, or on-site in Dipolog and Dapitan." since the 2026-11-18 copy trim); student status (the About
+  paragraph, "I’m a third-year BS Information Systems student…") removed 2026-11-19 (owner); About is the statement and
+  the tiles; The Sev Clinic
   only in Work (About's "Currently" and "Studying" tiles dropped); AI stated in the About tile, the Skills group, and
   inside INKWILD's project view (marquee keeps its word).
   Hints describe content: "Four things. Most projects end up needing two or three of them." / "Pick a group to see its
