@@ -16,16 +16,26 @@ numbers, dates, results or quotes.
   appears, move to Astro and keep `src/engine.js` as-is.
 - **Coding rules: ponytail** (`~/.claude/plugins/marketplaces/greenpt/bench/variants/ponytail.md`).
   Stdlib/native first, fewest files, `ponytail:` comment on every intentional shortcut.
-- `index.html` — all markup. Since the 2026-11-19 editorial redesign it has no inline styles: every rule is a class in
-  `styles.css` (the design template's inline styles went with the old layout).
-- `src/styles.css` — rewritten 2026-11-19 for the editorial system (12-column `.g12` grid, opening rules, captions, the
-  `.sep` ASCII band, the `--mark` vermilion; `DESIGN.md` has the grid, scale and every composition). Kept from before:
+- `index.html` — all markup, copied from the design template. Inline styles kept verbatim on purpose
+  (diffable against the design; their gaps snapped to the 4px scale on 2026-11-18); the 2026-11-15 hero uses classes in
+  `styles.css` instead.
+- `src/styles.css` — the design's `<helmet><style>`, fonts/images repointed to `/fonts`, `/img`, plus the 2026-11-15
+  rules (hero, header CTA, section padding, work cards, project dialog, contact rows) and the 2026-11-18 Hallmark pass:
   `:root` holds the colours `html` paints itself (page background, `scrollbar-color`) and the Tidal blocks reuse them;
-  `html, body` clip overflow-x; spacing on a 4px scale; labels and controls in sentence case; print shows every
+  `html, body` clip overflow-x; `.fbo` is an inline-size container, so `100cqw` (not `100vw`) makes the deck and the
+  phone skill-group row full bleed; spacing on a 4px scale; labels and controls in sentence case; print shows every
   section.
-  - Type scale: every text size is a token on `.fbo` (`--fs-xs` … `--fs-name`, plus `--fs-title` and `--fs-display`
-    since 2026-11-19); the list and their uses are in `DESIGN.md`. `text-wrap: balance` on h1–h3 and short blocks,
-    `pretty` on paragraphs. Labels and controls sentence case, tracked 0–0.03em; only the marquee keeps capitals.
+  - Type scale (2026-11-15, P2-11; 2026-11-18): every text size is a token on `.fbo`, used by the CSS and by
+    `index.html`'s inline styles. `--fs-xs` 12px (Geist Mono labels, tags, small links, `dt`s, marquee) · `--fs-sm` 14px
+    (buttons, nav and menu links, mono notes: logo, hints, tool rows; the proof line) · `--fs-md` 17px (Switzer reading text, line-height 1.5; closed service tabs) ·
+    `--fs-lg` `clamp(22px,2.1vw,30px)` (offer line, About statement, card, panel and project titles) · `--fs-xl`
+    `clamp(36px,4vw,60px)` (section headings) · `--fs-2xl` `clamp(40px,5.6vw,84px)` (the contact line) · `--fs-name`
+    `clamp(56px,8vw,128px)` (the name, two lines at every width). `--measure: 40ch` caps Switzer paragraphs at about
+    46–52 characters, the brand plan's line length (`ch` is the width of "0", so 52ch rendered 59–73). Light 300 only for
+    the name; headings and the About statement are Gambetta 400. The outlined "Febriel" behind the About photo (`.abg`) is
+    artwork sized to the photo, outside the scale. `text-wrap: balance` on h1–h3 and on short blocks (tags, card blurbs,
+    `dd`s, footer lines), `pretty` on paragraphs (`.vp` balance), so nothing ends on a lone word at 375 or 1280.
+    Labels and controls are sentence case, tracked 0–0.03em (owner, 2026-11-18); only the marquee keeps its capitals.
 - `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal and the portrait below.
   Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
   - Section reveals play once (2026-11-19, owner; replaced the 2026-11-15 dissolve/replay): `inView()` (tested)
@@ -50,13 +60,7 @@ numbers, dates, results or quotes.
     "Show the drawing" pin are gone; the 3D tilt and the pointer accent (a small accent-glyph cloud at the pointer,
     drifting on its own when nobody points) stay.
   - Work covers (2026-11-18, owner: one hover effect per card): hovering a card no longer speeds its cover up or draws it
-    every frame; the card's hover is the text scramble. Only the project view's big cover turns faster. Since
-    2026-11-19 each cover canvas is observed by the layer `io` (only on-screen covers draw, one per frame round-robin)
-    and its glyph grows with it (`w / 60`, min 9; stage `w / 40`, min 12), so the bigger illustrations cost about what
-    the old cards did.
-  - 2026-11-19: `scrollFx` (the deck arc `--o` and the scroll parallax `--sp`) and the pointer `--px/--py` vars were
-    deleted with the layouts that used them; the hero tilt stays. The ambient rain canvas draws at DPR 1 (`ponytail:`
-    note in `drawAmbient`).
+    every frame; the card's hover is the text scramble. Only the project view's big cover turns faster.
 - `public/img/avatar-map.png` — the portrait's density map, 264×264 RGBA read by `buildAvatar`: channel 0 = tone,
   1 = accents (only hair uses them, dark mode), 2 = hair flag (low = hair: dark mode gives it a minimum density),
   alpha = subject mask. `.plate` (page colour, behind the canvas, keeps the ambient rain out of the portrait) masks with
@@ -80,7 +84,7 @@ numbers, dates, results or quotes.
 
 ## Engine ↔ app contract
 
-Engine reads only: `logic.{root,tilt,avatar,stage,globe,tide,photo,skl}.current`,
+Engine reads only: `logic.{root,tilt,avatar,stage,globe,tide,photo,skl,deck}.current`,
 `logic.state.{dark,svc,cat,modal}`, `logic.props.{mode,motion,rain,light,glyph}`, and never writes app state (the
 design's 20 s clock with its `time`, and the avatar's `busy`/"speaking", went with the chatbot). App calls `eng.sync()`
 after every state change; `sync()` also drops the sections' height pins, so nothing should call it on a timer.
@@ -88,52 +92,47 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 ## DOM contract (index.html ↔ main.js)
 
 - Root `div#top.fbo.pal-tidal.is-dark[data-ref="root"]`; mode = swap `is-dark`/`is-light` (also sets `meta[name=theme-color]` to `--bg`).
-  `main#main` holds, in order: hero, marquee, `#work`, `div.sep`, `#services`, `div.sep`, `#skills`, `div.sep`, `#about`,
-  `div.sep`, `#contact` (nav and mobile menu follow the section order; `.sep` = the static ASCII band, `aria-hidden`, a
-  CSS `::before` string). `footer.foot` sits after `main`, inside the root. Skip link targets `#main`. Every section after
-  the hero opens with `.hd.g12` > `p.kick` (aria-hidden, the section's name) + `h2`. Paddings in `DESIGN.md`. The hero
-  has a min-height (screen under the header and marquee); the rest size to content. `html{scroll-padding-top:80px}` keeps anchors and keyboard
+  `main#main` holds, in order: hero, marquee, `#work`, `#services`, `#skills`, `#about`, `#contact` (nav and mobile menu
+  follow that order). `footer` sits after `main`, still inside the root. Skip link targets `#main`. Sections size to their
+  content, no min-height: `.wrap` padding 96px (56px ≤820px), `#services` 144/72 (88/40), the About band
+  (`section.band`, background `--band`) 120/120 (72/72), so the seams vary. `html{scroll-padding-top:80px}` keeps anchors and keyboard
   focus clear of the 64px sticky header (so `.sec` has no scroll-margin).
   Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint,
   and with nothing stored follows the OS (`prefers-color-scheme: light` → light, otherwise the markup's dark default).
   `state.dark` reads that class, so script and app agree; `render` then sets `theme-color`. The theme pill's `aria-label`
   starts with its visible word (WCAG 2.5.3): "Dark mode, switch to light" / "Light mode, switch to dark".
-- Refs: `[data-ref="…"]` — `tilt avatar globe tide photo skl work menu catRows modalTpl`.
+- Refs: `[data-ref="…"]` — `tilt avatar globe tide photo skl deck work menu catRows modalTpl`.
 - Text bindings: `[data-bind="…"]` — `modeLabel catKicker catTitle`; in the project view: `modTitle modDesc modMore modFacts`.
-- Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu closeModal copyEmail`.
+- Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu deckPrev deckNext closeModal copyEmail`.
   Escape with the mobile menu open closes it and focuses the menu button.
-- Hero: `.wrap.fxb.g12.stg` = `.hc` (columns 1–7: `h1.nm` "Febriel <span>B. Otud</span>", the span a block line, the
-  orchid italic surname under "Febriel" at every width; `p.vp`; `.hero-cta` with the Messenger `a.btn` + ghost "See my
-  work"; `.dateline` = the availability `p` and `p.proof` "Recent work: …" with plain underlined links to
-  `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `figure.fig.avf` (columns 8–12: `.av` > tilt > plate +
-  avatar canvas, then `figcaption.cap` "Portrait drawn the INKWILD way, then set in ASCII."). No hero text is bound by
-  JS. Inline text links keep the UA underline (accent vs body text is only 1.57:1).
+- Hero: `.wrap.stg` grid = `.hc` text column (`h1.nm` "Febriel <span>B. Otud</span>", the span a block line: the orchid
+  italic surname under "Febriel" at every width; `p.vp` (Gambetta 400), `.hero-cta` with the Messenger `a.btn` + ghost
+  "See my work", then the supporting `p` "Taking freelance and part-time projects now. I reply within two hours." and
+  `p.proof` "Recent work: PilaPass, The Sev Clinic and INKWILD" with plain underlined
+  links to `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `.av` (tilt → plate, avatar canvas) on the right /
+  below ≤820px. No hero text is bound by JS. Inline text links keep the UA underline (accent vs body text is only 1.57:1).
 - Header CTA: `a.btn.hcta` (same Messenger link) between the theme pill and the menu button; `aria-label` carries the name,
   its `span` label is `display:none` ≤1000px (icon only). ≤360px the theme pill hides its `modeLabel` word so the header fits 320px.
 - New-tab hint: hidden `span#nt` ("Opens in a new tab") right after the skip link; every `target=_blank` link (also the
   project view's JS-built `links`) has `aria-describedby="nt"`.
-- Services: `.pans` (12-column grid) > `.pan[data-svc="0..3"]` (`display: contents` above 820px) > `button.ph` (`span.pt`
-  title) + `.pb` > `.pbt` (text, tags) + `figure.pbc` > `canvas[data-stage]`. Active = `.pan.on`; inactive `.pb` carries
-  `hidden`. `logic.stage.current` = stage canvas of the active panel. Mouseenter (on the `.ph`, not the panel), click
-  and focus open one.
-- Skills: `figure.glf` (globe + caption) and `.skx` > `.skt[data-ref=skl]` (kicker `SKILLS.length` tools / "N in this
-  group" over the title "Everything" / the group name; decoded on change), `button[data-cat="all|build|design|social|
-  video|ai"]` (active `.on`, `aria-pressed`), `dl.ix[data-ref=catRows]` > `div[data-g]` > `dt` group + `dd` its tools,
-  static, in `SKILLS` order (`data.test.js` checks). A picked group: `.ix.f`, its row `.on`. ≤820px the group buttons
-  are one sideways-scrolling row with a faded right edge.
-- Work entries (static, in `PROJECTS` order): `.wks` > `article.wk.g12[data-scr]` > `.wkc` > `canvas[data-cover="shape"]`
+- Services: `.pan[data-svc="0..3"]` > `button.ph` + `.pb` > `canvas[data-stage]`. Active = `.pan.on`;
+  inactive `.pb` carries `hidden`. `logic.stage.current` = stage canvas of the active panel.
+- Skills: `button[data-cat="all|build|design|social|video|ai"]`, active gets `.on`. The card's kicker is a count over its
+  title: `SKILLS.length` tools ("26 tools", also the static text) over "Everything", "N in this group" over a group.
+  ≤820px the group buttons are one sideways-scrolling row with a faded right edge.
+- Work cards (static, in `PROJECTS` order): `article.wk[data-scr]` > `.wki.cut` > `.wkc` > `canvas[data-cover="shape"]`
   (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc, one line; role, type and status show only in the project
-  view), `a.wkl[href="#work/<id>"]` "View <title>", the entry's one control; its `::after` covers the entry, so the whole
-  entry opens it, and the entry gets the focus ring (`.wk:has(.wkl:focus-visible)`). Entries carry no `id`: the
-  browser's own scroll-to-fragment on a `#work/<id>` load would move focus off the open dialog. JS finds an entry by
-  its link's `href`. The five compositions are `nth-child` rules (see `DESIGN.md`).
+  view), `a.wkl[href="#work/<id>"]`
+  "View <title>", the card's one control; its `::after` covers the card, so the whole card opens it, and the card gets the
+  focus ring (`.wk:has(.wkl:focus-visible)`). Cards carry no `id`: the browser's own scroll-to-fragment on a
+  `#work/<id>` load would move focus off the open dialog. JS finds a card by its link's `href`.
 - Project view: `<template data-ref="modalTpl">` (last child of `#work`, outside `.fxb`) holds `dialog.modal[data-modal]`;
   JS sets its `aria-label` to the project title (not `aria-labelledby` the `h3`, whose text the engine scrambles while the
   dialog opens, so screen readers would hear the glyphs). Cloned into `#work` and `showModal()`ed on open, closed and
   removed on close: the engine reads the mount (`canvas[data-cover][data-big]` is
   its big cover, drawn only while `#work` is on screen, so opening scrolls `#work` into view instantly behind the dialog,
   but only when it is off screen: above the 64px header or below the viewport; a card click never moves the page).
-  Native focus trap, Escape, `::backdrop` (a 94% page-colour tint, no blur since 2026-11-19); a press and release both outside the dialog's box close it (the
+  Native focus trap, Escape, `::backdrop` (tint + blur); a press and release both outside the dialog's box close it (the
   dialog is the scroller, so a press on its own scrollbar is inside the box; `.mbox` alone would not cover the
   scrollbar); `html:has(.modal[open])` stops the page scrolling, and `html` carries the theme's background and
   `color-scheme`, so the stable scrollbar gutter matches the page. Inside: `.mvid` > big cover (or `img`,
@@ -148,12 +147,14 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   `#work` under it would send Back off the site anyway. Closing it replaces the hash with `#work`; Back from there
   leaves, as from any landing page. On every close, focus goes to that project's card link (the opener for card opens),
   which scrolls it into view if it is off screen.
-- Contact: `.hd` > `h2.cq`; `.ctw.g12` > `.ctm` (`p.lead` "Tell me what it is…", the Messenger `a.btn`, the only
-  primary, + reply/availability `p`) and `ul.cta` rows: `li.eml` (mailto link showing the address + ghost `Copy`,
-  `copyEmail`: clipboard, else selects the address; the button's text scrambles like any `[data-scr]`, so it isn't the
-  live region: `span.vh[data-nofx][aria-live=polite]` after it gets "Copied", cleared with the button's label after
-  2 s), `a.row` LinkedIn, Instagram, GitHub, `li.fol` "Follow INKWILD" + `a.lnk` TikTok / YouTube. `.tide` > the tide
-  canvas at the bottom of `#contact`; `footer.foot` = © + Back to top.
+- Contact: `h2`, "Tell me what it is…", `.ctm` = the Messenger `a.btn` (only primary) + reply/availability `p`
+  ("I reply within two hours, Philippine time (UTC+8)." / "Taking freelance and part-time projects now."); `.cta` row =
+  `.eml` (mailto link showing the address + ghost `Copy` button, `copyEmail`: clipboard, else selects the address; the
+  button's text scrambles like any `[data-scr]`, so it isn't the live region: `span.vh[data-nofx][aria-live=polite]`
+  after it gets "Copied", cleared with the button's label after 2 s) then
+  ghost `.sm` LinkedIn, Instagram, GitHub (≤1000px the email row stands alone and the three share the next row; ≤520px
+  one row each, so none is left alone); `p.lab` "Follow INKWILD" + `a.lnk` TikTok / YouTube (`.lab .lnk` = ink).
+  The tide canvas stays at the bottom of `#contact`; the copyright/back-to-top row is the `footer` after `main`.
 - `.fbo [hidden]{display:none!important}` exists because layout rules out-rank the UA `[hidden]` rule.
 
 ## Run
@@ -185,7 +186,7 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   decode can't rewrap a line (no CLS). Name parallax removed; portrait tilt kept (hover reveal and pin removed later the same day, see `engine.js`).
   Pointer ASCII light radius 64px and section glow 280px (2026-11-15, owner: smaller); the glow rests at the section's
   top edge (`--my` 0%) until the pointer moves it, so untouched sections and phones keep a faint top glow.
-  Portrait five grid columns, `min(100%,56vh)` since 2026-11-19 (492px at 1440×900; was `min(560px,58vh,40vw)`),
+  Portrait `min(560px,58vh,40vw)` since 2026-11-18 (owner: bigger; 522px at 1440×900, was `min(400px,42vh,34vw)`),
   320px max ≤820px.
 - Work as proof (2026-11-15, owner + research report P0-4): five projects, brand plan's three first: PilaPass, The Sev
   Clinic, INKWILD, Invex, KONSEPTO Events. The "Private client" card is folded into the content/motion service text
@@ -228,16 +229,9 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   `startEngine` with only `avatar` set, under `--force-prefers-reduced-motion` (still bust). Regenerate the same way if
   the hero or the mark changes. JSON-LD is a ProfilePage around the Person; Facebook in `sameAs` is
   https://www.facebook.com/febriel.otud.186.
-- Editorial redesign (2026-11-19, owner picked "Editorial poster" after rejecting a 3D zoom-through scroll as too much
-  motion and lag): layout, type and composition only, no new motion. 12-column grid, `--fs-display` openers, opening
-  rules, a static ASCII band between sections, the ASCII pieces as captioned illustration blocks, one second accent
-  (`--mark` vermilion, marks only). Owner, same day: no numbering furniture at all (no "No. 01", "Fig. 1", nav or entry
-  numbers). Content unchanged except the footer's portrait line moving to the hero bust's caption and "Hi, I’m
-  Febriel" becoming the About photo's caption; the outlined "Febriel" art and disc behind the photo were dropped; the
-  deck and its arrows replaced by the feature list. Scripting per rAF frame at 1440×900 (headless, DPR 1), before →
-  after: hero 2.25 → 0.6 ms, work 1.78 → 1.3, services 1.74 → 1.2, skills 2.34 → 0.5, about 2.13 → 1.9, contact 2.11
-  → 0.4. Page 4957 → about 8000px tall; canvas area at DPR 2 about 21.5M → 19.7M device px (rain at DPR 1). The
-  share image `public/og.png` was kept: name, offer line and bust are unchanged.
+- Hero spacing (2026-11-15; 2026-11-18): `.nm` has no bottom margin, `.hc` gap 16px, `.hero-cta` margin-top 8px. With
+  the two-line name and the 522px bust the hero is 714px tall at 1440×900, centred on the bust; the marquee starts at
+  y 778 and Work below the first screen (owner accepted losing the Work peek).
 - Hallmark pass (2026-11-18): every [SAFE] item of `reports/Hallmark audit.md` except the copy trims (applied later the
   same day: `reports/copy-trim.md`, approved as proposed) and the stamp, plus the owner's six [IDENTITY] picks:
   sentence-case labels, the orchid italic only in the surname ("all three." and "building?" roman; the About statement
@@ -263,4 +257,4 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   render tier (`--render`, `--url http://localhost:5173/`) needs `puppeteer-core`, which is not installed.
 - The last audit and its evidence: `reports/Hallmark audit.md`, `reports/hallmark-audit/` (git-ignored).
 
-last Claude session: 2026-11-19
+last Claude session: 2026-11-18 16:21

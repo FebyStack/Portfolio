@@ -9,14 +9,14 @@ const bind = (name, el = root) => $(`[data-bind="${name}"]`, el);
 const act = (name) => $(`[data-act="${name}"]`);
 
 const pans = [...root.querySelectorAll('.pan[data-svc]')];
-const work = ref('work');
+const work = ref('work'), deck = ref('deck');
 const cardLink = (i) => $(`.wkl[href="#work/${PROJECTS[i].id}"]`); // cards carry no id: the browser's own scroll-to-fragment would take focus from the open dialog
 const ARROW = 'M7 17 17 7M8 7h9v9'; // same arrow as the contact section's external links
 
 const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', menu: false, modal: -1 };
 const logic = {
   root: { current: root }, tilt: { current: ref('tilt') }, avatar: { current: ref('avatar') }, stage: { current: null },
-  globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') }, skl: { current: ref('skl') },
+  globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') }, skl: { current: ref('skl') }, deck: { current: deck },
   state,
   props: { mode: 'Dark', glyph: 10, rain: 1, light: 1, motion: 1 }
 };
@@ -55,11 +55,16 @@ function render(keys) {
   if (has('modal')) renderModal();
 }
 
-/* the index lists every tool as static text; a picked group is marked in it (and gathers on the globe) */
 function renderCat() {
-  const c = state.cat, all = c === 'all';
-  const title = all ? 'Everything' : (GROUPS.find((g) => g[0] === c) || ['', ''])[1];
-  const kicker = all ? SKILLS.length + ' tools' : SKILLS.filter((s) => s[1] === c).length + ' in this group'; // a fact over the title, not a name for it
+  const c = state.cat;
+  let rows, title = 'Everything', kicker = SKILLS.length + ' tools'; // a fact over the title, not a name for it
+  if (c === 'all') {
+    rows = GROUPS.map(([id, name]) => [name, SKILLS.filter((s) => s[1] === id).length + ' tools']);
+  } else {
+    rows = SKILLS.filter((s) => s[1] === c).map(([name]) => [name, name === 'Claude' ? 'specialty' : '']);
+    title = (GROUPS.find((g) => g[0] === c) || ['', ''])[1];
+    kicker = rows.length + ' in this group';
+  }
   for (const b of root.querySelectorAll('button[data-cat]')) {
     const on = b.dataset.cat === c;
     b.classList.toggle('on', on);
@@ -67,9 +72,7 @@ function renderCat() {
   }
   bind('catKicker').textContent = kicker;
   bind('catTitle').textContent = title;
-  const ix = ref('catRows');
-  ix.classList.toggle('f', !all);
-  for (const r of ix.children) r.classList.toggle('on', r.dataset.g === c);
+  ref('catRows').replaceChildren(...rows.map(([a, b]) => el('div', 'skr', el('span', null, a), el('span', null, b))));
 }
 
 /* The project view: a <dialog> cloned in from the template on open and removed on close (the engine reads its mount).
@@ -149,6 +152,11 @@ function el(tag, cls, ...kids) {
   return n;
 }
 
+function slide(dir) {
+  const first = deck.children[0], step = first ? first.offsetWidth + 16 : 320; // 16: the deck's gap
+  deck.scrollBy({ left: dir * step * 2, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+
 // ---- events ----
 const ACTIONS = {
   toggleMode: () => {
@@ -157,6 +165,8 @@ const ACTIONS = {
   },
   toggleMenu: () => setState({ menu: !state.menu }),
   closeMenu: () => setState({ menu: false }),
+  deckPrev: () => slide(-1),
+  deckNext: () => slide(1),
   closeModal: () => dlg?.close(),
   copyEmail: () => {
     const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]'); // the button's text scrambles (reveal, hover); this data-nofx span never does
@@ -179,7 +189,7 @@ addEventListener('keydown', (e) => {
 
 pans.forEach((p, i) => {
   const pick = () => { if (state.svc !== i) setState({ svc: i }); };
-  $('.ph', p).addEventListener('mouseenter', pick); // the title, not the panel: the open panel's object sits beside the list
+  p.addEventListener('mouseenter', pick);
   $('.ph', p).addEventListener('click', pick);
   $('.ph', p).addEventListener('focus', pick);
 });

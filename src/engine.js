@@ -193,7 +193,7 @@ export function startEngine(logic) {
     var list = r.querySelectorAll('[data-sec]');
     for (var i = 0; i < list.length; i++) {
       var el = list[i]; if (el.__fboSec) continue;
-      var o = { el: el, cv: el.querySelector('canvas[data-amb]'), hero: el.getAttribute('data-sec') === 'hero', px: 0, py: 0, sx: 0, sy: 0, inside: false, li: 0, veil: 0, shown: false, vis: false, drops: [] };
+      var o = { el: el, cv: el.querySelector('canvas[data-amb]'), hero: el.getAttribute('data-sec') === 'hero', px: 0, py: 0, sx: 0, sy: 0, inside: false, li: 0, veil: 0, shown: false, vis: false, drops: [], spS: '' };
       el.__fboSec = o; secs.push(o);
       if (o.hero) heroO = o;
       if (el.getAttribute('data-sec') === 'about') aboutO = o;
@@ -205,6 +205,7 @@ export function startEngine(logic) {
         var st = o.el.style, nx = o.px / b.width - 0.5, ny = o.py / b.height - 0.5;
         st.setProperty('--mx', o.px.toFixed(0) + 'px'); st.setProperty('--my', o.py.toFixed(0) + 'px');
         if (!calm.matches && e.pointerType === 'mouse') {
+          st.setProperty('--px', (nx * 2).toFixed(3)); st.setProperty('--py', (ny * 2).toFixed(3));
           var tl = logic.tilt.current;
           if (o.hero && tl) tl.style.transform = 'perspective(1100px) rotateY(' + (nx * 7).toFixed(2) + 'deg) rotateX(' + (-ny * 6).toFixed(2) + 'deg)';
         }
@@ -216,12 +217,27 @@ export function startEngine(logic) {
       ro.observe(el);
     }
   }
+  function scrollFx() {
+    var vh = window.innerHeight || 800, flat = calm.matches || vh > 2400, i;
+    for (i = 0; i < secs.length; i++) {
+      var o = secs[i]; if (!o.vis) continue;
+      var r = o.el.getBoundingClientRect();
+      var sp = flat ? 0 : Math.max(-1, Math.min(1, ((r.top + r.height / 2) - vh / 2) / vh)), s = sp.toFixed(3);
+      if (s !== o.spS) { o.spS = s; o.el.style.setProperty('--sp', s); }
+    }
+    var dk = logic.deck.current;
+    if (dk && dk.clientWidth) {
+      var half = dk.clientWidth / 2, mid = dk.scrollLeft + half, kids = dk.children;
+      for (i = 0; i < kids.length; i++) {
+        var c = kids[i], off = Math.max(-1.4, Math.min(1.4, (c.offsetLeft + c.offsetWidth / 2 - mid) / half)), so = off.toFixed(3);
+        if (c.__fboO !== so) { c.__fboO = so; c.style.setProperty('--o', so); }
+      }
+    }
+  }
   function drawAmbient(o, dt) {
     var cv = o.cv; if (!cv) return;
     var w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
-    /* ponytail: the rain and the pointer light draw at 1 device pixel per CSS pixel (sections got taller in the 2026-11-19
-       layout; the faint glyphs read the same). Ceiling: slightly soft rain on 2x screens; raise to 1.5 if that shows. */
-    var dpr = 1, W = Math.round(w), H = Math.round(h);
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5), W = Math.round(w * dpr), H = Math.round(h * dpr);
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     var ctx = cv.getContext('2d'), still = calm.matches, i, k, x, y;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
@@ -445,24 +461,23 @@ export function startEngine(logic) {
     if (E.svc !== sTo) { sFrom = sMix < 0.5 ? sFrom : sTo; sTo = E.svc; sMix = still ? 1 : 0; }
     if (sMix < 1) sMix = Math.min(1, sMix + dt / 0.7);
     if (!S.down) { S.yaw += S.vyaw; S.vyaw *= 0.93; if (!still) S.yaw += dt * 0.32 * E.speed; }
-    renderObject(S.ctx, S.w, S.h, Math.max(E.glyph + 2, Math.round(S.w / 40)), S.yaw, S.pitch, sFrom, sTo, sMix * sMix * (3 - 2 * sMix), E.t, S.inside && !S.down, S.px, S.py, 0.6);
+    renderObject(S.ctx, S.w, S.h, Math.max(9, E.glyph + 2), S.yaw, S.pitch, sFrom, sTo, sMix * sMix * (3 - 2 * sMix), E.t, S.inside && !S.down, S.px, S.py, 0.6);
   }
   /* covers: each project card gets its own slowly turning object (hover doesn't change it: the card's hover is the scramble) */
   var covers = [], coverAt = 0;
   function scanCovers() {
     var r = logic.root.current; if (!r) return;
     var list = r.querySelectorAll('canvas[data-cover]');
-    for (var j = 0; j < covers.length; j++) if (!covers[j].isConnected) io.unobserve(covers[j]); /* a closed project view's cover */
     covers.length = 0;
     for (var i = 0; i < list.length; i++) {
       var cv = list[i];
-      if (!cv.__fboC) { cv.__fboC = { yaw: 0.5 + i * 0.9, drawn: false, vis: true }; cv.__fboLayer = cv.__fboC; io.observe(cv); } /* io sets .vis */
+      if (!cv.__fboC) cv.__fboC = { yaw: 0.5 + i * 0.9, drawn: false };
       covers.push(cv);
     }
   }
   function drawCover(cv, dt, force) {
     var st = cv.__fboC, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
-    if (!st.vis) return;
+    var sec = cv.closest('[data-sec]'); if (sec && sec.__fboSec && !sec.__fboSec.vis) return;
     var big = cv.hasAttribute('data-big');
     if (!force && !big && st.drawn && calm.matches) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 1.5), W = Math.round(w * dpr), H = Math.round(h * dpr);
@@ -470,8 +485,7 @@ export function startEngine(logic) {
     var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!calm.matches) st.yaw += dt * (big ? 1.1 : 0.35) * E.speed;
     var k = parseInt(cv.getAttribute('data-cover'), 10) || 0;
-    /* the glyph grows with the cover (about 100 columns), so a bigger cover costs about twice a 2026-11-18 card cover, not five times */
-    renderObject(ctx, w, h, Math.max(big ? 11 : 9, Math.round(w / 60)), st.yaw, -0.34, k, k, 1, E.t, false, 0, 0, big ? 0.5 : 0.52);
+    renderObject(ctx, w, h, big ? 11 : 9, st.yaw, -0.34, k, k, 1, E.t, false, 0, 0, big ? 0.5 : 0.52);
     st.drawn = true;
   }
   function drawCovers(dt) {
@@ -698,6 +712,7 @@ export function startEngine(logic) {
   function frame(now) {
     raf = requestAnimationFrame(frame);
     if (fx.length) stepFx(now);
+    scrollFx();
     if (now - lastDraw < 30) return;
     var dt = Math.min(0.1, (now - last) / 1000); last = now; lastDraw = now; tick++;
     if (!calm.matches) E.t += dt * E.speed;

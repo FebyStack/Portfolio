@@ -35,15 +35,15 @@
 <script type="module" src="/src/main.js"></script>
 </head>
 <body>
-<div id="top" class="fbo pal-tidal is-dark" data-ref="root">
+<div id="top" class="fbo pal-tidal is-dark" data-ref="root" style="position: relative">
 <script>var m;try{m=localStorage['fbo-mode']}catch(e){}if(m?m==='light':matchMedia('(prefers-color-scheme: light)').matches)document.getElementById('top').classList.replace('is-dark','is-light')</script>
 <a class="btn sm skip" href="#main">Skip to content</a>
 <span id="nt" hidden>Opens in a new tab</span>
 
 <header class="nav">
 <div class="navi">
-<a class="logo" href="#top" data-scr>f.b.otud<span class="cur" aria-hidden="true">_</span></a>
-<div class="navr">
+<a href="#top" data-scr style="font-family: var(--mono); font-weight: 500; font-size: var(--fs-sm); letter-spacing: 0.02em; text-decoration: none; min-height: 48px; display: inline-flex; align-items: center">f.b.otud<span class="cur" aria-hidden="true">_</span></a>
+<div style="display: flex; align-items: center; gap: 8px clamp(8px, 1.6vw, 24px)">
 <nav class="navl" aria-label="Sections">
 <a class="lnk" data-scr href="#work">Work</a>
 <a class="lnk" data-scr href="#services">Services</a>
@@ -51,7 +51,7 @@
 <a class="lnk" data-scr href="#about">About</a>
 <a class="lnk" data-scr href="#contact">Contact</a>
 </nav>
-<button type="button" class="btn ghost sm mode" data-act="toggleMode" aria-label="Dark mode, switch to light">
+<button type="button" class="btn ghost sm" data-act="toggleMode" aria-label="Dark mode, switch to light" style="min-height: 44px; padding: 0 16px; gap: 8px">
 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 1.8a6.2 6.2 0 0 0 0 12.4z" fill="currentColor"/></svg>
 <span data-nofx data-bind="modeLabel">Dark</span>
 </button>
@@ -71,9 +71,9 @@
 </header>
 
 <main id="main">
-<section data-sec="hero" class="sec hero">
+<section data-sec="hero" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb g12 stg">
+<div class="wrap fxb stg">
 <div class="hc">
 <h1 class="nm">Febriel <span>B. Otud</span></h1>
 <p class="vp">I design the interface, write the code, and run the socials after launch.</p>
@@ -81,20 +81,15 @@
 <a class="btn" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Message me on Messenger</a>
 <a class="btn ghost" data-scr href="#work">See my work<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
 </div>
-<div class="dateline">
-<p>Taking freelance and <span class="nw">part-time</span> projects now. I reply within two hours.</p>
+<p style="margin: 0; max-width: var(--measure); color: var(--mute)">Taking freelance and <span style="white-space: nowrap">part-time</span> projects now. I reply within two hours.</p>
 <p class="proof">Recent work: <a data-scr href="#work/pilapass">PilaPass</a>, <a data-scr href="#work/sev-clinic">The Sev Clinic</a> and <a data-scr href="#work/inkwild">INKWILD</a></p>
 </div>
-</div>
-<figure class="fig avf">
 <div class="av">
-<div data-ref="tilt" class="tilt">
+<div data-ref="tilt" style="position: absolute; inset: 0; transition: transform 0.25s ease-out; will-change: transform">
 <div class="plate" aria-hidden="true"></div>
-<canvas data-ref="avatar" role="img" aria-label="ASCII portrait of Febriel, head and shoulders"></canvas>
+<canvas data-ref="avatar" role="img" aria-label="ASCII portrait of Febriel, head and shoulders" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: crosshair"></canvas>
 </div>
 </div>
-<figcaption class="cap">Portrait drawn the INKWILD way, then set in ASCII.</figcaption>
-</figure>
 </div>
 </section>
 
@@ -108,18 +103,21 @@
 
 <section data-ref="work" id="work" data-sec="work" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Work</p>
+<div class="wrap fxb" style="display: flex; flex-direction: column; gap: 4px">
+<div class="hd">
 <h2 class="h2">Selected work</h2>
+<div style="display: flex; align-items: center; gap: 12px">
 <p class="hint">Open a project for the details.</p>
+<button type="button" class="icb dnav" data-act="deckPrev" aria-label="Previous projects"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+<button type="button" class="icb dnav" data-act="deckNext" aria-label="More projects"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
 </div>
-<div class="wks">
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="1" aria-hidden="true"></canvas></div><div class="wkb"><h3>PilaPass</h3><p>A campus queue app my team and I are building.</p><a class="wkl" href="#work/pilapass">View PilaPass<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="0" aria-hidden="true"></canvas></div><div class="wkb"><h3>The Sev Clinic</h3><p>I run its digital operations, social media and graphic design.</p><a class="wkl" href="#work/sev-clinic">View The Sev Clinic<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="3" aria-hidden="true"></canvas></div><div class="wkb"><h3>INKWILD</h3><p>My animated series about how animals sense the world.</p><a class="wkl" href="#work/inkwild">View INKWILD<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="2" aria-hidden="true"></canvas></div><div class="wkb"><h3>Invex</h3><p>Our school project: every branch’s inventory in one dashboard.</p><a class="wkl" href="#work/invex">View Invex<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="4" aria-hidden="true"></canvas></div><div class="wkb"><h3>KONSEPTO Events</h3><p>I record each event and post on their socials every day.</p><a class="wkl" href="#work/konsepto">View KONSEPTO Events<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
+</div>
+<div data-ref="deck" class="deck">
+<article class="wk" data-scr><div class="wki cut"><div class="wkc"><canvas data-cover="1" aria-hidden="true"></canvas></div><div class="wkb"><h3>PilaPass</h3><p>A campus queue app my team and I are building.</p><a class="wkl" href="#work/pilapass">View PilaPass<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></article>
+<article class="wk" data-scr><div class="wki cut"><div class="wkc"><canvas data-cover="0" aria-hidden="true"></canvas></div><div class="wkb"><h3>The Sev Clinic</h3><p>I run its digital operations, social media and graphic design.</p><a class="wkl" href="#work/sev-clinic">View The Sev Clinic<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></article>
+<article class="wk" data-scr><div class="wki cut"><div class="wkc"><canvas data-cover="3" aria-hidden="true"></canvas></div><div class="wkb"><h3>INKWILD</h3><p>My animated series about how animals sense the world.</p><a class="wkl" href="#work/inkwild">View INKWILD<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></article>
+<article class="wk" data-scr><div class="wki cut"><div class="wkc"><canvas data-cover="2" aria-hidden="true"></canvas></div><div class="wkb"><h3>Invex</h3><p>Our school project: every branch’s inventory in one dashboard.</p><a class="wkl" href="#work/invex">View Invex<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></article>
+<article class="wk" data-scr><div class="wki cut"><div class="wkc"><canvas data-cover="4" aria-hidden="true"></canvas></div><div class="wkb"><h3>KONSEPTO Events</h3><p>I record each event and post on their socials every day.</p><a class="wkl" href="#work/konsepto">View KONSEPTO Events<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></article>
 </div>
 </div>
 <template data-ref="modalTpl">
@@ -127,10 +125,10 @@
 <div class="mbox cut">
 <div class="mvid"><canvas data-cover="0" data-big="1" aria-hidden="true"></canvas></div>
 <div class="minf">
-<div class="mtop"><h3 data-bind="modTitle"></h3>
+<div class="mtop"><h3 data-bind="modTitle" style="margin: 0; font-family: var(--serif); font-weight: 400; font-size: var(--fs-lg); line-height: 1.02; letter-spacing: -0.025em"></h3>
 <button type="button" class="icb" data-act="closeModal" aria-label="Close" autofocus><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
 <p data-bind="modDesc"></p>
-<p data-bind="modMore" class="mute"></p>
+<p data-bind="modMore" style="color: var(--mute)"></p>
 <dl class="mdl" data-bind="modFacts"></dl>
 </div>
 </div>
@@ -138,61 +136,50 @@
 </template>
 </section>
 
-<div class="sep" aria-hidden="true"></div>
-
 <section id="services" data-sec="services" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Services</p>
+<div class="wrap fxb" style="display: flex; flex-direction: column; gap: 24px">
+<div class="hd">
 <h2 class="h2">What I can build for you</h2>
 <p class="hint">Four things. Most projects end up needing two or three of them.</p>
 </div>
 <div class="pans">
 
-<div class="pan on" data-svc="0">
-<button type="button" class="ph" data-scr aria-expanded="true"><span class="pt">Clinic operations and systems</span></button>
-<div class="pb"><div class="pbt"><p>Booking, intake, SOPs, dashboards. The unglamorous stuff that keeps a clinic running every day.</p><span class="tg">Booking and intake / SOPs / Dashboards</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="Three nested rings turning, drawn in ASCII."></canvas></figure></div>
+<div class="pan cut on" data-svc="0">
+<button type="button" class="ph" data-scr aria-expanded="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M19 7h1M4 12h3M13 12h7M4 17h11"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="17.5" cy="17" r="2"/></svg><span class="pt">Clinic operations and systems</span></button>
+<div class="pb"><div class="pbt"><p style="margin: 0; max-width: var(--measure); color: var(--mute)">Booking, intake, SOPs, dashboards. The unglamorous stuff that keeps a clinic running every day.</p><span class="tg">Booking and intake / SOPs / Dashboards</span></div>
+<div class="pbc"><canvas data-stage role="img" aria-label="Three nested rings turning, drawn in ASCII."></canvas></div></div>
 </div>
 
-<div class="pan" data-svc="1">
-<button type="button" class="ph" data-scr aria-expanded="false"><span class="pt">Brand, identity and UX/UI</span></button>
-<div class="pb" hidden><div class="pbt"><p>How it looks and how it works. Wireframe first. A prototype you can click through after.</p><span class="tg">Design systems / UX/UI / Figma / Canva</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="A cut gem turning, drawn in ASCII."></canvas></figure></div>
+<div class="pan cut" data-svc="1">
+<button type="button" class="ph" data-scr aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg><span class="pt">Brand, identity and UX/UI</span></button>
+<div class="pb" hidden><div class="pbt"><p style="margin: 0; max-width: var(--measure); color: var(--mute)">How it looks and how it works. Wireframe first. A prototype you can click through after.</p><span class="tg">Design systems / UX/UI / Figma / Canva</span></div>
+<div class="pbc"><canvas data-stage role="img" aria-label="A cut gem turning, drawn in ASCII."></canvas></div></div>
 </div>
 
-<div class="pan" data-svc="2">
-<button type="button" class="ph" data-scr aria-expanded="false"><span class="pt">Websites and apps</span></button>
-<div class="pb" hidden><div class="pbt"><p>Landing pages, web apps, mobile apps. I design them in Figma, then build what I designed.</p><span class="tg">Next.js / React Native and Expo / Supabase / Lovable</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="A stack of three layers turning, drawn in ASCII."></canvas></figure></div>
+<div class="pan cut" data-svc="2">
+<button type="button" class="ph" data-scr aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14"/></svg><span class="pt">Websites and apps</span></button>
+<div class="pb" hidden><div class="pbt"><p style="margin: 0; max-width: var(--measure); color: var(--mute)">Landing pages, web apps, mobile apps. I design them in Figma, then build what I designed.</p><span class="tg">Next.js / React Native and Expo / Supabase / Lovable</span></div>
+<div class="pbc"><canvas data-stage role="img" aria-label="A stack of three layers turning, drawn in ASCII."></canvas></div></div>
 </div>
 
-<div class="pan" data-svc="3">
-<button type="button" class="ph" data-scr aria-expanded="false"><span class="pt">Content, campaigns and motion</span></button>
-<div class="pb" hidden><div class="pbt"><p>I can manage the page, plan the posts, write the captions and cut the reels, including ongoing video editing for a private client. Animation too.</p><span class="tg">Social media / Copywriting / CapCut / Animation</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="Three drops merging, drawn in ASCII."></canvas></figure></div>
+<div class="pan cut" data-svc="3">
+<button type="button" class="ph" data-scr aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></svg><span class="pt">Content, campaigns and motion</span></button>
+<div class="pb" hidden><div class="pbt"><p style="margin: 0; max-width: var(--measure); color: var(--mute)">I can manage the page, plan the posts, write the captions and cut the reels, including ongoing video editing for a private client. Animation too.</p><span class="tg">Social media / Copywriting / CapCut / Animation</span></div>
+<div class="pbc"><canvas data-stage role="img" aria-label="Three drops merging, drawn in ASCII."></canvas></div></div>
 </div>
 
 </div>
 </div>
 </section>
 
-<div class="sep" aria-hidden="true"></div>
-
 <section id="skills" data-sec="skills" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Skills</p>
+<div class="wrap fxb" style="display: flex; flex-direction: column; gap: 24px">
+<div class="hd">
+<div style="display: flex; flex-direction: column; gap: 12px">
 <h2 class="h2">Tools I work in</h2>
 <p class="hint">Pick a group to see its tools.</p>
-</div>
-<div class="skg g12">
-<figure class="fig glf">
-<div class="glb"><canvas data-ref="globe" role="img" aria-label="A 3D globe of skills. The selected group moves to the front."></canvas></div>
-<figcaption class="cap" aria-hidden="true">A 3D globe of skills. The selected group moves to the front.</figcaption>
-</figure>
-<div class="skx">
-<div data-ref="skl" class="skt">
-<span class="lab" data-bind="catKicker">26 tools</span>
-<p data-bind="catTitle">Everything</p>
 </div>
 <div class="grp" role="group" aria-label="Skill groups">
 <button type="button" class="btn ghost sm on" data-scr data-cat="all">All</button>
@@ -202,71 +189,72 @@
 <button type="button" class="btn ghost sm" data-scr data-cat="video">Video</button>
 <button type="button" class="btn ghost sm" data-scr data-cat="ai">AI</button>
 </div>
-<dl class="ix" data-ref="catRows">
-<div data-g="build"><dt>Build</dt><dd>Next.js, React Native, Supabase, Expo, PostgreSQL, Lovable, Firebase</dd></div>
-<div data-g="design"><dt>Design</dt><dd>Figma, UX/UI design, Canva, Design systems, Brand identity, Prototyping</dd></div>
-<div data-g="social"><dt>Social</dt><dd>Social media management, Content strategy, Copywriting, Content planning</dd></div>
-<div data-g="video"><dt>Video</dt><dd>CapCut, Reel editing, Code animation, Sound design</dd></div>
-<div data-g="ai"><dt>AI</dt><dd>Claude <span class="lab">specialty</span>, Prompt design, AI agents and skills, AI workflows, Other AI tools</dd></div>
-</dl>
+</div>
+<div class="skg">
+<div class="glb">
+<canvas data-ref="globe" role="img" aria-label="A 3D globe of skills. The selected group moves to the front." style="position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab"></canvas>
+</div>
+<div data-ref="skl" class="skc cut">
+<span class="lab" data-bind="catKicker">26 tools</span>
+<div data-bind="catTitle" style="font-family: var(--serif); font-size: var(--fs-lg); line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 12px">Everything</div>
+<div data-ref="catRows" style="display: contents">
+<div class="skr"><span>Build</span><span>7 tools</span></div>
+<div class="skr"><span>Design</span><span>6 tools</span></div>
+<div class="skr"><span>Social</span><span>4 tools</span></div>
+<div class="skr"><span>Video</span><span>4 tools</span></div>
+<div class="skr"><span>AI</span><span>5 tools</span></div>
+</div>
 </div>
 </div>
 </div>
 </section>
-
-<div class="sep" aria-hidden="true"></div>
 
 <section id="about" data-sec="about" class="sec band">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">About</p>
-<h2 class="pq">Most projects need a designer, a developer and a social media manager. I am all three.</h2>
+<div class="wrap fxb" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr)); gap: 36px 56px; align-items: center">
+<div class="abp">
+<div class="abd" aria-hidden="true"></div>
+<div class="abg" aria-hidden="true">Febriel</div>
+<canvas data-ref="photo" class="abi" role="img" aria-label="Photo of Febriel, smiling, in a white shirt. Its edges dissolve into ASCII."></canvas>
+<div class="abl cut">Hi, I’m Febriel</div>
 </div>
-<div class="abw g12">
-<figure class="fig abf">
-<div class="abp"><canvas data-ref="photo" class="abi" role="img" aria-label="Photo of Febriel, smiling, in a white shirt. Its edges dissolve into ASCII."></canvas></div>
-<figcaption class="cap">Hi, I’m Febriel</figcaption>
-</figure>
-<dl class="facts">
-<div><dt>Based in</dt><dd>Dipolog City, Philippines. Remote, or <span class="nw">on-site</span> in Dipolog and Dapitan.</dd></div>
-<div><dt>Languages</dt><dd>Bisaya, Tagalog and English</dd></div>
-<div><dt>AI</dt><dd>I work across AI tools and write my own agent skills and prompts. Claude is my specialty.</dd></div>
+<div style="display: flex; flex-direction: column; gap: 16px; min-width: 0">
+<h2 style="margin: 0; font-family: var(--serif); font-weight: 400; font-size: var(--fs-lg); line-height: 1.26; letter-spacing: -0.01em; max-width: 28ch">Most projects need a designer, a developer and a social media manager. I am all three.</h2>
+<dl class="tiles">
+<div class="tile cut"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><dt>Based in</dt><dd>Dipolog City, Philippines. Remote, or <span style="white-space: nowrap">on-site</span> in Dipolog and Dapitan.</dd></div></div>
+<div class="tile cut"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><div><dt>Languages</dt><dd>Bisaya, Tagalog and English</dd></div></div>
+<div class="tile cut" style="grid-column: 1 / -1"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 3l1.9 5.6L18.5 10.5l-5.6 1.9L11 18l-1.9-5.6L3.5 10.5l5.6-1.9zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><div><dt>AI</dt><dd>I work across AI tools and write my own agent skills and prompts. Claude is my specialty.</dd></div></div>
 </dl>
 </div>
 </div>
 </section>
 
-<div class="sep" aria-hidden="true"></div>
-
 <section id="contact" data-sec="contact" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
-<div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Contact</p>
-<h2 class="h2 cq">Got an app, a brand or a feed that needs building?</h2>
-</div>
-<div class="ctw g12">
+<div class="wrap fxb" style="display: flex; flex-direction: column; gap: 28px">
+<h2 style="margin: 0; font-family: var(--serif); font-weight: 400; font-size: var(--fs-2xl); line-height: 0.98; letter-spacing: -0.03em; max-width: 17ch">Got an app, a brand or a feed that needs building?</h2>
+<p style="margin: 0; max-width: var(--measure); color: var(--mute)">Tell me what it is. I’ll tell you how I’d do it.</p>
 <div class="ctm">
-<p class="lead">Tell me what it is. I’ll tell you how I’d do it.</p>
 <a class="btn" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Message me on Messenger</a>
-<p class="mute">I reply within two hours, <span class="nw">Philippine time (UTC+8).</span><br>Taking freelance and <span class="nw">part-time</span> projects now.</p>
+<p>I reply within two hours, <span style="white-space: nowrap">Philippine time (UTC+8).</span><br>Taking freelance and <span style="white-space: nowrap">part-time</span> projects now.</p>
 </div>
-<ul class="cta">
-<li class="eml"><a data-scr href="mailto:febrielotud0@gmail.com">febrielotud0@gmail.com</a><button type="button" class="btn ghost sm" data-scr data-act="copyEmail">Copy</button><span class="vh" data-nofx aria-live="polite"></span></li>
-<li><a class="row" data-scr href="https://www.linkedin.com/in/febriel-otud-86500b390" target="_blank" rel="noopener" aria-describedby="nt">LinkedIn<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
-<li><a class="row" data-scr href="https://www.instagram.com/bongieex" target="_blank" rel="noopener" aria-describedby="nt">Instagram<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
-<li><a class="row" data-scr href="https://github.com/FebyStack" target="_blank" rel="noopener" aria-describedby="nt">GitHub<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a></li>
-<li class="fol"><span class="lab">Follow INKWILD</span><a class="lnk" data-scr href="https://www.tiktok.com/@inkwil0" target="_blank" rel="noopener" aria-describedby="nt">TikTok</a><a class="lnk" data-scr href="https://www.youtube.com/@inkwildanimals" target="_blank" rel="noopener" aria-describedby="nt">YouTube</a></li>
-</ul>
+<div class="cta">
+<span class="eml"><a data-scr href="mailto:febrielotud0@gmail.com">febrielotud0@gmail.com</a><button type="button" class="btn ghost sm" data-scr data-act="copyEmail">Copy</button><span class="vh" data-nofx aria-live="polite"></span></span>
+<a class="btn ghost sm" data-scr href="https://www.linkedin.com/in/febriel-otud-86500b390" target="_blank" rel="noopener" aria-describedby="nt">LinkedIn<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+<a class="btn ghost sm" data-scr href="https://www.instagram.com/bongieex" target="_blank" rel="noopener" aria-describedby="nt">Instagram<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+<a class="btn ghost sm" data-scr href="https://github.com/FebyStack" target="_blank" rel="noopener" aria-describedby="nt">GitHub<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
 </div>
+<p class="lab" style="margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 16px">Follow INKWILD <a class="lnk" data-scr href="https://www.tiktok.com/@inkwil0" target="_blank" rel="noopener" aria-describedby="nt">TikTok</a> <a class="lnk" data-scr href="https://www.youtube.com/@inkwildanimals" target="_blank" rel="noopener" aria-describedby="nt">YouTube</a></p>
 </div>
-<div class="tide"><canvas data-ref="tide" aria-hidden="true"></canvas></div>
+<div style="position: relative; z-index: 1; width: 100%; height: clamp(200px, 30vh, 280px)">
+<canvas data-ref="tide" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: pan-y"></canvas>
+</div>
 </section>
 </main>
 
-<footer class="foot">
+<footer style="position: relative; z-index: 1; width: 100%; max-width: 1360px; margin: 0 auto; padding: 8px var(--pad) 16px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 32px; font-family: var(--mono); font-size: var(--fs-xs); letter-spacing: 0.03em; color: var(--mute)">
 <span>© 2026 Febriel B. Otud</span>
+<span>Portrait drawn the INKWILD way, then set in ASCII.</span>
 <a class="lnk" data-scr href="#top">Back to top</a>
 </footer>
 
