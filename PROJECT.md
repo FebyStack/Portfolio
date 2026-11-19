@@ -35,10 +35,8 @@ numbers, dates, results or quotes.
     hysteresis, `hide()`, reversed decode and reversed intros were deleted). The section observer's `rootMargin` drops
     the strip under the sticky header (its height, read once at start), so "on screen" means below the header. A
     section's height is pinned for 1.5 s while its text decodes (scrambled glyphs rewrap on phones); `sync()` drops pins
-    since app changes win. `focusin` reveals a not-yet-revealed section. The decode (reveal, hover, dialog, skills)
-    never scrambles text inside the focused element (`named()`: it is a control's accessible name), also when focus
-    arrives mid-decode. Reduced motion: unchanged (content always visible, no veil/decode); switched on after load, the
-    `@media print,(prefers-reduced-motion:reduce)` rule shows sections still waiting. Checked 2026-11-19 (headless Chrome, 1440×900 and 375×812): each section reveals once on
+    since app changes win. `focusin` reveals a not-yet-revealed section. Reduced motion: unchanged (content always
+    visible, no veil/decode). Checked 2026-11-19 (headless Chrome, 1440×900 and 375×812): each section reveals once on
     the first pass down; two more round trips keep every section at opacity 1 with its original text; nothing stuck
     after fast scrolling or `#contact` / `#work/invex` loads; no console errors. Since 2026-11-18 the
     first screen at 1440×900 ends on the marquee: 66px of Work's empty top padding show under it, so nothing sits
@@ -47,8 +45,7 @@ numbers, dates, results or quotes.
     viewport of the screen (`rootMargin` 100% at the bottom), not at startup (first request at scrollY 1440 of 3880 on
     1440×900).
   - `ponytail:` note in `frame()`: every layer draws with `fillText`; ceiling about 3–7 ms per draw on a fast Mac.
-    Upgrade path: a glyph atlas or an OffscreenCanvas worker (not done). Each layer draws inside its own `run()` try
-    (2026-11-19), so one layer throwing logs once (`fbo engine: <layer>`) and the others keep drawing.
+    Upgrade path: a glyph atlas or an OffscreenCanvas worker (not done).
   - Hero portrait (2026-11-15, owner): ASCII only, a head-and-shoulders bust. The hover/tap ink reveal and its
     "Show the drawing" pin are gone; the 3D tilt and the pointer accent (a small accent-glyph cloud at the pointer,
     drifting on its own when nobody points) stay.
@@ -98,15 +95,13 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   has a min-height (screen under the header and marquee); the rest size to content. `html{scroll-padding-top:80px}` keeps anchors and keyboard
   focus clear of the 64px sticky header (so `.sec` has no scroll-margin).
   Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint,
-  and with nothing stored follows the OS (`prefers-color-scheme: light` → light, otherwise the markup's dark default);
-  `main.js` keeps following OS changes live (`followOS`) until the visitor toggles.
+  and with nothing stored follows the OS (`prefers-color-scheme: light` → light, otherwise the markup's dark default).
   `state.dark` reads that class, so script and app agree; `render` then sets `theme-color`. The theme pill's `aria-label`
   starts with its visible word (WCAG 2.5.3): "Dark mode, switch to light" / "Light mode, switch to dark".
 - Refs: `[data-ref="…"]` — `tilt avatar globe tide photo skl work menu catRows modalTpl`.
 - Text bindings: `[data-bind="…"]` — `modeLabel catKicker catTitle`; in the project view: `modTitle modDesc modMore modFacts`.
 - Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu closeModal copyEmail`.
-  Escape with the mobile menu open closes it and focuses the menu button; widening past 820px (where the menu button
-  hides) closes it too (`matchMedia`, `data.test.js` checks the JS and CSS numbers match).
+  Escape with the mobile menu open closes it and focuses the menu button.
 - Hero: `.wrap.fxb.g12.stg` = `.hc` (columns 1–7: `h1.nm` "Febriel <span>B. Otud</span>", the span a block line, the
   orchid italic surname under "Febriel" at every width; `p.vp`; `.hero-cta` with the Messenger `a.btn` + ghost "See my
   work"; `.dateline` = the availability `p` and `p.proof` "Recent work: …" with plain underlined links to
@@ -136,8 +131,8 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   JS sets its `aria-label` to the project title (not `aria-labelledby` the `h3`, whose text the engine scrambles while the
   dialog opens, so screen readers would hear the glyphs). Cloned into `#work` and `showModal()`ed on open, closed and
   removed on close: the engine reads the mount (`canvas[data-cover][data-big]` is
-  its big cover; the dialog sits in the top layer, so the cover is on screen and animates from any scroll position, and
-  opening never moves the page; the old scroll of `#work` into view was removed 2026-11-19).
+  its big cover, drawn only while `#work` is on screen, so opening scrolls `#work` into view instantly behind the dialog,
+  but only when it is off screen: above the 64px header or below the viewport; a card click never moves the page).
   Native focus trap, Escape, `::backdrop` (a 94% page-colour tint, no blur since 2026-11-19); a press and release both outside the dialog's box close it (the
   dialog is the scroller, so a press on its own scrollbar is inside the box; `.mbox` alone would not cover the
   scrollbar); `html:has(.modal[open])` stops the page scrolling, and `html` carries the theme's background and
@@ -156,36 +151,10 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Contact: `.hd` > `h2.cq`; `.ctw.g12` > `.ctm` (`p.lead` "Tell me what it is…", the Messenger `a.btn`, the only
   primary, + reply/availability `p`) and `ul.cta` rows: `li.eml` (mailto link showing the address + ghost `Copy`,
   `copyEmail`: clipboard, else selects the address; the button's text scrambles like any `[data-scr]`, so it isn't the
-  live region: `span.vh[data-nofx][aria-live=polite]` after it gets "Copied" (or, when the clipboard is blocked,
-  "Address selected. Press Ctrl or ⌘ + C to copy.", which the button also shows, wrapping on phones), cleared with the
-  button's label after 2 s), `a.row` LinkedIn, Instagram, GitHub, `li.fol` "Follow INKWILD" + `a.lnk` TikTok / YouTube. `.tide` > the tide
+  live region: `span.vh[data-nofx][aria-live=polite]` after it gets "Copied", cleared with the button's label after
+  2 s), `a.row` LinkedIn, Instagram, GitHub, `li.fol` "Follow INKWILD" + `a.lnk` TikTok / YouTube. `.tide` > the tide
   canvas at the bottom of `#contact`; `footer.foot` = © + Back to top.
 - `.fbo [hidden]{display:none!important}` exists because layout rules out-rank the UA `[hidden]` rule.
-
-## State
-
-No state library and no `data-state` attributes (2026-11-19 decision, `reports/State machines.md`): each app machine
-is one field of `state` in `main.js`, one branch of `render()`, and an existing DOM mirror that tests and agents read.
-Engine machines are one-way: `sync()` (after every `setState`) mirrors `state` into `E.{dark,svc,cat,modal}` and fires
-one-shot effects on a change.
-
-| Machine | States | Events | Source of truth | DOM mirror |
-|---|---|---|---|---|
-| Theme | dark / light; origin stored (`fbo-mode`) or OS | `toggleMode` (stores, `followOS = false`); OS `prefers-color-scheme` change while `followOS` | `main.js` `state.dark` + `followOS`; `index.html` pre-paint | root `is-dark`/`is-light`, `meta[theme-color]`, pill `aria-label` + `modeLabel` |
-| Menu | closed / open | `toggleMenu`, `closeMenu` (links), Escape (focus → button), any `hashchange`, widening past 820px | `state.menu` | `[data-ref=menu][hidden]`, `.mnb[aria-expanded]` |
-| Services | 0..3 | `.ph` mouseenter / click / focus | `state.svc` (engine morph `sFrom/sTo/sMix`) | `.pan.on`, `.pb[hidden]`, `.ph[aria-expanded]` |
-| Skills group | all / build / design / social / video / ai | `button[data-cat]` click | `state.cat` (engine `gMix`, decode of `skl`) | `aria-pressed`, `.on`, `.ix.f`, row `.on`, `catKicker`/`catTitle` |
-| Project view | closed / open(i, `onWork`) / closing (transient: dialog closed, hash and `state.modal` still open until the `history.back()` hashchange) | only `hashchange`/load open it; Back or another hash closes; close button / Escape / backdrop → `history.back()` if `onWork`, else `replaceState('#work')`; every close focuses the card link | `state.modal` (-1 or index), `onWork`, `dlg`, `shown` | `location.hash` `#work/<id>`, `dialog.modal[open]` (removed when closed), `history.length` |
-| Copy button | idle / copied / selected, 2 s back to idle | `copyEmail` click; clipboard ok or blocked | `copyT` timer in `main.js` | button text, `.eml [aria-live]` text, the selection |
-| Section reveal | waiting / revealed (once) / static (reduced motion at load, no JS) | 160px in view (`inView`) or `focusin` | `engine.js` `o.shown` per `[data-sec]` | `[data-sec][data-fx="wait"]` while waiting |
-| Text decode | per text node: scrambling → settled; dropped if the app changes the node or it gets focus | reveal, `[data-scr]` pointerover, skills change, dialog open | `engine.js` `fx[]` | the text itself (never inside the focused element) |
-| Canvas layers / drag | per layer: visible × pointer outside / inside / down (captured), inertia `vyaw` | pointer events, `hold()` rebinds on `sync()` | `engine.js` `makeLayer` objects `A S Gl Td Ph`, covers' `__fboC` | none (canvas pixels) |
-| Intros | portrait `aIntro`, photo `pIntro` 0 → 1 after their section reveals; photo not near → loading → loaded | section reveal, photo within one screen | `engine.js` | none |
-| Animation loop | running (rAF, draws at most every 30 ms; paused by the browser in a hidden tab) | — | `engine.js` `frame()`; per-layer `run()` errors in `bad` | none |
-| Motion modes | normal / reduced motion (read live) / no JS / print | OS setting, print | `calm` media query in `engine.js`; CSS media rules | `[data-fx]` never set under reduce at load or without JS |
-
-Dead state kept for the engine contract: `logic.props.mode` and `sync()`'s `st.dark == null` branch (`state.dark` is
-always boolean), the `heroO.shown` test inside `aIntro`.
 
 ## Run
 

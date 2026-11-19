@@ -135,9 +135,6 @@ export function startEngine(logic) {
 
   /* ----- text that resolves out of ASCII ----- */
   var fx = [];
-  /* a focused control's text is its accessible name, so it never scrambles while focused (a focused container around
-     the decoded element, e.g. the dialog scroller, doesn't stop the effect inside it) */
-  function named(n, el) { var f = document.activeElement; return !!f && f !== document.body && f.contains(n) && (f === el || !f.contains(el)); }
   function decode(el, dur) {
     if (!el || calm.matches) return;
     var tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null), n, k = 0, now = performance.now();
@@ -145,11 +142,11 @@ export function startEngine(logic) {
       var s = n.nodeValue;
       if (!s || !s.trim()) continue;
       var p = n.parentNode;
-      if (!p || !p.closest || p.closest('[data-nofx]') || named(n, el)) continue;
+      if (!p || !p.closest || p.closest('[data-nofx]')) continue;
       if (fx.some(function (f) { return f.node === n; })) continue;
       var rnd = new Float32Array(s.length);
       for (var j = 0; j < s.length; j++) rnd[j] = Math.random();
-      fx.push({ node: n, root: el, orig: s, last: n.nodeValue, rnd: rnd, t0: now + Math.min(k, 16) * 30, dur: dur });
+      fx.push({ node: n, orig: s, last: n.nodeValue, rnd: rnd, t0: now + Math.min(k, 16) * 30, dur: dur });
       k++;
     }
   }
@@ -159,7 +156,7 @@ export function startEngine(logic) {
       var f = fx[i];
       if (f.node.nodeValue !== f.last || !f.node.isConnected) { fx.splice(i, 1); continue; }
       var p = (now - f.t0) / f.dur;
-      if (p >= 1 || named(f.node, f.root)) { f.node.nodeValue = f.orig; fx.splice(i, 1); continue; }
+      if (p >= 1) { f.node.nodeValue = f.orig; fx.splice(i, 1); continue; }
       if (p < 0) p = 0;
       var out = '', len = f.orig.length;
       for (var j = 0; j < len; j++) {
@@ -171,7 +168,7 @@ export function startEngine(logic) {
   }
   function endFx() { for (var i = 0; i < fx.length; i++) if (fx[i].node.nodeValue === fx[i].last) fx[i].node.nodeValue = fx[i].orig; fx.length = 0; }
 
-  /* ----- sections: ghost reveal (once), ASCII rain, ASCII light, hero tilt ----- */
+  /* ----- sections: ghost reveal (once), ASCII rain, ASCII light, scroll and pointer parallax ----- */
   var secs = [], hdr = logic.root.current && logic.root.current.querySelector('header');
   var ro = new IntersectionObserver(function (es) {
     for (var i = 0; i < es.length; i++) {
@@ -698,9 +695,6 @@ export function startEngine(logic) {
   /* ponytail: every layer draws with fillText on the main thread (whole rows where it can). Ceiling: about 3-7 ms per
      draw on a fast Mac, so several times that on a mid-range phone. Upgrade path: a glyph atlas (RAMP pre-rendered per
      colour, blitted with drawImage), or this loop in an OffscreenCanvas worker. */
-  /* one layer throwing doesn't stop the others; each logs once */
-  var bad = {};
-  function run(k, f, a, b) { try { f(a, b); } catch (err) { if (!bad[k]) { bad[k] = true; console.error('fbo engine: ' + k, err); } } }
   function frame(now) {
     raf = requestAnimationFrame(frame);
     if (fx.length) stepFx(now);
@@ -709,13 +703,15 @@ export function startEngine(logic) {
     if (!calm.matches) E.t += dt * E.speed;
     if (E.themeDirty || !E.col) readTheme();
     if (!E.col) return;
-    if (A.el && A.vis && (calm.matches || !heroO || heroO.shown)) run('avatar', drawAvatar, now, dt); /* waits for the hero's reveal */
-    if (S.el && S.vis) run('stage', drawStage, now, dt);
-    if (Gl.el && Gl.vis) run('globe', drawGlobe, now, dt);
-    if (Td.el && Td.vis && tick % 2 === 0) run('tide', drawTide);
-    if (Ph.el && Ph.vis) run('photo', drawPhoto, now, dt);
-    run('covers', drawCovers, dt);
-    for (var i = 0; i < secs.length; i++) if (secs[i].vis && secs[i].shown) run('ambient', drawAmbient, secs[i], dt);
+    try {
+      if (A.el && A.vis && (calm.matches || !heroO || heroO.shown)) drawAvatar(now, dt); /* waits for the hero's reveal */
+      if (S.el && S.vis) drawStage(now, dt);
+      if (Gl.el && Gl.vis) drawGlobe(now, dt);
+      if (Td.el && Td.vis && tick % 2 === 0) drawTide();
+      if (Ph.el && Ph.vis) drawPhoto(now, dt);
+      drawCovers(dt);
+      for (var i = 0; i < secs.length; i++) if (secs[i].vis && secs[i].shown) drawAmbient(secs[i], dt);
+    } catch (err) { if (!E.failed) { E.failed = true; console.error('fbo engine', err); } }
   }
   function sync() {
     var st = logic.state, p = logic.props;

@@ -22,8 +22,6 @@ const logic = {
 };
 let eng = null, dlg = null, shown = -1, copyT = 0;
 let onWork = false; // the history entry under the open project is #work, so a close steps back to it instead of stacking another
-let followOS = true; // no stored mode: the theme follows the OS (index.html's pre-paint rule) until the visitor toggles
-try { followOS = !localStorage.getItem('fbo-mode'); } catch { /* storage blocked: nothing stored */ }
 
 function setState(patch) {
   Object.assign(state, patch);
@@ -115,7 +113,11 @@ function renderModal() {
   });
   work.append(frag);
   dlg = d;
-  d.showModal(); // the page doesn't move: the dialog sits in the top layer, so its big cover is always on screen
+  d.showModal();
+  // the big cover draws only while #work is on screen: bring it in behind the dialog, but only from off screen (64: the
+  // sticky header), so a card click never moves the page
+  const w = work.getBoundingClientRect();
+  if (w.bottom <= 64 || w.top >= innerHeight) work.scrollIntoView({ block: 'start', behavior: 'instant' });
 }
 
 /* "#work/<id>" opens that project; any other hash (Back, a nav link) closes it */
@@ -150,7 +152,6 @@ function el(tag, cls, ...kids) {
 // ---- events ----
 const ACTIONS = {
   toggleMode: () => {
-    followOS = false;
     setState({ dark: !state.dark });
     try { localStorage.setItem('fbo-mode', state.dark ? 'dark' : 'light'); } catch { /* storage blocked: mode just won't persist */ }
   },
@@ -159,9 +160,8 @@ const ACTIONS = {
   closeModal: () => dlg?.close(),
   copyEmail: () => {
     const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]'); // the button's text scrambles (reveal, hover); this data-nofx span never does
-    const say = (t) => { b.textContent = live.textContent = t; clearTimeout(copyT); copyT = setTimeout(() => { b.textContent = 'Copy'; live.textContent = ''; }, 2000); };
-    const done = () => say('Copied');
-    const pick = () => { getSelection().selectAllChildren(a); say('Address selected. Press Ctrl or ⌘ + C to copy.'); }; // clipboard blocked: select it for a manual copy
+    const done = () => { b.textContent = live.textContent = 'Copied'; clearTimeout(copyT); copyT = setTimeout(() => { b.textContent = 'Copy'; live.textContent = ''; }, 2000); };
+    const pick = () => getSelection().selectAllChildren(a); // clipboard blocked: select it for a manual copy
     try { navigator.clipboard.writeText(a.href.slice(7)).then(done, pick); } catch { pick(); } // href, since the text may be mid-scramble
   }
 };
@@ -176,9 +176,6 @@ addEventListener('hashchange', route);
 addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && state.menu) { setState({ menu: false }); act('toggleMenu').focus(); }
 });
-// past the breakpoint the menu button is hidden (styles.css; data.test.js keeps the two numbers equal), so the menu closes
-matchMedia('(max-width:820px)').addEventListener('change', (e) => { if (!e.matches && state.menu) setState({ menu: false }); });
-matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => { if (followOS) setState({ dark: !e.matches }); });
 
 pans.forEach((p, i) => {
   const pick = () => { if (state.svc !== i) setState({ svc: i }); };
