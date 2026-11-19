@@ -9,6 +9,14 @@ test('projectAt: #work/<id> opens that project, any other hash none', () => {
   assert.equal(new Set(PROJECTS.map((p) => p.id)).size, PROJECTS.length, 'ids are unique');
 });
 
+test('the menu closes (main.js) at the breakpoint where its button hides (styles.css)', () => {
+  const css = readFileSync(new URL('./styles.css', import.meta.url), 'utf8'), js = readFileSync(new URL('./main.js', import.meta.url), 'utf8');
+  const cssPx = css.match(/@media \(max-width:(\d+)px\)\{(?:[^{}]*\{[^{}]*\})*?[^{}]*\.mnb\{display:inline-flex\}/)?.[1];
+  const jsPx = js.match(/matchMedia\('\(max-width:(\d+)px\)'\)/)?.[1];
+  assert.ok(cssPx, 'styles.css menu breakpoint');
+  assert.equal(jsPx, cssPx);
+});
+
 test('each static card in index.html matches data.js', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   for (const p of PROJECTS) {
