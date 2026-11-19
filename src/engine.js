@@ -27,6 +27,21 @@ function scrChar(c, r) {
 /* a section reveals, once, when 160px of it is on screen (a third of it, or of the viewport, when that is less, so it can
    always get there) */
 function inView(seen, vh, h) { return seen >= Math.min(160, Math.min(vh, h) / 3); }
+/* iOS WebKit refuses a canvas over 16.7M device px and kills the tab when its total memory runs out, so no canvas backs
+   more than MAX_PX (16 MB): past it the DPR drops until it fits (the largest today, desktop rain, is 3.6M) */
+var MAX_PX = 4194304;
+function backing(cw, ch, dpr) {
+  var d = Math.min(dpr, Math.sqrt(MAX_PX / (cw * ch))), f = d < dpr ? Math.floor : Math.round; /* floor: rounding up could pass it */
+  return { W: f(cw * d), H: f(ch * d), d: d };
+}
+/* the rain and light are full strength in the page margins (past the 1360px container) and 30% over text; the hero's
+   fade in on its picture side (right, or below once stacked at 820px and under). Applied in the canvas (destination-in),
+   not as a CSS mask: WebKit gives a masked layer a second full-size backing store at the screen's scale.
+   Returns [x0, y0, x1, y1, [[offset, alpha], ...]] for createLinearGradient. */
+function ambMask(w, h, hero, narrow) {
+  if (hero) return narrow ? [0, 0.55 * h, 0, 0.72 * h, [[0, 0.3], [1, 1]]] : [0.5 * w, 0, 0.68 * w, 0, [[0, 0.3], [1, 1]]];
+  return [w / 2 - 720, 0, w / 2 + 720, 0, [[0, 1], [160 / 1440, 0.3], [1280 / 1440, 0.3], [1, 1]]];
+}
 
 /* ---------- 3D shapes (signed distance) ---------- */
 function sdBox(x, y, z, bx, by, bz, r) {
@@ -112,8 +127,7 @@ export function startEngine(logic) {
   function fit(L) {
     var cw = L.el.clientWidth, ch = L.el.clientHeight;
     if (!cw || !ch) return false;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var W = Math.round(cw * dpr), H = Math.round(ch * dpr);
+    var b = backing(cw, ch, Math.min(window.devicePixelRatio || 1, 2)), dpr = b.d, W = b.W, H = b.H;
     if (L.el.width !== W || L.el.height !== H) { L.el.width = W; L.el.height = H; }
     L.w = cw; L.h = ch; L.dpr = dpr;
     L.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -181,6 +195,12 @@ export function startEngine(logic) {
     }
   /* ponytail: 1% steps fire the rule within ~1% of a section's height (≈30px on a 3000px one); exact edges would need per-section rootMargin observers */
   }, { threshold: Array.from({ length: 101 }, function (_, j) { return j / 100; }), rootMargin: -(hdr ? hdr.offsetHeight : 0) + 'px 0px 0px 0px' }); /* what sits under the sticky header isn't on screen */
+  /* a section more than a screen away gives its rain canvas (section-sized) back; it is rebuilt when it nears again.
+     The screen of margin keeps Safari's toolbar (about 80px) from freeing and rebuilding one at a viewport edge. */
+  var far = new IntersectionObserver(function (es) {
+    for (var i = 0; i < es.length; i++) { var o = es[i].target.__fboSec; if (o && o.cv && !es[i].isIntersecting) o.cv.width = 0; }
+  }, { rootMargin: '100% 0px' });
+  var narrow = window.matchMedia('(max-width: 820px)');
   function show(o) {
     o.shown = true;
     o.el.removeAttribute('data-fx');
@@ -216,7 +236,7 @@ export function startEngine(logic) {
       o.focus = (function (o) { return function () { if (!o.shown) show(o); }; })(o);
       el.addEventListener('pointermove', o.move); el.addEventListener('pointerleave', o.leave); el.addEventListener('focusin', o.focus);
       if (!calm.matches) el.setAttribute('data-fx', 'wait');
-      ro.observe(el);
+      ro.observe(el); far.observe(el);
     }
   }
   function drawAmbient(o, dt) {
@@ -224,7 +244,7 @@ export function startEngine(logic) {
     var w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
     /* ponytail: the rain and the pointer light draw at 1 device pixel per CSS pixel (sections got taller in the 2026-11-19
        layout; the faint glyphs read the same). Ceiling: slightly soft rain on 2x screens; raise to 1.5 if that shows. */
-    var dpr = 1, W = Math.round(w), H = Math.round(h);
+    var bk = backing(w, h, 1), dpr = bk.d, W = bk.W, H = bk.H;
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     var ctx = cv.getContext('2d'), still = calm.matches, i, k, x, y;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
@@ -273,7 +293,10 @@ export function startEngine(logic) {
         ctx.fillText(s, 0, y * ch);
       }
     }
-    ctx.globalAlpha = 1;
+    var m = ambMask(w, h, o.hero, narrow.matches), gr = ctx.createLinearGradient(m[0], m[1], m[2], m[3]);
+    for (i = 0; i < m[4].length; i++) gr.addColorStop(m[4][i][0], 'rgba(0,0,0,' + m[4][i][1] + ')');
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'destination-in'; ctx.fillStyle = gr; ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = 'source-over';
   }
 
   /* ----- avatar: the INKWILD portrait, head and shoulders, set in ASCII ----- */
@@ -468,7 +491,7 @@ export function startEngine(logic) {
     if (!st.vis) return;
     var big = cv.hasAttribute('data-big');
     if (!force && !big && st.drawn && calm.matches) return;
-    var dpr = Math.min(window.devicePixelRatio || 1, 1.5), W = Math.round(w * dpr), H = Math.round(h * dpr);
+    var bk = backing(w, h, Math.min(window.devicePixelRatio || 1, 1.5)), dpr = bk.d, W = bk.W, H = bk.H;
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!calm.matches) st.yaw += dt * (big ? 1.1 : 0.35) * E.speed;
@@ -738,7 +761,7 @@ export function startEngine(logic) {
     sync: sync,
     stop: function () {
       cancelAnimationFrame(raf); endFx();
-      hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null); io.disconnect(); ro.disconnect(); if (pNear) pNear.disconnect();
+      hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null); io.disconnect(); ro.disconnect(); far.disconnect(); if (pNear) pNear.disconnect();
       if (rootEl) rootEl.removeEventListener('pointerover', onOver);
       for (var i = 0; i < secs.length; i++) { var o = secs[i]; o.el.removeEventListener('pointermove', o.move); o.el.removeEventListener('pointerleave', o.leave); o.el.removeEventListener('focusin', o.focus); o.el.removeAttribute('data-fx'); clearTimeout(o.pin); o.el.style.height = ''; o.el.__fboSec = null; }
       secs.length = 0;
@@ -746,4 +769,4 @@ export function startEngine(logic) {
   };
 }
 
-export { clamp01, smooth, scrChar, sdf, inView };
+export { clamp01, smooth, scrChar, sdf, inView, backing, ambMask, MAX_PX };
