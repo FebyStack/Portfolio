@@ -84,8 +84,7 @@ body{margin:0}
 .fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,72%) var(--my,0%),var(--glow),transparent 64%)}
 /* the ambient rain and pointer light: full strength in the page margins (and the hero's picture side), a third over
    the text columns, so nothing busy sits behind reading text */
-.fbo .amb{--m:linear-gradient(90deg,#000 calc(50% - 720px),rgba(0,0,0,.3) calc(50% - 560px),rgba(0,0,0,.3) calc(50% + 560px),#000 calc(50% + 720px));position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;-webkit-mask:var(--m);mask:var(--m)}
-.fbo .hero .amb{--m:linear-gradient(90deg,rgba(0,0,0,.3) 50%,#000 68%)}
+.fbo .amb{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none} /* its fade-over-text mask is drawn by engine.js (ambMask) */
 .fbo .band .wrap{padding-block:96px}
 #contact .wrap{padding-bottom:48px}
 /* reveal: once per section (engine.js); opacity and a short rise only */
@@ -277,7 +276,6 @@ from{opacity:0;transform:translateY(10px)}
 .fbo :is(.h2,.hd .hint,.pq,.cq){grid-column:1/-1}
 .fbo .kick{margin-bottom:16px}
 .fbo .hero .wrap{min-height:0;padding-block:40px 56px}
-.fbo .hero .amb{--m:linear-gradient(180deg,rgba(0,0,0,.3) 55%,#000 72%)}
 .fbo .hc,.fbo .avf{grid-column:1/-1}
 .fbo .avf{justify-self:center;width:min(100%,320px)}
 .fbo .dateline{grid-template-columns:minmax(0,1fr)}

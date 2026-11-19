@@ -91,8 +91,12 @@ Owner's decisions and waivers below bind like the rest: a Hallmark run reports t
   the bust (boil, accent cloud, tilt), section reveal with decode (once per section, first time in view), the text
   scramble on hover (`data-scr`), the globe, the service objects, the turning work covers, the about photo, the tide.
   Layers draw only on screen (each cover is observed on its own). No scroll parallax (the deck arc and the About
-  photo's drift were removed 2026-11-19). The rain and light are masked (CSS `mask`) to full strength in the page
-  margins and the hero's picture side, 30% over text columns; they draw at 1 device pixel per CSS pixel.
+  photo's drift were removed 2026-11-19). The rain and light are full strength in the page
+  margins and the hero's picture side, 30% over text columns (drawn in the canvas, never a CSS `mask`: iOS); they draw
+  at 1 device pixel per CSS pixel.
+- Canvas memory (iOS): about 32 MB of live canvas backing on a 390×844@3 phone; no canvas over 4.19M device px; a
+  section's rain canvas is freed more than a screen away. Any new canvas or large illustration follows these rules
+  (`PROJECT.md`, Canvas memory).
 - CSS: reveal 0.9s (opacity and an 18px rise; the blur was dropped 2026-11-19 for cost on tall sections), panels 0.6s, project view 0.35s, colour 0.2s, press 0.15s; the marquee loops 48s
   and pauses under the pointer; the logo caret blinks five times and stays.
 - Reduced motion: no veil, decode, scramble, loop or transition; content always visible.

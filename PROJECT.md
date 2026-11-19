@@ -60,6 +60,17 @@ numbers, dates, results or quotes.
   - 2026-11-19: `scrollFx` (the deck arc `--o` and the scroll parallax `--sp`) and the pointer `--px/--py` vars were
     deleted with the layouts that used them; the hero tilt stays. The ambient rain canvas draws at DPR 1 (`ponytail:`
     note in `drawAmbient`).
+  - Canvas memory, iOS rule (2026-11-19, after Safari's "A problem repeatedly occurred" on the owner's iPhone with the
+    redesign): budget about 32 MB of live canvas backing store on a 390×844@3 phone (measured 18–23 MB; the pre-redesign
+    `55d25cf` 16–23 MB; the redesign before the fix 27.5–32 MB, every section's rain canvas kept once shown). Rules: (1) no
+    canvas backs more than `MAX_PX` 4.19M device px (16 MB, a quarter of WebKit's 16.7M per-canvas cap): `backing()`
+    (tested) lowers its DPR past that; caps stay 2 for the objects, 1.5 covers, 1 rain. (2) A section more than a screen
+    away frees its section-sized rain canvas (`far` observer, `width = 0`); the reveal-once change had deleted the old
+    free-on-dissolve, which is what kept them all. The screen of margin means Safari's toolbar (±80px) never frees and
+    rebuilds one at an edge; canvases only resize when their CSS size changes, and nothing is sized in `dvh`. (3) No CSS
+    `mask` on a canvas or a section-sized layer: WebKit gives the masked layer a second full-size backing store at the
+    screen's scale. The rain's fade over text is drawn in the canvas (`ambMask`, tested, `destination-in`). Measured in
+    headless Chrome with iPhone emulation (scratch CDP scripts, not in the repo); only a real iPhone confirms WebKit.
 - `public/img/avatar-map.png` — the portrait's density map, 264×264 RGBA read by `buildAvatar`: channel 0 = tone,
   1 = accents (only hair uses them, dark mode), 2 = hair flag (low = hair: dark mode gives it a minimum density),
   alpha = subject mask. `.plate` (page colour, behind the canvas, keeps the ambient rain out of the portrait) masks with
