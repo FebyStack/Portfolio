@@ -1,196 +1,53 @@
 # Portfolio — Febriel B. Otud
 
-One-page ASCII portfolio. The design system is locked in `DESIGN.md` (2026-11-18: palette, type and spacing scales,
-radii, motion budget, the owner's decisions and the Hallmark waivers); read it before any visual change. The original
-look is `design/Main.dc.html` (Claude Design canvas export, artifact `6NeXsueHHaZ59dNx7zeXTw`), except the hero, header
-CTA, contact, section order and sizing, work cards and project view, redesigned 2026-11-15, and the 2026-11-18 Hallmark
-pass (see Decisions). `design/Brand.dc.html` = brand plan.
-Copy comes only from the owner's own words (`Obsidian/Astro/Claude Code/Febriel Avatar Facts.md`); never invent clients,
-numbers, dates, results or quotes.
+One-page ASCII portfolio. See `DESIGN.md` for the current composition, type and motion rules.
+The original design and brand direction are archived in `design/Main.dc.html` and `design/Brand.dc.html`.
+Use the owner's project facts and copy. Treat walkthroughs as illustrations of supported flows.
 
-## Architecture (and why)
+## Architecture
 
-- **Vite + vanilla HTML/CSS/JS. No framework, no TypeScript.** The page is one static document
-  plus one canvas engine; state is ~7 fields. Static markup in `index.html` = full content
-  without JS (SEO, no hydration). Trade-off: no component model. If a second page/blog
-  appears, move to Astro and keep `src/engine.js` as-is.
-- **Coding rules: ponytail** (`~/.claude/plugins/marketplaces/greenpt/bench/variants/ponytail.md`).
-  Stdlib/native first, fewest files, `ponytail:` comment on every intentional shortcut.
-- `index.html` — all markup. Since the 2026-11-19 editorial redesign it has no inline styles: every rule is a class in
-  `styles.css` (the design template's inline styles went with the old layout).
-- `src/styles.css` — rewritten 2026-11-19 for the editorial system (12-column `.g12` grid, opening rules, captions, the
-  `.sep` ASCII band, the `--mark` vermilion; `DESIGN.md` has the grid, scale and every composition). Kept from before:
-  `:root` holds the colours `html` paints itself (page background, `scrollbar-color`) and the Tidal blocks reuse them;
-  `html, body` clip overflow-x; spacing on a 4px scale; labels and controls in sentence case; print shows every
-  section.
-  - Type scale: every text size is a token on `.fbo` (`--fs-xs` … `--fs-name`, plus `--fs-title` and `--fs-display`
-    since 2026-11-19); the list and their uses are in `DESIGN.md`. `text-wrap: balance` on h1–h3 and short blocks,
-    `pretty` on paragraphs. Labels and controls sentence case, tracked 0–0.03em; only the marquee keeps capitals.
-- `src/engine.js` — the design's canvas engine (lines 451–1274), near-verbatim except the section reveal and the portrait below.
-  Do not restyle it; port fixes only. `startEngine(logic)` → `{ sync, stop }`.
-  - Section reveals play once (2026-11-19, owner; replaced the 2026-11-15 dissolve/replay): `inView()` (tested)
-    reveals a `[data-sec]` the first time 160px of it is on screen (a third of the section or of the viewport when that
-    is less, so it can always get there): veil 1 → 0, text decode (`decode(el, 950)`), hero portrait and about photo
-    intros from 0. After that the section stays as it is in both scroll directions: no dissolve, no replay (the exit
-    hysteresis, `hide()`, reversed decode and reversed intros were deleted). The section observer's `rootMargin` drops
-    the strip under the sticky header (its height, read once at start), so "on screen" means below the header. A
-    section's height is pinned for 1.5 s while its text decodes (scrambled glyphs rewrap on phones); `sync()` drops pins
-    since app changes win. `focusin` reveals a not-yet-revealed section. The decode (reveal, hover, dialog, skills)
-    never scrambles text inside the focused element (`named()`: it is a control's accessible name), also when focus
-    arrives mid-decode. Reduced motion: unchanged (content always visible, no veil/decode); switched on after load, the
-    `@media print,(prefers-reduced-motion:reduce)` rule shows sections still waiting. Checked 2026-11-19 (headless Chrome, 1440×900 and 375×812): each section reveals once on
-    the first pass down; two more round trips keep every section at opacity 1 with its original text; nothing stuck
-    after fast scrolling or `#contact` / `#work/invex` loads; no console errors. Since 2026-11-18 the
-    first screen ends exactly on the marquee at both 1440×900 and 1920×1080, so nothing sits half-revealed; Work
-    reveals on the first scroll.
-  - About photo (2026-11-15, P1-10): fetched by a one-shot IntersectionObserver once the photo canvas is within one
-    viewport of the screen (`rootMargin` 100% at the bottom), not at startup (first request at scrollY 1440 of 3880 on
-    1440×900).
-  - `ponytail:` note in `frame()`: every layer draws with `fillText`; ceiling about 3–7 ms per draw on a fast Mac.
-    Upgrade path: a glyph atlas or an OffscreenCanvas worker (not done). Each layer draws inside its own `run()` try
-    (2026-11-19), so one layer throwing logs once (`fbo engine: <layer>`) and the others keep drawing.
-  - Hero portrait (2026-11-15, owner): ASCII only, a head-and-shoulders bust. The hover/tap ink reveal and its
-    "Show the drawing" pin are gone; the 3D tilt and the pointer accent (a small accent-glyph cloud at the pointer,
-    drifting on its own when nobody points) stay.
-  - Work covers (2026-11-18, owner: one hover effect per card): hovering a card no longer speeds its cover up or draws it
-    every frame; the card's hover is the text scramble. Only the project view's big cover turns faster. Since
-    2026-11-19 each cover canvas is observed by the layer `io` (only on-screen covers draw, one per frame round-robin)
-    and its glyph grows with it (`w / 60`, min 9; stage `w / 40`, min 12), so the bigger illustrations cost about what
-    the old cards did.
-  - 2026-11-19: `scrollFx` (the deck arc `--o` and the scroll parallax `--sp`) and the pointer `--px/--py` vars were
-    deleted with the layouts that used them; the hero tilt stays. The ambient rain canvas draws at DPR 1 (`ponytail:`
-    note in `drawAmbient`).
-  - Canvas memory, iOS rule (2026-11-19, after Safari's "A problem repeatedly occurred" on the owner's iPhone with the
-    redesign): budget about 32 MB of live canvas backing store on a 390×844@3 phone (measured 18–23 MB; the pre-redesign
-    `55d25cf` 16–23 MB; the redesign before the fix 27.5–32 MB, every section's rain canvas kept once shown). Rules: (1) no
-    canvas backs more than `MAX_PX` 4.19M device px (16 MB, a quarter of WebKit's 16.7M per-canvas cap): `backing()`
-    (tested) lowers its DPR past that; caps stay 2 for the objects, 1.5 covers, 1 rain. (2) A section more than a screen
-    away frees its section-sized rain canvas (`far` observer, `width = 0`); the reveal-once change had deleted the old
-    free-on-dissolve, which is what kept them all. The screen of margin means Safari's toolbar (±80px) never frees and
-    rebuilds one at an edge; canvases only resize when their CSS size changes, and nothing is sized in `dvh`. (3) No CSS
-    `mask` on a canvas or a section-sized layer: WebKit gives the masked layer a second full-size backing store at the
-    screen's scale. The rain's fade over text is drawn in the canvas (`ambMask`, tested, `destination-in`). Measured in
-    headless Chrome with iPhone emulation (scratch CDP scripts, not in the repo); only a real iPhone confirms WebKit.
-- `public/img/avatar-map.png` — the portrait's density map, 264×264 RGBA read by `buildAvatar`: channel 0 = tone,
-  1 = accents (only hair uses them, dark mode), 2 = hair flag (low = hair: dark mode gives it a minimum density),
-  alpha = subject mask. Built once (scratch script, not in the repo) from the
-  head-only map of `26a4b8f` (traced from the INKWILD ink drawing): head scaled 0.75 into the top two-thirds, neck
-  continued from its row 238, shoulders and V-neck t-shirt from `photo.webp`'s alpha (skin = warm pixels), shirt tone
-  ≈0.5 from the photo's luminance (lighter mass than the face in dark mode, darker in light mode), 6px soft edges, a
-  rounded vignette fading shoulders and bottom to dots. `public/img` also holds `photo.webp` (About photo);
-  `avatar-ink.webp` was deleted with the reveal.
-- `src/data.js` — `SKILLS`, `GROUPS`, `PROJECTS` (card order; fields `id title shape desc role type status more tools
-  image alt`, optional `links: [[label, url], …]`) and `projectAt(hash)` (`#work/<id>` → index, else -1).
-  Screenshots later = set `image` (+ `alt`) here only: it replaces the ASCII cover on the card and in the project view.
-  `src/data.test.js` checks the hash mapping, that each card in `index.html` repeats its title and desc, and that the
-  skills card's static kicker is `SKILLS.length` tools.
-- `src/main.js` — state + DOM glue; replaces the design's `Component` class. Builds the `logic`
-  object the engine expects.
-- `supabase/migrations/*_chat_logs.sql` — record of the `chat_logs` table that stays in the hosted database after the
-  chatbot's removal: RLS on, no policies, revoked from anon/authenticated; views `chat_daily` / `chat_review` /
-  `chat_top_questions` (security_invoker); pg_cron job `chat-logs-retention` (180 days). `*_chat_logs_unanswered.sql` adds
-  the `unanswered` column. Nothing in the site reads or writes it any more.
+- Vite serves one static HTML document with vanilla CSS and JavaScript. `index.html` supplies the
+  portfolio copy and work art. `src/styles.css` owns the palette, type, grid and responsive styling.
+- `src/data.js` defines `SKILLS`, `GROUPS`, `PROJECTS`, and the `projectAt(hash)` lookup.
+  Keep project IDs stable and duplicate each project title and description in the static HTML.
+  Set a project's `image` and `alt` together to use a screenshot in the list and dialog.
+- `src/main.js` owns theme, mobile menu, active service, active skill group, dialog and clipboard feedback.
+  `index.html` applies the saved theme or OS preference before paint. Theme changes update the
+  corresponding root class and theme color. The mode choice is stored in `localStorage['fbo-mode']`.
+- The site does not use the Supabase chat backend. `supabase/migrations/` records its retained database
+  objects and permissions for maintenance.
 
-## Engine ↔ app contract
+## Canvas engine
 
-Engine reads only: `logic.{root,tilt,avatar,stage,globe,tide,photo,skl}.current`,
-`logic.state.{dark,svc,cat,modal}`, `logic.props.{mode,motion,rain,light,glyph}`, and never writes app state (the
-design's 20 s clock with its `time`, and the avatar's `busy`/"speaking", went with the chatbot). App calls `eng.sync()`
-after every state change; `sync()` also drops the sections' height pins, so nothing should call it on a timer.
+`startEngine(logic)` returns `sync()` and `stop()`. It reads the root and canvas refs, plus
+`logic.state.{dark,svc,cat}`. The app calls `sync()` after state changes and the engine never writes app state.
 
-## DOM contract (index.html ↔ main.js)
+- Portrait pixels come from `public/img/avatar-map.png`, a 264×264 density map traced from the INKWILD
+  drawing. The `data-ref="avatar"` canvas renders the print and plays a short reveal once. The portrait
+  ink responds to pointer position and returns to a still highlight when the pointer leaves.
+- The active `canvas[data-stage]` and `data-ref="globe"` accept drag. Selection moves them to the
+  chosen service shape or skill group. Reduced motion skips interpolation and inertial rotation.
+- `photo.webp` loads as About approaches and the canvas blends its edges into ASCII. The tide is static.
+  Each canvas has a maximum backing store of 4.19M device pixels. The engine only draws near the
+  viewport and logs failures per layer.
 
-- Root `div#top.fbo.pal-tidal.is-dark[data-ref="root"]`; mode = swap `is-dark`/`is-light` (also sets `meta[name=theme-color]` to `--bg`).
-  `main#main` holds, in order: hero, marquee, `#work`, `div.sep`, `#services`, `div.sep`, `#skills`, `div.sep`, `#about`,
-  `div.sep`, `#contact` (nav and mobile menu follow the section order; `.sep` = the static ASCII band, `aria-hidden`, a
-  CSS `::before` string). `footer.foot` sits after `main`, inside the root. Skip link targets `#main`. Every section after
-  the hero opens with `.hd` > `h2` and an optional hint. Paddings in `DESIGN.md`. The hero
-  has a min-height (screen under the header and marquee); the rest size to content. `html{scroll-padding-top:80px}` keeps anchors and keyboard
-  focus clear of the 64px sticky header (so `.sec` has no scroll-margin).
-  Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint,
-  and with nothing stored follows the OS (`prefers-color-scheme: light` → light, otherwise the markup's dark default);
-  `main.js` keeps following OS changes live (`followOS`) until the visitor toggles.
-  `state.dark` reads that class, so script and app agree; `render` then sets `theme-color`. The theme pill's `aria-label`
-  starts with its visible word (WCAG 2.5.3): "Dark mode, switch to light" / "Light mode, switch to dark".
-- Refs: `[data-ref="…"]` — `tilt avatar globe tide photo skl work menu catRows modalTpl`.
-- Text bindings: `[data-bind="…"]` — `modeLabel catKicker catTitle`; in the project view: `modTitle modDesc modMore modFacts`.
-- Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu closeModal copyEmail`.
-  Escape with the mobile menu open closes it and focuses the menu button; widening past 820px (where the menu button
-  hides) closes it too (`matchMedia`, `data.test.js` checks the JS and CSS numbers match).
-- Hero: `.wrap.fxb.g12` holds `.hc` (name, offer, Messenger and “See my work”), `figure.fig.avf` (the portrait
-  frame `.av`, tilt canvas and caption), and `.dateline` (availability and recent project links). On narrow widths
-  they follow that reading order. The name and offer are static text with `data-nofx`.
-- Header CTA: `a.btn.hcta` (same Messenger link) between the theme pill and the menu button; `aria-label` carries the name,
-  its `span` label is `display:none` ≤1000px (icon only). ≤360px the theme pill hides its `modeLabel` word so the header fits 320px.
-- New-tab hint: hidden `span#nt` ("Opens in a new tab") right after the skip link; every `target=_blank` link (also the
-  project view's JS-built `links`) has `aria-describedby="nt"`.
-- Services: `.pans` (12-column grid) > `.pan[data-svc="0..3"]` (`display: contents` above 820px) > `button.ph` (`span.pt`
-  title) + `.pb` > `.pbt` (text, tags) + `figure.pbc` > `canvas[data-stage]`. Active = `.pan.on`; inactive `.pb` carries
-  `hidden`. `logic.stage.current` = stage canvas of the active panel. Mouseenter (on the `.ph`, not the panel), click
-  and focus open one.
-- Skills: `.skills-grid` holds `.skh` (selected group title, count and buttons), `figure.glf` (globe and caption),
-  and `dl.ix[data-ref=catRows]` (static tools in `SKILLS` order). The buttons expose their active state with
-  `aria-pressed`. The selected row gets `.on` and the others use muted ink. At ≤820px the controls wrap above the globe.
-- Work entries (static, in `PROJECTS` order): `.works.g12` > `article.wk[data-scr]` > `.wkc` > `canvas[data-cover="shape"]`
-  (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc, one line; role, type and status show only in the project
-  view), `a.wkl[href="#work/<id>"]` "View <title>", the entry's one control; its `::after` covers the entry, so the whole
-  entry opens it, and the entry gets the focus ring (`.wk:has(.wkl:focus-visible)`). Entries carry no `id`: the
-  browser's own scroll-to-fragment on a `#work/<id>` load would move focus off the open dialog. JS finds an entry by
-  its link's `href`. The first entry is the lead, followed by paired entries that stack on phones (see `DESIGN.md`).
-- Project view: `<template data-ref="modalTpl">` (last child of `#work`, outside `.fxb`) holds `dialog.modal[data-modal]`;
-  JS sets its `aria-label` to the project title (not `aria-labelledby` the `h3`, whose text the engine scrambles while the
-  dialog opens, so screen readers would hear the glyphs). Cloned into `#work` and `showModal()`ed on open, closed and
-  removed on close: the engine reads the mount (`canvas[data-cover][data-big]` is
-  its big cover; the dialog sits in the top layer, so the cover is on screen and animates from any scroll position, and
-  opening never moves the page; the old scroll of `#work` into view was removed 2026-11-19).
-  Native focus trap, Escape, `::backdrop` (a 94% page-colour tint, no blur since 2026-11-19); a press and release both outside the dialog's box close it (the
-  dialog is the scroller, so a press on its own scrollbar is inside the box; `.mbox` alone would not cover the
-  scrollbar); `html:has(.modal[open])` stops the page scrolling, and `html` carries the theme's background and
-  `color-scheme`, so the stable scrollbar gutter matches the page. Inside: `.mvid` > big cover (or `img`,
-  `object-fit: contain`), `.mtop` > `h3[modTitle]` + close
-  `button[data-act=closeModal][autofocus]`, `p[modDesc]`, `p[modMore]`, `dl.mdl[modFacts]` (Role / Type / Tools / Status
-  rows built by JS, empty ones skipped), then `.mlk` links (JS, after the `dl`).
-- Project URLs: `#work/<id>` opens that project (`hashchange` → `route()`), so clicking a card or hero link pushes an
-  entry and Back closes it. A close by button, Escape or backdrop restores `#work`: `history.back()` when the entry
-  below is `#work` (opened from `#work`), else `replaceState('#work')`, so no `#work` entries pile up.
-  Loading `#work/<id>` (a shared link, or a reload with a project open) opens it on that entry and writes no history
-  before the visitor acts: Chrome's back-button intervention skips entries pushed without a user gesture, so a pushed
-  `#work` under it would send Back off the site anyway. Closing it replaces the hash with `#work`; Back from there
-  leaves, as from any landing page. On every close, focus goes to that project's card link (the opener for card opens),
-  which scrolls it into view if it is off screen.
-- Contact: `.hd` > `h2.cq`; `.ctw.g12` > `.ctm` (`p.lead` "Tell me what it is…", the Messenger `a.btn`, the only
-  primary, + reply/availability `p`) and `ul.cta` rows: `li.eml` (mailto link showing the address + ghost `Copy`,
-  `copyEmail`: clipboard, else selects the address; the button's text scrambles like any `[data-scr]`, so it isn't the
-  live region: `span.vh[data-nofx][aria-live=polite]` after it gets "Copied" (or, when the clipboard is blocked,
-  "Address selected. Press Ctrl or ⌘ + C to copy.", which the button also shows, wrapping on phones), cleared with the
-  button's label after 2 s), `a.row` LinkedIn, Instagram, GitHub, `li.fol` "Follow INKWILD" + `a.lnk` TikTok / YouTube. `.tide` > the tide
-  canvas at the bottom of `#contact`; `footer.foot` = © + Back to top.
-- `.fbo [hidden]{display:none!important}` exists because layout rules out-rank the UA `[hidden]` rule.
+## DOM and navigation
 
-## State
-
-No state library and no `data-state` attributes (2026-11-19 decision, `reports/State machines.md`): each app machine
-is one field of `state` in `main.js`, one branch of `render()`, and an existing DOM mirror that tests and agents read.
-Engine machines are one-way: `sync()` (after every `setState`) mirrors `state` into `E.{dark,svc,cat,modal}` and fires
-one-shot effects on a change.
-
-| Machine | States | Events | Source of truth | DOM mirror |
-|---|---|---|---|---|
-| Theme | dark / light; origin stored (`fbo-mode`) or OS | `toggleMode` (stores, `followOS = false`); OS `prefers-color-scheme` change while `followOS` | `main.js` `state.dark` + `followOS`; `index.html` pre-paint | root `is-dark`/`is-light`, `meta[theme-color]`, pill `aria-label` + `modeLabel` |
-| Menu | closed / open | `toggleMenu`, `closeMenu` (links), Escape (focus → button), any `hashchange`, widening past 820px | `state.menu` | `[data-ref=menu][hidden]`, `.mnb[aria-expanded]` |
-| Services | 0..3 | `.ph` mouseenter / click / focus | `state.svc` (engine morph `sFrom/sTo/sMix`) | `.pan.on`, `.pb[hidden]`, `.ph[aria-expanded]` |
-| Skills group | all / build / design / social / video / ai | `button[data-cat]` click | `state.cat` (engine `gMix`, decode of `skl`) | `aria-pressed`, `.on`, `.ix.f`, row `.on`, `catKicker`/`catTitle` |
-| Project view | closed / open(i, `onWork`) / closing (transient: dialog closed, hash and `state.modal` still open until the `history.back()` hashchange) | only `hashchange`/load open it; Back or another hash closes; close button / Escape / backdrop → `history.back()` if `onWork`, else `replaceState('#work')`; every close focuses the card link | `state.modal` (-1 or index), `onWork`, `dlg`, `shown` | `location.hash` `#work/<id>`, `dialog.modal[open]` (removed when closed), `history.length` |
-| Copy button | idle / copied / selected, 2 s back to idle | `copyEmail` click; clipboard ok or blocked | `copyT` timer in `main.js` | button text, `.eml [aria-live]` text, the selection |
-| Section reveal | waiting / revealed (once) / static (reduced motion at load, no JS) | 160px in view (`inView`) or `focusin` | `engine.js` `o.shown` per `[data-sec]` | `[data-sec][data-fx="wait"]` while waiting |
-| Text decode | per text node: scrambling → settled; dropped if the app changes the node or it gets focus | reveal, `[data-scr]` pointerover, skills change, dialog open | `engine.js` `fx[]` | the text itself (never inside the focused element) |
-| Canvas layers / drag | per layer: visible × pointer outside / inside / down (captured), inertia `vyaw` | pointer events, `hold()` rebinds on `sync()` | `engine.js` `makeLayer` objects `A S Gl Td Ph`, covers' `__fboC` | none (canvas pixels) |
-| Intros | portrait `aIntro`, photo `pIntro` 0 → 1 after their section reveals; photo not near → loading → loaded | section reveal, photo within one screen | `engine.js` | none |
-| Animation loop | running (rAF, draws at most every 30 ms; paused by the browser in a hidden tab) | — | `engine.js` `frame()`; per-layer `run()` errors in `bad` | none |
-| Motion modes | normal / reduced motion (read live) / no JS / print | OS setting, print | `calm` media query in `engine.js`; CSS media rules | `[data-fx]` never set under reduce at load or without JS |
-
-Dead state kept for the engine contract: `logic.props.mode` and `sync()`'s `st.dark == null` branch (`state.dark` is
-always boolean), the `heroO.shown` test inside `aIntro`.
+- The main section IDs are `work`, `services`, `skills`, `about` and `contact`. Keep them stable.
+  At 820px and below the nav moves to the mobile menu, which closes on selection, Escape, or widening.
+  `scroll-padding-top` keeps anchors and keyboard focus clear of the sticky header.
+- The work list is `.works.g12`. Each `.wk` has one `.wkl` project link whose hit area covers the row.
+  `.wkc` contains the queue walkthrough or one of the static plates. The dialog clones the same media.
+- Opening `#work/<id>` uses the native modal dialog. Back closes a dialog entered from `#work`.
+  The Close button, Escape or backdrop restore `#work` without adding a redundant history entry.
+  A direct project URL leaves the session history alone until the user acts. Closing a project returns
+  focus to its link.
+- Service buttons expose `aria-expanded` and `aria-controls`. Skill buttons expose `aria-pressed`
+  and emphasize the active group in both the globe and the full tools index. At 820px and below the
+  controls sit above the globe.
+- The Copy button writes the address to the clipboard. When clipboard access fails, it selects the
+  address and announces the keyboard alternative in the live region. New-tab links share the
+  `aria-describedby="nt"` hint.
 
 ## Run
 
@@ -202,13 +59,12 @@ always boolean), the `heroO.shown` test inside `aIntro`.
 - Supabase backend for the chat removed 2026-11-15: `ask` edge function deleted, `GROQ_API_KEY` and `ALLOWED_ORIGIN`
   unset (no custom secrets left). `chat_logs` + its views and 180-day cron job stay by the owner's choice.
 
-## Decisions / dead-ends
+## Historical decisions
 
 - Canonical, `og:url`, `og:image`, JSON-LD `url` (ProfilePage and its Person), `public/sitemap.xml` and the robots `Sitemap:` line are hardcoded to
   `https://febrielportfolio.vercel.app/` (an env placeholder once shipped as a literal). Change all seven (five in
   `index.html`, one each in `public/sitemap.xml` and `public/robots.txt`) if the domain changes.
 - Palette fixed to Tidal Orchid; the other two palettes stay in CSS (class swap on root) — design tweak, not UI.
-- Design-tool tweak props (glyph, rain, light, motion) are constants in `main.js`.
 - 2026-11-15: AI chatbot ("Ask my avatar", Groq via the Supabase `ask` function, rating thumbs) removed from the site and
   the code (owner's decision). The avatar's knowledge is kept outside the repo. The `chat_logs` table stays in Supabase by
   the owner's choice; the migration files are its record.
@@ -280,8 +136,7 @@ always boolean), the `heroO.shown` test inside `aIntro`.
   is now the section's `h2`), one hover effect per work card, the bigger bust, the surname on its own line, About on the band
   (`--band` = `color-mix(in oklab, --bg, --bg2)`: #0A2025 dark, #E6E1D1 light; lowest text contrast on it 5.03:1).
   Also: em dashes out of the titles, marquee pauses on hover, caret stops after five blinks, solid phone menu, no hover
-  lift on buttons, 52px buttons, curly apostrophes. The waivers and what stays open (Floor 18 / WCAG 2.2.2 by the owner's
-  no-pause decision) are in `DESIGN.md`. sloplint static: 77 FAIL / 30 REFLEX / 8 WARN → 53 / 1 / 7 (50 of the 53 are
+  lift on buttons, 52px buttons, curly apostrophes. This pass preceded the removal of the marquee, ambient loops and text scramble. sloplint static: 77 FAIL / 30 REFLEX / 8 WARN → 53 / 1 / 7 (50 of the 53 are
   the palette blocks, which sloplint can't read as a theme block).
 - Still open from P1-10: `avatar-map.png` is fetched twice on a first visit (CSS mask and engine image use different
   request modes; cached afterwards); glyph atlas or OffscreenCanvas; a Lighthouse run and a mid-range Android check.

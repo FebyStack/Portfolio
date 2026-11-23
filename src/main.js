@@ -15,10 +15,9 @@ const ARROW = 'M7 17 17 7M8 7h9v9'; // same arrow as the contact section's exter
 
 const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', menu: false, modal: -1 };
 const logic = {
-  root: { current: root }, tilt: { current: ref('tilt') }, avatar: { current: ref('avatar') }, stage: { current: null },
-  globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') }, skl: { current: ref('skl') },
-  state,
-  props: { mode: 'Dark', glyph: 10, rain: 1, light: 1, motion: 1 }
+  root: { current: root }, avatar: { current: ref('avatar') }, stage: { current: null },
+  globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') },
+  state
 };
 let eng = null, dlg = null, shown = -1, copyT = 0;
 let onWork = false; // the history entry under the open project is #work, so a close steps back to it instead of stacking another
@@ -74,7 +73,7 @@ function renderCat() {
   for (const r of ix.children) r.classList.toggle('on', r.dataset.g === c);
 }
 
-/* The project view: a <dialog> cloned in from the template on open and removed on close (the engine reads its mount).
+/* The project view: a <dialog> cloned in from the template on open and removed on close.
    Only the URL opens it (route() below); every close (button, Escape, backdrop, Back) ends up here with modal -1. */
 function renderModal() {
   const m = PROJECTS[state.modal];
@@ -88,7 +87,7 @@ function renderModal() {
   shown = state.modal;
   if (!m) return;
   const frag = ref('modalTpl').content.cloneNode(true), d = $('[data-modal]', frag), facts = bind('modFacts', frag);
-  d.setAttribute('aria-label', m.title); // not the h3's text: the engine scrambles that while the dialog opens
+  d.setAttribute('aria-label', m.title);
   bind('modTitle', frag).textContent = m.title;
   bind('modDesc', frag).textContent = m.desc;
   bind('modMore', frag).textContent = m.more;
@@ -97,12 +96,10 @@ function renderModal() {
   if (m.links) facts.after(el('div', 'mlk', ...m.links.map(([label, url]) => {
     const a = el('a', 'btn ghost sm', label, icon(ARROW));
     Object.assign(a, { href: url, target: '_blank', rel: 'noopener' });
-    a.dataset.scr = '';
     a.setAttribute('aria-describedby', 'nt');
     return a;
   })));
-  const cover = $('canvas[data-cover]', frag);
-  if (m.image) cover.replaceWith(img(m)); else cover.dataset.cover = String(m.shape);
+  $('.mvid', frag).append($('.wkc', cardLink(state.modal).closest('.wk')).cloneNode(true));
   // the backdrop: pressed and released outside the dialog's box (its own scrollbar is inside it, and so is a text drag's start)
   const out = (e) => { const r = d.getBoundingClientRect(); return e.target === d && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom); };
   let downOut = false;
@@ -158,11 +155,11 @@ const ACTIONS = {
   closeMenu: () => setState({ menu: false }),
   closeModal: () => dlg?.close(),
   copyEmail: () => {
-    const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]'); // the button's text scrambles (reveal, hover); this data-nofx span never does
+    const b = act('copyEmail'), a = $('.eml a'), live = $('.eml [aria-live]');
     const say = (t) => { b.textContent = live.textContent = t; clearTimeout(copyT); copyT = setTimeout(() => { b.textContent = 'Copy'; live.textContent = ''; }, 2000); };
     const done = () => say('Copied');
     const pick = () => { getSelection().selectAllChildren(a); say('Address selected. Press Ctrl or ⌘ + C to copy.'); }; // clipboard blocked: select it for a manual copy
-    try { navigator.clipboard.writeText(a.href.slice(7)).then(done, pick); } catch { pick(); } // href, since the text may be mid-scramble
+    try { navigator.clipboard.writeText(a.href.slice(7)).then(done, pick); } catch { pick(); }
   }
 };
 
@@ -187,7 +184,7 @@ pans.forEach((p, i) => {
   $('.ph', p).addEventListener('focus', pick);
 });
 
-PROJECTS.forEach((p, i) => { if (p.image) $('canvas[data-cover]', cardLink(i).closest('.wk')).replaceWith(img(p)); }); // a screenshot replaces the ASCII cover
+PROJECTS.forEach((p, i) => { if (p.image) $('.wkc', cardLink(i).closest('.wk')).replaceChildren(img(p)); }); // a screenshot replaces the ASCII cover
 render(['dark', 'menu', 'svc', 'cat']);
 eng = startEngine(logic);
 // a project link opens on its own entry, with no history writes before the visitor acts (Chrome's Back skips entries
