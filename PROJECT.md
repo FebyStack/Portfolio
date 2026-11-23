@@ -73,8 +73,7 @@ numbers, dates, results or quotes.
     headless Chrome with iPhone emulation (scratch CDP scripts, not in the repo); only a real iPhone confirms WebKit.
 - `public/img/avatar-map.png` — the portrait's density map, 264×264 RGBA read by `buildAvatar`: channel 0 = tone,
   1 = accents (only hair uses them, dark mode), 2 = hair flag (low = hair: dark mode gives it a minimum density),
-  alpha = subject mask. `.plate` (page colour, behind the canvas, keeps the ambient rain out of the portrait) masks with
-  the same file's alpha, so its silhouette always matches. Built once (scratch script, not in the repo) from the
+  alpha = subject mask. Built once (scratch script, not in the repo) from the
   head-only map of `26a4b8f` (traced from the INKWILD ink drawing): head scaled 0.75 into the top two-thirds, neck
   continued from its row 238, shoulders and V-neck t-shirt from `photo.webp`'s alpha (skin = warm pixels), shirt tone
   ≈0.5 from the photo's luminance (lighter mass than the face in dark mode, darker in light mode), 6px soft edges, a
@@ -105,7 +104,7 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   `main#main` holds, in order: hero, marquee, `#work`, `div.sep`, `#services`, `div.sep`, `#skills`, `div.sep`, `#about`,
   `div.sep`, `#contact` (nav and mobile menu follow the section order; `.sep` = the static ASCII band, `aria-hidden`, a
   CSS `::before` string). `footer.foot` sits after `main`, inside the root. Skip link targets `#main`. Every section after
-  the hero opens with `.hd.g12` > `p.kick` (aria-hidden, the section's name) + `h2`. Paddings in `DESIGN.md`. The hero
+  the hero opens with `.hd` > `h2` and an optional hint. Paddings in `DESIGN.md`. The hero
   has a min-height (screen under the header and marquee); the rest size to content. `html{scroll-padding-top:80px}` keeps anchors and keyboard
   focus clear of the 64px sticky header (so `.sec` has no scroll-margin).
   Persisted in `localStorage['fbo-mode']` = `dark|light`, written only on an actual toggle; inline script after the root tag applies it pre-paint,
@@ -118,12 +117,9 @@ after every state change; `sync()` also drops the sections' height pins, so noth
 - Actions: `[data-act="…"]` — `toggleMode toggleMenu closeMenu closeModal copyEmail`.
   Escape with the mobile menu open closes it and focuses the menu button; widening past 820px (where the menu button
   hides) closes it too (`matchMedia`, `data.test.js` checks the JS and CSS numbers match).
-- Hero: `.wrap.fxb.g12` = `.hc` (columns 1–7: `h1.nm` "Febriel <span>B. Otud</span>", the span a block line, the
-  orchid italic surname under "Febriel" at every width; `p.vp`; `.hero-cta` with the Messenger `a.btn` + ghost "See my
-  work"; `.dateline` = the availability `p` and `p.proof` "Recent work: …" with plain underlined links to
-  `#work/pilapass`, `#work/sev-clinic`, `#work/inkwild`) and `figure.fig.avf` (columns 8–12: `.av` > tilt > plate +
-  avatar canvas, then `figcaption.cap` "Portrait drawn the INKWILD way, then set in ASCII."). No hero text is bound by
-  JS. Inline text links keep the UA underline (accent vs body text is only 1.57:1).
+- Hero: `.wrap.fxb.g12` holds `.hc` (name, offer, Messenger and “See my work”), `figure.fig.avf` (the portrait
+  frame `.av`, tilt canvas and caption), and `.dateline` (availability and recent project links). On narrow widths
+  they follow that reading order. The name and offer are static text with `data-nofx`.
 - Header CTA: `a.btn.hcta` (same Messenger link) between the theme pill and the menu button; `aria-label` carries the name,
   its `span` label is `display:none` ≤1000px (icon only). ≤360px the theme pill hides its `modeLabel` word so the header fits 320px.
 - New-tab hint: hidden `span#nt` ("Opens in a new tab") right after the skip link; every `target=_blank` link (also the
@@ -132,17 +128,15 @@ after every state change; `sync()` also drops the sections' height pins, so noth
   title) + `.pb` > `.pbt` (text, tags) + `figure.pbc` > `canvas[data-stage]`. Active = `.pan.on`; inactive `.pb` carries
   `hidden`. `logic.stage.current` = stage canvas of the active panel. Mouseenter (on the `.ph`, not the panel), click
   and focus open one.
-- Skills: `figure.glf` (globe + caption) and `.skx` > `.skt[data-ref=skl]` (kicker `SKILLS.length` tools / "N in this
-  group" over the title "Everything" / the group name; decoded on change), `button[data-cat="all|build|design|social|
-  video|ai"]` (active `.on`, `aria-pressed`), `dl.ix[data-ref=catRows]` > `div[data-g]` > `dt` group + `dd` its tools,
-  static, in `SKILLS` order (`data.test.js` checks). A picked group: `.ix.f`, its row `.on`. ≤820px the group buttons
-  are one sideways-scrolling row with a faded right edge.
-- Work entries (static, in `PROJECTS` order): a plain `div` > `article.wk.g12[data-scr]` > `.wkc` > `canvas[data-cover="shape"]`
+- Skills: `.skills-grid` holds `.skh` (selected group title, count and buttons), `figure.glf` (globe and caption),
+  and `dl.ix[data-ref=catRows]` (static tools in `SKILLS` order). The buttons expose their active state with
+  `aria-pressed`. The selected row gets `.on` and the others use muted ink. At ≤820px the controls wrap above the globe.
+- Work entries (static, in `PROJECTS` order): `.works.g12` > `article.wk[data-scr]` > `.wkc` > `canvas[data-cover="shape"]`
   (an `img` once `image` is set) + `.wkb` > `h3`, `p` (desc, one line; role, type and status show only in the project
   view), `a.wkl[href="#work/<id>"]` "View <title>", the entry's one control; its `::after` covers the entry, so the whole
   entry opens it, and the entry gets the focus ring (`.wk:has(.wkl:focus-visible)`). Entries carry no `id`: the
   browser's own scroll-to-fragment on a `#work/<id>` load would move focus off the open dialog. JS finds an entry by
-  its link's `href`. The five compositions are `nth-child` rules (see `DESIGN.md`).
+  its link's `href`. The first entry is the lead, followed by paired entries that stack on phones (see `DESIGN.md`).
 - Project view: `<template data-ref="modalTpl">` (last child of `#work`, outside `.fxb`) holds `dialog.modal[data-modal]`;
   JS sets its `aria-label` to the project title (not `aria-labelledby` the `h3`, whose text the engine scrambles while the
   dialog opens, so screen readers would hear the glyphs). Cloned into `#work` and `showModal()`ed on open, closed and

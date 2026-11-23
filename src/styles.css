@@ -13,15 +13,13 @@ html:has(.is-dark){background:var(--paper-dark);color-scheme:dark;scrollbar-colo
 html:has(.is-light){background:var(--paper-light);color-scheme:light;scrollbar-color:var(--mute-light) var(--paper-light)}
 body{margin:0}
 /* Editorial system (2026-11-19). Type scale: every text size is a token.
-   xs: mono furniture (running heads, captions, labels, dt, the marquee) · sm: buttons, nav, hints, the
+   xs: mono furniture (captions, labels, dt, the marquee) · sm: buttons, nav, hints, the
    proof line · md: reading text · lg: offer line, standfirsts, contact rows, project-view title · title: service titles ·
    xl: project titles, the skills group title · 2xl: the About pull quote · display: section openers · name: the name.
    --measure: 40ch ≈ 46–52 Switzer characters. --gap: the 12-column grid's gutter. --mark: the second accent, only for
    editorial marks (rule ticks, caption squares, the marquee slashes, a picked skill group label); orchid (--accent) stays for the surname, actions, focus and the ASCII
    highlights. --band: About's paper, halfway between --bg and --bg2. */
-.fbo{--fs-xs:12px;--fs-sm:14px;--fs-md:17px;--fs-lg:clamp(22px,2.1vw,30px);--fs-title:clamp(28px,3vw,44px);--fs-xl:clamp(36px,4vw,60px);--fs-2xl:clamp(40px,5.6vw,84px);--fs-display:clamp(48px,6.6vw,104px);--fs-name:clamp(56px,8vw,128px);--measure:40ch;--gap:24px;--serif:"Gambetta","Iowan Old Style","Palatino Linotype",Georgia,serif;--sans:"Switzer","Helvetica Neue",Arial,sans-serif;--mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;--pad:clamp(20px,5vw,72px);--band:color-mix(in oklab,var(--bg),var(--bg2));--mark:var(--accent);position:relative;background-color:var(--bg);color:var(--ink);font-family:var(--sans);font-size:var(--fs-md);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;transition:background-color .5s ease,color .5s ease}
-/* paper grain, on the page and on the band */
-.fbo,.fbo .band{background-image:radial-gradient(var(--grain) 0.7px,transparent 1px),radial-gradient(var(--grain) 0.6px,transparent 0.9px);background-size:7px 7px,11px 11px;background-position:0 0,3px 5px}
+.fbo{--fs-xs:12px;--fs-sm:14px;--fs-md:17px;--fs-lg:clamp(22px,2.1vw,30px);--fs-title:clamp(28px,3vw,44px);--fs-xl:clamp(2rem,1.5rem + 2vw,3.75rem);--fs-2xl:clamp(2.5rem,1.5rem + 3.4vw,4.75rem);--fs-display:clamp(2.75rem,1.5rem + 4.8vw,5.75rem);--fs-name:clamp(3.5rem,2.2rem + 6.4vw,8rem);--measure:40ch;--gap:24px;--serif:"Gambetta","Iowan Old Style","Palatino Linotype",Georgia,serif;--sans:"Switzer","Helvetica Neue",Arial,sans-serif;--mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;--pad:clamp(20px,5vw,72px);--band:color-mix(in oklab,var(--bg),var(--bg2));--mark:var(--accent);position:relative;background-color:var(--bg);color:var(--ink);font-family:var(--sans);font-size:var(--fs-md);line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;transition:background-color .5s ease,color .5s ease}
 .fbo .band{background-color:var(--band);transition:background-color .5s ease}
 .fbo *{box-sizing:border-box}
 .fbo :is(h1,h2,h3){text-wrap:balance;overflow-wrap:break-word;min-width:0}
@@ -49,12 +47,9 @@ body{margin:0}
 .fbo .skip:focus{left:8px}
 .fbo .ic{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 /* ---- the grid: twelve columns inside the 1360px container ---- */
-.fbo .wrap{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:72px var(--pad) 96px}
+.fbo .wrap{position:relative;z-index:1;width:100%;max-width:1360px;margin:0 auto;padding:64px var(--pad) 80px}
 .fbo .g12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gap)}
-/* ---- furniture: the opening rule, captions, the ASCII divider ---- */
-/* the opening rule: ink hairline with a short vermilion mark at its start; the section's name rides at the right end */
-.fbo .kick{grid-column:1/-1;position:relative;margin:0 0 32px;padding-top:12px;border-top:1px solid var(--ink);font:500 var(--fs-xs)/1.5 var(--mono);color:var(--mute);text-align:right}
-.fbo .kick::before{content:"";position:absolute;left:0;top:-2px;width:48px;height:3px;background:var(--mark)}
+/* ---- editorial captions and ASCII dividers ---- */
 .fbo .fig{margin:0;min-width:0}
 .fbo .cap{display:flex;align-items:baseline;gap:12px;margin-top:12px;padding-top:8px;border-top:1px solid var(--line);font:500 var(--fs-xs)/1.5 var(--mono);color:var(--mute)}
 /* a caption opens on a small vermilion square */
@@ -62,8 +57,8 @@ body{margin:0}
 .fbo .lab{font-family:var(--mono);font-size:var(--fs-xs);color:var(--mute)}
 .fbo .hint{margin:0;font-family:var(--mono);font-size:var(--fs-sm);letter-spacing:.02em;color:var(--mute)}
 /* between sections: a static band of the engine's ramp glyphs (a swell, light end of the ramp), offset per seam */
-.fbo .sep{width:calc(100% - 2 * var(--pad));max-width:calc(1360px - 2 * var(--pad));margin:24px auto;overflow:hidden}
-.fbo .sep::before{content:".';;:;;,,,,:;;cc::ccc::;l:c:ccl::lc:;:lc;llccccc:c;::;,c;c;;::;;'::,,.',.,;,',',,. ., ., '.  '     '' .''..,.''..'''.',.'..'''.''',';';';;.',.'.;;',';;'..'',...; ',, '',,,, ' ''''' '. ,.'.'., ', ,,.  ';',,.',,;;,,,:;,::;,c,;:,;c;;:cl::ll:;;;c;lcl;:occcl:lc:::;c::cc;;,:;,';:,;:;,.;,;',.,'''.,,.  .   \A kokxkxkkkkkkxkxkxdkxkdxkdxxxoodxodxlxlldcocllllc:c;:,;c,',,:,;.;,,;' ',',  ' ',,.,,,  ',' ,'.,;,.;,';';';,,,:;,,,c,:::;:c;l;:::ll:ll:;ll::;;:c::;c,::;;;;,:,,:;'':,;,''';,;,,;:,':,:;,':;c:;;l:ccllocc:olooldlodxxxoloxooxxdkkkddxkxddkkxxxoxdxdxdddoxldcdold::cc;:;;;;;;;;',,,,;; ,', '.  '  .  .  .  .  . \A ;cllclcccc;l:c;,:,:c;:,:,,';,'';,,''. .'.'., ,    .  .' ..  .      .   .  .   ' '' . .'',.'..'.,'.'':''.:;;,'''';;;:';;,;;;,'':;,:':'::',;;;',,,;','.;;,...;,;;','.',,;,',;,;,;;:,,:;:;,':c:;;:,::cc::;:cl:;cclc;c:;;c;;:l,;l;:,,:,:;:;:::',';;.,'.;,;,,'' ' .. ''.   '  ..  .    .             .'     .''.,";display:block;white-space:pre;overflow:hidden;font:400 var(--fs-xs)/14px var(--mono);color:var(--mute);opacity:.7}
+.fbo .sep{width:calc(100% - 2 * var(--pad));max-width:calc(1360px - 2 * var(--pad));margin:8px auto;overflow:hidden}
+.fbo .sep::before{content:".';;:;;,,,,:;;cc::ccc::;l:c:ccl::lc:;:lc;llccccc:c;::;,c;c;;::;;'::,,.',.,;,',',,. ., ., '.  '     '' .''..,.''..'''.',.'..'''.''',';';';;.',.'.;;',';;'..'',...; ',, '',,,, ' ''''' '. ,.'.'., ', ,,.  ';',,.',,;;,,,:;,::;,c,;:,;c;;:cl::ll:;;;c;lcl;:occcl:lc:::;c::cc;;,:;,';:,;:;,.;,;',.,'''.,,.  .   \A kokxkxkkkkkkxkxkxdkxkdxkdxxxoodxodxlxlldcocllllc:c;:,;c,',,:,;.;,,;' ',',  ' ',,.,,,  ',' ,'.,;,.;,';';';,,,:;,,,c,:::;:c;l;:::ll:ll:;ll::;;:c::;c,::;;;;,:,,:;'':,;,''';,;,,;:,':,:;,':;c:;;l:ccllocc:olooldlodxxxoloxooxxdkkkddxkxddkkxxxoxdxdxdddoxldcdold::cc;:;;;;;;;;',,,,;; ,', '.  '  .  .  .  .  . \A ;cllclcccc;l:c;,:,:c;:,:,,';,'';,,''. .'.'., ,    .  .' ..  .      .   .  .   ' '' . .'',.'..'.,'.'':''.:;;,'''';;;:';;,;;;,'':;,:':'::',;;;',,,;','.;;,...;,;;','.',,;,',;,;,;;:,,:;:;,':c:;;:,::cc::;:cl:;cclc;c:;;c;;:l,;l;:,,:,:;:;:::',';;.,'.;,;,,'' ' .. ''.   '  ..  .    .             .'     .''.,";display:block;white-space:pre;overflow:hidden;font:400 var(--fs-xs)/14px var(--mono);color:var(--mute);opacity:.55}
 .fbo .sep:nth-of-type(3)::before{margin-left:-560px}
 .fbo .sep:nth-of-type(4)::before{margin-left:-280px}
 .fbo .sep:nth-of-type(5)::before{margin-left:-840px}
@@ -81,19 +76,19 @@ body{margin:0}
 .fbo .mnu a{display:flex;align-items:baseline;min-height:56px;padding-top:12px;border-top:1px solid var(--line);font:400 28px/1.1 var(--serif);text-decoration:none}
 /* ---- sections ---- */
 .fbo .sec{position:relative;overflow:hidden}
-.fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,72%) var(--my,0%),var(--glow),transparent 64%)}
+.fbo .sec::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px circle at var(--mx,-280px) var(--my,-280px),var(--glow),transparent 64%)}
 /* the ambient rain and pointer light: full strength in the page margins (and the hero's picture side), a third over
    the text columns, so nothing busy sits behind reading text */
 .fbo .amb{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none} /* its fade-over-text mask is drawn by engine.js (ambMask) */
-.fbo .band .wrap{padding-block:96px}
+.fbo .band .wrap{padding-block:80px}
 #contact .wrap{padding-bottom:48px}
-/* reveal: once per section (engine.js); opacity and a short rise only */
-.fbo .fxb{transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)}
-.fbo [data-fx="wait"] .fxb{opacity:0;transform:translateY(18px)}
-/* head block: the head on nine columns, the hint in the margin on the last three */
-.fbo .hd{margin-bottom:64px;align-items:end}
-.fbo .h2{grid-column:1/10;margin:0;font:400 var(--fs-display)/.95 var(--serif);letter-spacing:-.03em}
-.fbo .hd .hint{grid-column:10/13;padding-bottom:.5em}
+/* Waiting sections are readable before the reveal and settle into place once on screen. */
+.fbo .fxb{transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1)}
+.fbo [data-fx="wait"] .fxb{opacity:.88;transform:translateY(8px)}
+.fbo .hd{position:relative;margin-bottom:clamp(28px,4vw,56px);padding-top:clamp(20px,3vw,40px);border-top:1px solid var(--line)}
+.fbo .hd::before{content:"";position:absolute;left:0;top:-1px;width:32px;height:2px;background:var(--mark)}
+.fbo .h2{margin:0;max-width:18ch;font:400 var(--fs-display)/.99 var(--serif);letter-spacing:-.035em;text-wrap:wrap}
+.fbo .hd .hint{margin-top:16px;max-width:var(--measure)}
 /* ---- controls ---- */
 .fbo .btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:0 28px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);font:500 var(--fs-sm)/1 var(--mono);text-decoration:none;border-radius:999px;cursor:pointer;white-space:nowrap;transition:background-color .2s ease,color .2s ease,border-color .2s ease,transform .15s ease}
 .fbo .btn:hover{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
@@ -110,26 +105,32 @@ body{margin:0}
 .fbo .lnk{display:inline-flex;align-items:center;min-height:48px;padding:0 4px;font:500 var(--fs-xs)/1 var(--mono);text-decoration:none;color:var(--mute);background-image:linear-gradient(currentColor,currentColor);background-size:0 1px;background-repeat:no-repeat;background-position:4px calc(50% + 11px);transition:color .2s ease,background-size .3s ease}
 .fbo .lnk:hover{color:var(--ink);background-size:calc(100% - 8px) 1px}
 .fbo .cut{clip-path:polygon(0 0,calc(100% - 26px) 0,100% 26px,100% 100%,26px 100%,0 calc(100% - 26px))}
-/* ---- hero: a poster front page. Text on columns 1–7, the bust and its caption on 8–12, centred in the first screen.
-   The name never wraps inside a line (nowrap), so the ASCII decode can't rewrap it. ---- */
-.fbo .hero .wrap{min-height:calc(100svh - 64px - 56px);padding-block:56px;align-items:center;row-gap:44px}
-.fbo .hc{grid-column:1/8;display:flex;flex-direction:column;align-items:flex-start;gap:24px;min-width:0}
-.fbo .nm{margin:0 0 8px;font:300 var(--fs-name)/.95 var(--serif);letter-spacing:-.03em;white-space:nowrap}
+/* ---- hero: name and actions on the left, in a print-like spread with the ASCII portrait ---- */
+.fbo .hero .wrap{min-height:calc(100svh - 64px - 48px);padding-block:48px 56px;align-content:center;row-gap:28px}
+.fbo .hc{grid-area:1/1/2/7;align-self:end;display:flex;flex-direction:column;align-items:flex-start;gap:24px;min-width:0}
+.fbo .nm{margin:0;font:300 var(--fs-name)/.88 var(--serif);letter-spacing:-.035em}
 .fbo .nm span{display:block;font-style:italic;color:var(--accent)}
-.fbo .vp{margin:0;max-width:26ch;font:400 var(--fs-lg)/1.22 var(--serif);letter-spacing:-.01em;text-wrap:balance}
-.fbo .hero-cta{display:flex;flex-wrap:wrap;gap:12px}
-.fbo .dateline{align-self:stretch;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px var(--gap);margin-top:8px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute)}
-.fbo .dateline p{margin:0;max-width:var(--measure)}
-.fbo .proof{font-size:var(--fs-sm);padding-top:3px}
+.fbo .vp{margin:4px 0 0;max-width:29ch;font:400 var(--fs-lg)/1.24 var(--serif);letter-spacing:-.01em;text-wrap:pretty}
+.fbo .hero-cta{display:flex;align-items:center;flex-wrap:wrap;gap:4px 20px}
+.fbo .hero-cta .hero-work{padding:0 4px;margin-top:0;text-decoration-color:currentColor;text-underline-offset:.3em}
+.fbo .dateline{grid-area:2/1/3/7;align-self:start;display:grid;gap:8px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);font-size:var(--fs-sm)}
+.fbo .dateline p{margin:0}
 .fbo .proof a{white-space:nowrap}
-.fbo .avf{grid-column:8/13;justify-self:end;width:min(100%,56vh)}
-.fbo .av{position:relative;z-index:3;width:100%;aspect-ratio:1/1}
-.fbo .tilt{position:absolute;inset:0;transition:transform .25s ease-out;will-change:transform}
-.fbo .av canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:crosshair}
-/* the portrait map's alpha is its subject mask: this page-coloured plate keeps the ambient rain out of the bust */
-.fbo .plate{position:absolute;inset:0;background:var(--bg);-webkit-mask:url(/img/avatar-map.png) center/100% 100% no-repeat;mask:url(/img/avatar-map.png) center/100% 100% no-repeat;transition:background-color .5s ease}
+.fbo .avf{grid-area:1/7/3/13;align-self:center;justify-self:end;width:min(100%,64svh)}
+.fbo .av{position:relative;aspect-ratio:8/7;overflow:hidden;border:1px solid var(--line);background:
+  radial-gradient(var(--grain) 1px,transparent 1px) 0 0/10px 10px,
+  radial-gradient(ellipse at 50% 55%,var(--bg2),var(--bg))}
+.fbo .av::before{content:"";position:absolute;inset:12px;pointer-events:none;--tick:linear-gradient(var(--mute),var(--mute));background:
+  var(--tick) left top/14px 1px,var(--tick) left top/1px 14px,
+  var(--tick) right top/14px 1px,var(--tick) right top/1px 14px,
+  var(--tick) left bottom/14px 1px,var(--tick) left bottom/1px 14px,
+  var(--tick) right bottom/14px 1px,var(--tick) right bottom/1px 14px;
+  background-repeat:no-repeat;opacity:.65}
+.fbo .tilt{position:absolute;inset:0;margin:auto;height:94%;aspect-ratio:1;transition:transform .25s ease-out;will-change:transform}
+.fbo .av canvas{width:100%;height:100%;display:block;touch-action:pan-y;cursor:crosshair}
+.fbo .avf .cap{margin-top:0;border:0;padding:10px 0 0}
 /* marquee: pauses under the pointer */
-.fbo .mq{position:relative;z-index:1;overflow:hidden;height:56px;display:flex;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fbo .mq{position:relative;z-index:1;overflow:hidden;height:48px;display:flex;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .fbo .mqt{display:flex;flex:none;white-space:nowrap;animation:fbo-mq 48s linear infinite;font:500 var(--fs-xs)/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 .fbo .mq:hover .mqt{animation-play-state:paused}
 .fbo .mqt span{padding:0 20px}
@@ -137,62 +138,59 @@ body{margin:0}
 @keyframes fbo-mq{
 to{transform:translateX(-33.333%)}
 }
-/* ---- work: a feature list. Each entry is a ruled row on the grid; the five set their cover at a different span, ratio
-   and side (only the third mirrors). A card's one link ("View …") covers it, so the whole entry opens the project; its
-   focus ring is the entry's. Hover is the text scramble (data-scr) and the link's own colour, nothing more. ---- */
-.fbo .wk{position:relative;row-gap:24px;padding:40px 0;border-top:1px solid var(--line)}
-.fbo .wk:last-child{border-bottom:1px solid var(--line)}
-.fbo .wk:has(.wkl:focus-visible){outline:2px solid var(--accent);outline-offset:3px}
-.fbo .wkc{grid-row:1;position:relative;aspect-ratio:16/9;background:var(--bg2)}
+/* ---- work: a lead project, then two pairs of illustrated entries ---- */
+.fbo .works{row-gap:40px}
+.fbo .wk{position:relative;grid-column:span 6;display:flex;flex-direction:column;gap:20px;min-width:0;padding-top:20px;border-top:1px solid var(--line)}
+.fbo .wk:first-child{grid-column:1/-1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));align-items:center;column-gap:var(--gap)}
+.fbo .wk:first-child .wkb{grid-area:1/1/2/5}
+.fbo .wk:first-child .wkc{grid-area:1/5/2/13;aspect-ratio:2/1}
+.fbo .wk:has(.wkl:focus-visible){outline:2px solid var(--accent);outline-offset:4px}
+.fbo .wkc{position:relative;aspect-ratio:16/9}
+.fbo :is(.wkc,.pbc,.glb){background:radial-gradient(ellipse at center,var(--bg2),color-mix(in oklab,var(--bg),var(--bg2) 40%));border:1px solid var(--line)}
 .fbo .wkc canvas,.fbo .wkc img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
-.fbo .wkb{grid-row:1;display:flex;flex-direction:column;align-items:flex-start;gap:16px;min-width:0}
-.fbo .wkb h3{margin:0;font:400 var(--fs-xl)/1 var(--serif);letter-spacing:-.025em}
-.fbo .wkb p{margin:0;max-width:30ch;color:var(--mute)}
-.fbo .wkl{display:inline-flex;align-items:center;gap:8px;min-height:44px;font:500 var(--fs-sm)/1 var(--mono);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:.4em;transition:color .2s ease}
-.fbo .wkl::after{content:"";position:absolute;inset:0}
-.fbo .wkl:focus-visible{outline:0}
+.fbo .wkb{display:flex;flex:1;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.fbo .wkb h3{margin:0;font:400 var(--fs-title)/1.04 var(--serif);letter-spacing:-.025em}
+.fbo .wk:first-child h3{font-size:var(--fs-xl)}
+.fbo .wkb p{margin:0;max-width:var(--measure);color:var(--mute);text-wrap:pretty}
+.fbo .wkl{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:auto;color:var(--accent);font:500 var(--fs-sm)/1.2 var(--mono);text-decoration:underline;text-decoration-color:transparent;text-underline-offset:.28em;transition:color .2s ease,text-decoration-color .2s ease}
+.fbo .wk:hover .wkl,.fbo .wkl:focus-visible{text-decoration-color:currentColor}
+.fbo .wk .wkl::after{content:"";position:absolute;inset:0}
+.fbo .wk .wkl:focus-visible{outline:0}
 .fbo .wkl .ic{width:16px;height:16px}
-.fbo .wk:nth-child(1) .wkb{grid-column:1/5;align-self:end}
-.fbo .wk:nth-child(1) .wkc{grid-column:5/13;aspect-ratio:2/1}
-.fbo .wk:nth-child(2) .wkb{grid-column:1/6;align-self:start}
-.fbo .wk:nth-child(2) .wkc{grid-column:7/13;aspect-ratio:16/9}
-.fbo .wk:nth-child(3) .wkb{grid-column:9/13;align-self:end}
-.fbo .wk:nth-child(3) .wkc{grid-column:1/8;aspect-ratio:2/1}
-.fbo .wk:nth-child(4) .wkb{grid-column:1/5;align-self:start}
-.fbo .wk:nth-child(4) .wkc{grid-column:6/13;aspect-ratio:21/9}
-.fbo .wk:nth-child(5) .wkb{grid-column:1/6;align-self:end}
-.fbo .wk:nth-child(5) .wkc{grid-column:8/13;aspect-ratio:3/2}
 /* tags: the service panels' one-line tag rows */
 .fbo .tg{font-family:var(--mono);font-size:var(--fs-xs)}
 /* ---- services: a list on columns 1–6; the open entry's object and text on 8–12 (the panels are
    display: contents, so their parts sit on the list's grid; the list's rows never move when another opens) ---- */
 .fbo .pans{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(4,auto) 1fr;column-gap:var(--gap)}
 .fbo .pan{display:contents}
-.fbo .ph{grid-column:1/7;display:flex;align-items:baseline;gap:24px;width:100%;min-height:88px;padding:24px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--mute);font:inherit;cursor:pointer;text-align:left;transition:color .3s ease}
+.fbo .ph{grid-column:1/7;display:flex;align-items:center;justify-content:space-between;gap:20px;width:100%;min-height:80px;padding:20px 12px 20px 0;border:0;border-top:1px solid var(--line);background:none;color:var(--mute);font:inherit;cursor:pointer;text-align:left;transition:color .3s ease}
 .fbo .pan:last-child .ph{border-bottom:1px solid var(--line)}
 .fbo .ph:hover,.fbo .pan.on .ph{color:var(--ink)}
 .fbo .pan.on .ph{cursor:default;border-top-color:var(--ink)}
+.fbo .ph::after{content:"";flex:none;width:8px;height:8px;border-right:1.5px solid;border-bottom:1.5px solid;transform:rotate(-45deg)}
+.fbo .pan.on .ph::after{color:var(--accent);transform:rotate(45deg)}
 /* the open entry: ink title under an ink rule, with the vermilion mark */
 .fbo .pan.on .ph{position:relative}
-.fbo .pan.on .ph::before{content:"";position:absolute;left:0;top:-2px;width:48px;height:3px;background:var(--mark)}
+.fbo .pan.on .ph::before{content:"";position:absolute;left:0;top:-1px;width:32px;height:2px;background:var(--mark)}
 .fbo .pt{font:400 var(--fs-title)/1.05 var(--serif);letter-spacing:-.02em}
 .fbo .pb{grid-column:8/13;grid-row:1/span 5;display:flex;flex-direction:column;gap:24px;animation:fbo-in .6s .12s both}
 .fbo .pbc{margin:0}
-.fbo .pbc canvas{display:block;width:100%;height:min(400px,46vh);min-height:280px;touch-action:pan-y;cursor:grab}
-.fbo .pbt{display:flex;flex-direction:column;gap:16px;padding-top:28px}
+.fbo .pbc canvas{display:block;width:100%;height:clamp(224px,32svh,340px);touch-action:pan-y;cursor:grab}
+.fbo .pbt{display:flex;flex-direction:column;gap:10px}
 .fbo .pbt p{margin:0;max-width:var(--measure);color:var(--mute)}
 @keyframes fbo-in{
 from{opacity:0;transform:translateY(10px)}
 }
-/* ---- skills: the globe and its caption on columns 1–6, a typographic index of every tool on 7–12 ---- */
-.fbo .glf{grid-column:1/7}
-.fbo .glb{position:relative;height:min(520px,60vh);min-height:300px}
+/* ---- skills: controls precede the artwork in the mobile reading order ---- */
+.fbo .skills-grid{row-gap:24px;align-items:start;grid-template-rows:auto 1fr}
+.fbo .glf{grid-area:1/1/3/7}
+.fbo .glb{position:relative;aspect-ratio:5/4}
 .fbo .glb canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
-.fbo .skx{grid-column:7/13;display:flex;flex-direction:column;gap:24px;min-width:0}
+.fbo .skh{grid-area:1/7/2/13;display:flex;flex-direction:column;gap:16px;min-width:0}
 .fbo .skt{display:flex;flex-direction:column;gap:4px}
 .fbo .skt p{margin:0;font:400 var(--fs-xl)/1 var(--serif);letter-spacing:-.025em}
 .fbo .grp{display:flex;flex-wrap:wrap;gap:8px}
-.fbo .ix{margin:0}
+.fbo .ix{grid-area:2/7/3/13;margin:0}
 .fbo .ix div{display:grid;grid-template-columns:72px minmax(0,1fr);gap:16px;padding:12px 0;border-top:1px solid var(--line)}
 .fbo .ix div:last-child{border-bottom:1px solid var(--line)}
 .fbo .ix dt{font:500 var(--fs-xs)/1.9 var(--mono);color:var(--mute)}
@@ -201,7 +199,7 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .ix.f div:not(.on) dd{color:var(--mute)}
 .fbo .ix div.on dt{color:var(--mark)}
 /* ---- about (on the band): the statement as a pull quote, the photo with its caption, the facts as a ruled list ---- */
-.fbo .pq{grid-column:1/12;margin:0;font:400 var(--fs-2xl)/1.04 var(--serif);letter-spacing:-.025em}
+.fbo .pq{margin:0;max-width:27ch;font:400 var(--fs-2xl)/1.04 var(--serif);letter-spacing:-.025em}
 .fbo .abw{align-items:end}
 .fbo .abf{grid-column:1/7}
 .fbo .abp{position:relative;width:min(100%,64vh,520px);aspect-ratio:1/1}
@@ -213,7 +211,7 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .facts dd{margin:0}
 /* ---- contact: the closing poster. The question at display size, Messenger alone as the primary, the other ways in as
    ruled rows, the tide under it all ---- */
-.fbo .cq{grid-column:1/12}
+.fbo .cq{max-width:21ch}
 .fbo .ctw{align-items:start;row-gap:48px}
 .fbo .ctm{grid-column:1/6;display:flex;flex-direction:column;align-items:flex-start;gap:24px}
 .fbo .ctm p{margin:0}
@@ -243,7 +241,7 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .minf{display:flex;flex-direction:column;gap:16px;padding:32px 32px 32px 16px}
 .fbo .minf p{margin:0;max-width:var(--measure)}
 .fbo .mtop{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
-.fbo .mtop h3{margin:0;font:400 var(--fs-lg)/1.02 var(--serif);letter-spacing:-.025em}
+.fbo .mtop h3{margin:0;font:400 var(--fs-title)/1.04 var(--serif);letter-spacing:-.025em}
 .fbo .mdl{display:flex;flex-direction:column;gap:12px;margin:4px 0 0;padding-top:16px;border-top:1px solid var(--line)}
 .fbo .mdl div{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px}
 .fbo .mdl dt{font:500 var(--fs-xs)/1.9 var(--mono);color:var(--mute)}
@@ -259,51 +257,41 @@ from{opacity:0;transform:translateY(10px)}
 .fbo .hcta span{display:none}
 .fbo .mbox{grid-template-columns:minmax(0,1fr)}
 .fbo .minf{padding:8px 24px 28px}
-.fbo .skx,.fbo .glf{grid-column:1/-1}
-.fbo .glf{margin-bottom:40px}
-.fbo .facts,.fbo .abf{grid-column:1/-1}
-.fbo .abf{margin-bottom:40px}
-.fbo .ctm,.fbo .cta{grid-column:1/-1}
 }
 @media (max-width:820px){
 .fbo{--gap:16px}
 .fbo .navl{display:none}
 .fbo .icb.mnb{display:inline-flex}
-.fbo .wrap{padding:56px var(--pad)}
+.fbo .wrap{padding:40px var(--pad) 48px}
 #contact .wrap{padding-bottom:32px}
-.fbo .band .wrap{padding-block:72px}
-.fbo .hd{margin-bottom:40px;row-gap:16px}
-.fbo :is(.h2,.hd .hint,.pq,.cq){grid-column:1/-1}
-.fbo .kick{margin-bottom:16px}
-.fbo .hero .wrap{min-height:0;padding-block:40px 56px}
-.fbo .hc,.fbo .avf{grid-column:1/-1}
-.fbo .avf{justify-self:center;width:min(100%,320px)}
-.fbo .dateline{grid-template-columns:minmax(0,1fr)}
-/* tablets: every entry the same split, the cover on seven columns */
-.fbo .wk{padding:32px 0}
-.fbo .wk:nth-child(n) .wkc{grid-column:1/8;aspect-ratio:4/3}
-.fbo .wk:nth-child(n) .wkb{grid-column:8/13;align-self:end}
+.fbo .band .wrap{padding-block:48px}
+.fbo .hero .wrap{min-height:0;padding-block:32px 40px;row-gap:24px}
+.fbo .hc,.fbo .avf,.fbo .dateline{grid-area:auto/1/auto/-1}
+.fbo .avf{justify-self:center;width:min(100%,29rem)}
+.fbo .nm{font-size:clamp(3.75rem,2rem + 11vw,5.75rem)}
 .fbo .pans{display:block}
 .fbo .pan{display:block}
-.fbo .ph{min-height:72px;padding:20px 0}
-.fbo .pan.on .ph{border-bottom:0!important}
-.fbo .pb{padding:4px 0 32px}
-.fbo .pbc canvas{height:280px;min-height:0}
-/* skill groups scroll sideways: the right edge fades, so the cut-off buttons read as more to come (48px end padding: at
-   the end of the row the fade covers only that) */
-.fbo .grp{flex-wrap:nowrap;overflow-x:auto;margin:0 calc(var(--pad)*-1);padding:0 48px 0 var(--pad);scrollbar-width:none;width:calc(100% + var(--pad)*2);-webkit-mask:linear-gradient(90deg,var(--bg) calc(100% - 48px),transparent);mask:linear-gradient(90deg,var(--bg) calc(100% - 48px),transparent)}
-.fbo .glb{height:340px}
+.fbo .ph{min-height:64px;padding:16px 10px 16px 0}
+.fbo .pan.on .ph{border-bottom:0}
+.fbo .pan:last-child.on .pb{border-bottom:1px solid var(--line)}
+.fbo .pb{padding:4px 0 24px;gap:16px}
+.fbo .pbc canvas{height:clamp(192px,50vw,264px)}
+.fbo .skills-grid{grid-template-rows:auto}
+.fbo .skh,.fbo .glf,.fbo .ix{grid-area:auto/1/auto/-1}
+.fbo .glb{aspect-ratio:3/2;max-height:340px}
+.fbo .abw{row-gap:24px}
+.fbo .facts,.fbo .abf,.fbo .ctm,.fbo .cta{grid-column:1/-1}
 .fbo .modal{width:calc(100% - 20px);max-height:calc(100% - 20px)}
 .fbo .row,.fbo .cta li{min-height:64px}
 }
-/* phones: the hero's buttons take a row each; a work entry stacks, its cover first */
 @media (max-width:600px){
-.fbo .hero-cta{align-self:stretch}
-.fbo .hero-cta .btn{flex:1 1 100%;padding:0 16px}
-.fbo .wk{display:flex;flex-direction:column;align-items:stretch}
-.fbo .wk:nth-child(n) .wkc{aspect-ratio:16/10}
-.fbo .wk:nth-child(even) .wkc{aspect-ratio:4/3}
-.fbo .wk:nth-child(n) .wkb{align-self:auto}
+.fbo .hc{gap:16px}
+.fbo .hero-cta .btn{min-height:48px;padding-inline:18px}
+.fbo .hero-cta .hero-work{padding-inline:0}
+.fbo .works{row-gap:28px}
+.fbo .wk,.fbo .wk:first-child{grid-column:1/-1;display:flex;align-items:stretch;gap:16px;padding-top:16px}
+.fbo .wk:first-child .wkc{aspect-ratio:16/9}
+.fbo .grp .btn{padding-inline:14px;min-height:44px}
 }
 /* 320px phones: the theme pill drops its word (its aria-label still names the action) so the header CTA fits */
 @media (max-width:360px){

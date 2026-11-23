@@ -56,11 +56,11 @@
 <span data-nofx data-bind="modeLabel">Dark</span>
 </button>
 <a class="btn hcta" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-label="Message me on Messenger" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Message me</span></a>
-<button type="button" class="icb mnb" data-act="toggleMenu" aria-expanded="false" aria-label="Menu">
+<button type="button" class="icb mnb" data-act="toggleMenu" aria-expanded="false" aria-controls="section-menu" aria-label="Menu">
 <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
 </button>
 </div>
-<nav class="mnu" data-ref="menu" hidden aria-label="Sections, small screens">
+<nav id="section-menu" class="mnu" data-ref="menu" hidden aria-label="Sections, small screens">
 <a href="#work" data-act="closeMenu">Work</a>
 <a href="#services" data-act="closeMenu">Services</a>
 <a href="#skills" data-act="closeMenu">Skills</a>
@@ -70,31 +70,30 @@
 </div>
 </header>
 
-<main id="main">
+<main id="main" tabindex="-1">
 <section data-sec="hero" class="sec hero">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb g12">
 <div class="hc">
-<h1 class="nm">Febriel <span>B. Otud</span></h1>
-<p class="vp">I design the interface, write the code, and run the socials after launch.</p>
+<h1 class="nm" data-nofx>Febriel <span>B. Otud</span></h1>
+<p class="vp" data-nofx>I design the interface, write the code, and run the socials after launch.</p>
 <div class="hero-cta">
 <a class="btn" data-scr href="https://m.me/febriel.otud.186" target="_blank" rel="noopener" aria-describedby="nt"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Message me on Messenger</a>
-<a class="btn ghost" data-scr href="#work">See my work<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
-</div>
-<div class="dateline">
-<p>Taking freelance and <span class="nw">part-time</span> projects now. I reply within two hours.</p>
-<p class="proof">Recent work: <a data-scr href="#work/pilapass">PilaPass</a>, <a data-scr href="#work/sev-clinic">The Sev Clinic</a> and <a data-scr href="#work/inkwild">INKWILD</a></p>
+<a class="wkl hero-work" data-scr href="#work">See my work<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></a>
 </div>
 </div>
 <figure class="fig avf">
 <div class="av">
 <div data-ref="tilt" class="tilt">
-<div class="plate" aria-hidden="true"></div>
 <canvas data-ref="avatar" role="img" aria-label="ASCII portrait of Febriel, head and shoulders"></canvas>
 </div>
 </div>
 <figcaption class="cap">Portrait drawn the INKWILD way, then set in ASCII.</figcaption>
 </figure>
+<div class="dateline">
+<p>Taking freelance and <span class="nw">part-time</span> projects now. I reply within two hours.</p>
+<p class="proof">Recent work: <a data-scr href="#work/pilapass">PilaPass</a>, <a data-scr href="#work/sev-clinic">The Sev Clinic</a> and <a data-scr href="#work/inkwild">INKWILD</a></p>
+</div>
 </div>
 </section>
 
@@ -109,17 +108,15 @@
 <section data-ref="work" id="work" data-sec="work" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Work</p>
+<div class="hd">
 <h2 class="h2">Selected work</h2>
-<p class="hint">Open a project for the details.</p>
 </div>
-<div>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="1" aria-hidden="true"></canvas></div><div class="wkb"><h3>PilaPass</h3><p>A campus queue app my team and I are building.</p><a class="wkl" href="#work/pilapass">View PilaPass<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="0" aria-hidden="true"></canvas></div><div class="wkb"><h3>The Sev Clinic</h3><p>I run its digital operations, social media and graphic design.</p><a class="wkl" href="#work/sev-clinic">View The Sev Clinic<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="3" aria-hidden="true"></canvas></div><div class="wkb"><h3>INKWILD</h3><p>My animated series about how animals sense the world.</p><a class="wkl" href="#work/inkwild">View INKWILD<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="2" aria-hidden="true"></canvas></div><div class="wkb"><h3>Invex</h3><p>Our school project: every branch’s inventory in one dashboard.</p><a class="wkl" href="#work/invex">View Invex<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
-<article class="wk g12" data-scr><div class="wkc"><canvas data-cover="4" aria-hidden="true"></canvas></div><div class="wkb"><h3>KONSEPTO Events</h3><p>I record each event and post on their socials every day.</p><a class="wkl" href="#work/konsepto">View KONSEPTO Events<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
+<div class="works g12">
+<article class="wk" data-scr><div class="wkc"><canvas data-cover="1" aria-hidden="true"></canvas></div><div class="wkb"><h3>PilaPass</h3><p>A campus queue app my team and I are building.</p><a class="wkl" href="#work/pilapass">View PilaPass<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
+<article class="wk" data-scr><div class="wkc"><canvas data-cover="0" aria-hidden="true"></canvas></div><div class="wkb"><h3>The Sev Clinic</h3><p>I run its digital operations, social media and graphic design.</p><a class="wkl" href="#work/sev-clinic">View The Sev Clinic<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
+<article class="wk" data-scr><div class="wkc"><canvas data-cover="3" aria-hidden="true"></canvas></div><div class="wkb"><h3>INKWILD</h3><p>My animated series about how animals sense the world.</p><a class="wkl" href="#work/inkwild">View INKWILD<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
+<article class="wk" data-scr><div class="wkc"><canvas data-cover="2" aria-hidden="true"></canvas></div><div class="wkb"><h3>Invex</h3><p>Our school project: every branch’s inventory in one dashboard.</p><a class="wkl" href="#work/invex">View Invex<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
+<article class="wk" data-scr><div class="wkc"><canvas data-cover="4" aria-hidden="true"></canvas></div><div class="wkb"><h3>KONSEPTO Events</h3><p>I record each event and post on their socials every day.</p><a class="wkl" href="#work/konsepto">View KONSEPTO Events<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></article>
 </div>
 </div>
 <template data-ref="modalTpl">
@@ -143,31 +140,30 @@
 <section id="services" data-sec="services" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Services</p>
+<div class="hd">
 <h2 class="h2">What I can build for you</h2>
 <p class="hint">Four things. Most projects end up needing two or three of them.</p>
 </div>
 <div class="pans">
 
 <div class="pan on" data-svc="0">
-<button type="button" class="ph" data-scr aria-expanded="true"><span class="pt">Clinic operations and systems</span></button>
-<div class="pb"><div class="pbt"><p>Booking, intake, SOPs, dashboards. The unglamorous stuff that keeps a clinic running every day.</p><span class="tg">Booking and intake / SOPs / Dashboards</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="Three nested rings turning, drawn in ASCII."></canvas></figure></div>
+<button type="button" class="ph" data-scr aria-controls="clinic-systems" aria-expanded="true"><span class="pt">Clinic operations and systems</span></button>
+<div class="pb" id="clinic-systems"><div class="pbt"><p>Booking, intake, SOPs, dashboards. The unglamorous stuff that keeps a clinic running every day.</p><span class="tg">Booking and intake / SOPs / Dashboards</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="Three nested rings turning, drawn in ASCII."></canvas></figure></div>
 </div>
 
 <div class="pan" data-svc="1">
-<button type="button" class="ph" data-scr aria-expanded="false"><span class="pt">Brand, identity and UX/UI</span></button>
-<div class="pb" hidden><div class="pbt"><p>How it looks and how it works. Wireframe first. A prototype you can click through after.</p><span class="tg">Design systems / UX/UI / Figma / Canva</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="A cut gem turning, drawn in ASCII."></canvas></figure></div>
+<button type="button" class="ph" data-scr aria-controls="brand-design" aria-expanded="false"><span class="pt">Brand, identity and UX/UI</span></button>
+<div class="pb" id="brand-design" hidden><div class="pbt"><p>How it looks and how it works. Wireframe first. A prototype you can click through after.</p><span class="tg">Design systems / UX/UI / Figma / Canva</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="A cut gem turning, drawn in ASCII."></canvas></figure></div>
 </div>
 
 <div class="pan" data-svc="2">
-<button type="button" class="ph" data-scr aria-expanded="false"><span class="pt">Websites and apps</span></button>
-<div class="pb" hidden><div class="pbt"><p>Landing pages, web apps, mobile apps. I design them in Figma, then build what I designed.</p><span class="tg">Next.js / React Native and Expo / Supabase / Lovable</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="A stack of three layers turning, drawn in ASCII."></canvas></figure></div>
+<button type="button" class="ph" data-scr aria-controls="web-and-apps" aria-expanded="false"><span class="pt">Websites and apps</span></button>
+<div class="pb" id="web-and-apps" hidden><div class="pbt"><p>Landing pages, web apps, mobile apps. I design them in Figma, then build what I designed.</p><span class="tg">Next.js / React Native and Expo / Supabase / Lovable</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="A stack of three layers turning, drawn in ASCII."></canvas></figure></div>
 </div>
 
 <div class="pan" data-svc="3">
-<button type="button" class="ph" data-scr aria-expanded="false"><span class="pt">Content, campaigns and motion</span></button>
-<div class="pb" hidden><div class="pbt"><p>I can manage the page, plan the posts, write the captions and cut the reels, including ongoing video editing for a private client. Animation too.</p><span class="tg">Social media / Copywriting / CapCut / Animation</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="Three drops merging, drawn in ASCII."></canvas></figure></div>
+<button type="button" class="ph" data-scr aria-controls="content-and-motion" aria-expanded="false"><span class="pt">Content, campaigns and motion</span></button>
+<div class="pb" id="content-and-motion" hidden><div class="pbt"><p>I can manage the page, plan the posts, write the captions and cut the reels, including ongoing video editing for a private client. Animation too.</p><span class="tg">Social media / Copywriting / CapCut / Animation</span></div><figure class="pbc"><canvas data-stage role="img" aria-label="Three drops merging, drawn in ASCII."></canvas></figure></div>
 </div>
 
 </div>
@@ -179,17 +175,12 @@
 <section id="skills" data-sec="skills" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Skills</p>
+<div class="hd">
 <h2 class="h2">Tools I work in</h2>
 <p class="hint">Pick a group to see its tools.</p>
 </div>
-<div class="g12">
-<figure class="fig glf">
-<div class="glb"><canvas data-ref="globe" role="img" aria-label="A 3D globe of skills. The selected group moves to the front."></canvas></div>
-<figcaption class="cap" aria-hidden="true">A 3D globe of skills. The selected group moves to the front.</figcaption>
-</figure>
-<div class="skx">
+<div class="skills-grid g12">
+<div class="skh">
 <div data-ref="skl" class="skt">
 <span class="lab" data-bind="catKicker">26 tools</span>
 <p data-bind="catTitle">Everything</p>
@@ -202,6 +193,11 @@
 <button type="button" class="btn ghost sm" data-scr data-cat="video">Video</button>
 <button type="button" class="btn ghost sm" data-scr data-cat="ai">AI</button>
 </div>
+</div>
+<figure class="fig glf">
+<div class="glb"><canvas data-ref="globe" role="img" aria-label="A 3D globe of skills. The selected group moves to the front."></canvas></div>
+<figcaption class="cap" aria-hidden="true">A 3D globe of skills. The selected group moves to the front.</figcaption>
+</figure>
 <dl class="ix" data-ref="catRows">
 <div data-g="build"><dt>Build</dt><dd>Next.js, React Native, Supabase, Expo, PostgreSQL, Lovable, Firebase</dd></div>
 <div data-g="design"><dt>Design</dt><dd>Figma, UX/UI design, Canva, Design systems, Brand identity, Prototyping</dd></div>
@@ -211,7 +207,6 @@
 </dl>
 </div>
 </div>
-</div>
 </section>
 
 <div class="sep" aria-hidden="true"></div>
@@ -219,8 +214,7 @@
 <section id="about" data-sec="about" class="sec band">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">About</p>
+<div class="hd">
 <h2 class="pq">Most projects need a designer, a developer and a social media manager. I am all three.</h2>
 </div>
 <div class="abw g12">
@@ -242,8 +236,7 @@
 <section id="contact" data-sec="contact" class="sec">
 <canvas data-amb aria-hidden="true" class="amb"></canvas>
 <div class="wrap fxb">
-<div class="hd g12">
-<p class="kick" aria-hidden="true">Contact</p>
+<div class="hd">
 <h2 class="h2 cq">Got an app, a brand or a feed that needs building?</h2>
 </div>
 <div class="ctw g12">

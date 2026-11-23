@@ -327,7 +327,7 @@ export function startEngine(logic) {
         for (j = y0; j < y1; j++) for (i = x0; i < x1; i++) { var o = (j * 264 + i) * 4; T += aMap[o]; G += aMap[o + 1]; R += aMap[o + 2]; Al += aMap[o + 3]; n++; }
         T /= n * 255; G /= n * 255; R /= n * 255; Al /= n * 255;
         var v;
-        if (E.dark) { v = Math.pow(clamp01((T - 0.06) / 0.86), 1.15); if (R < 0.25) v = Math.max(v, 0.17) + G * 0.1; }
+        if (E.dark) { v = Math.pow(clamp01((T - 0.06) / 0.86), 1.15); if (R < 0.25) v = Math.max(v, 0.22) + G * 0.1; }
         else { v = Math.pow(clamp01((0.97 - T) / 0.8), 0.9); }
         dens[y * cols + x] = clamp01(v) * Al;
       }
@@ -490,14 +490,13 @@ export function startEngine(logic) {
     var st = cv.__fboC, w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
     if (!st.vis) return;
     var big = cv.hasAttribute('data-big');
-    if (!force && !big && st.drawn && calm.matches) return;
     var bk = backing(w, h, Math.min(window.devicePixelRatio || 1, 1.5)), dpr = bk.d, W = bk.W, H = bk.H;
     if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
     var ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     if (!calm.matches) st.yaw += dt * (big ? 1.1 : 0.35) * E.speed;
     var k = parseInt(cv.getAttribute('data-cover'), 10) || 0;
     /* the glyph grows with the cover (about 100 columns), so a bigger cover costs about twice a 2026-11-18 card cover, not five times */
-    renderObject(ctx, w, h, Math.max(big ? 11 : 9, Math.round(w / 60)), st.yaw, -0.34, k, k, 1, E.t, false, 0, 0, big ? 0.5 : 0.52);
+    renderObject(ctx, w, h, Math.max(big ? 11 : 9, Math.round(w / 60)), st.yaw, -0.34, k, k, 1, E.t, false, 0, 0, big ? 0.58 : 0.64);
     st.drawn = true;
   }
   function drawCovers(dt) {

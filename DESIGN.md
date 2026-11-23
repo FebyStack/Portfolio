@@ -34,43 +34,32 @@ Owner's decisions and waivers below bind like the rest: a Hallmark run reports t
 - Contrast (WCAG, lowest pairs): light `--mute` on `--bg2` 4.75:1, on the band 5.03:1; dark `--mute` on the band 6.55:1.
   Any new pair stays at 4.5:1 or more. `--mark` dark: 6.99 on --bg, 6.06 on --bg2, 6.55 on the band; light: 5.35,
   4.77, 5.05. Orchid stays for the surname, actions, focus and the ASCII highlights; vermilion only for small
-  editorial marks: the 48×3px tick that starts each section's opening rule and the open service's rule, the 6px square
+  editorial marks: the 32×2px tick that starts each section's opening rule and the open service's rule, the 6px square
   before a caption, the marquee's slashes, and the label of a picked skill group. No numbers anywhere (owner,
   2026-11-19: no section, figure, nav, menu or entry numbering).
-- Type scale (`.fbo`): `--fs-xs` 12px mono furniture (running heads, captions, labels, `dt`, marquee) · `--fs-sm`
-  14px buttons, nav, hints, proof line · `--fs-md` 17px Switzer reading text (line-height 1.5, `--measure` 40ch) ·
-  `--fs-lg` clamp(22px, 2.1vw, 30px) offer line, standfirsts ("Tell me what it is…"), contact rows, project-view title
-  · `--fs-title` clamp(28px, 3vw, 44px) service titles · `--fs-xl` clamp(36px, 4vw, 60px) project titles, the skills
-  group title · `--fs-2xl` clamp(40px, 5.6vw, 84px) the About pull quote · `--fs-display` clamp(48px, 6.6vw, 104px)
-  section openers (`h2`, line-height .95, -0.03em) · `--fs-name` clamp(56px, 8vw, 128px) the name (largest on the page). Weights: Gambetta 300 (the name only) and 400, Switzer 400, Geist Mono 500.
-  Labels and controls are sentence case, tracked 0 to 0.03em; the marquee alone keeps capitals.
-- Grid: `.g12`, twelve `minmax(0,1fr)` columns, `--gap` 24px (16px ≤820px), inside the 1360px container. Head block:
-  the opening rule (1px ink, vermilion tick, section name at the right in mono), the `h2` on columns 1–9, the hint as
-  marginalia on 10–12, 64px to the body. Rules, not cards: hairlines in `--line` part rows; the only filled surfaces
-  are the cover wells (`--bg2`), the About band and the project view.
-- Spacing: multiples of 4px (in use: 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 56, 72, 88, 96, 120, 144); 2px only
-  as an optical nudge. Sibling surfaces (cards, panels, tiles, the skills card) sit 12 to 16px apart; the About split
-  56px, the hero's clamp(24px, 5vw, 72px). Container 1360px, gutter
-  `--pad` clamp(20px, 5vw, 72px). Sections: 72px top, 96px bottom (56 / 56 at 820px and under); the About band 96 / 96 (72 / 72); Contact 72 / 48
-  above the tide. The ASCII band (`.sep`, 3 rows of 12px Geist Mono from the engine's ramp, static, 70% `--mute`, a
-  different offset per seam, 24px above and below) sits between Work, Services, Skills, About and Contact.
+- Type scale: Geist Mono at 12px for captions, labels and the marquee, 14px for controls and hints. Switzer at
+  17px for reading text and 14px for the hero dateline. Gambetta for the offer line, project and service titles,
+  section heads, and the name. The display scale is fluid, with section heads at 2.75–5.75rem and the name at
+  3.5–8rem. Labels and controls are sentence case. The marquee keeps capitals.
+- Grid: `.g12`, twelve `minmax(0,1fr)` columns, `--gap` 24px (16px ≤820px) inside the 1360px container.
+  Section headings follow a hairline with a short vermilion mark. When present, hints sit below the heading.
+- Spacing: the gutter is `clamp(20px, 5vw, 72px)`. Sections use 64px top and 80px bottom (40 / 48 at ≤820px);
+  About uses 80px on both sides (48px at ≤820px). The static ASCII dividers span the content width between sections.
+  The page paper is flat and the dot texture sits inside the portrait frame.
 - Radii: controls are pills (999px); the project view keeps the one 26px cut corner (`.cut`); everything else is square
   and open (rules, wells), never rounded.
 
-## Compositions (1440; ≤820px everything stacks in reading order)
-- Hero (Settled, fills the screen under the header down to the marquee): text on columns 1–7 (name on two lines, the
-  offer line, the two buttons, then a ruled dateline of two columns: the availability line and the proof line); the
-  bust on 8–12 (`min(100%, 56vh)`) with its caption "Portrait drawn the INKWILD way, then set in ASCII." (moved from
-  the footer). Messenger at y 552 on 1440×900, 347 on 375×812.
-- Work: five ruled entries; each sets its cover at a different span, ratio and side: text 1–4 / cover 5–12 at 2:1;
-  text 1–5 / cover 7–12 at 16:9; cover 1–7 at 2:1 / text 9–12 (the one mirror); text 1–4 / cover 6–12 at 21:9; text
-  1–5 / cover 8–12 at 3:2. Title at `--fs-xl`, the one-line desc, "View …". 601–820px: cover 1–7, text 8–12; ≤600px
-  cover over text.
-- Services: the four titles as a ruled list on 1–6 (the open one in ink under an ink rule with the vermilion tick); the
-  open service's text, tags and its drag-to-turn object on 8–12 (`.pan` is `display: contents`, so opening another
-  never moves the list). Hover, click or focus opens. ≤820px an accordion.
-- Skills: the globe on 1–6 with its caption; on 7–12 the count over the group title, the group buttons, and a ruled
-  `dl` index of all 26 tools by group (static text; a picked group's row stays ink, the others go to `--mute`).
+## Compositions
+- Hero: name, offer and actions on columns 1–6. The framed ASCII portrait and caption occupy columns 7–12, with
+  the dateline under the actions. At ≤820px the portrait goes between the actions and the dateline. Messenger is
+  the filled action and “See my work” is a text link.
+- Work: PilaPass leads with a full-width split feature (copy on columns 1–4, a 2:1 cover on 5–12).
+  The other four projects sit in two pairs with 16:9 covers above their summaries. At ≤600px all five stack.
+- Services: the four titles form a ruled list on 1–6, with a chevron marking the open state. The active service's
+  description, tags and drag-to-turn ASCII object sit on 8–12. Hover, click or focus opens a service. At ≤820px its
+  panel sits below its trigger.
+- Skills: the globe and caption sit on 1–6. On 7–12 are the group controls and a ruled index of all 26 tools.
+  At ≤820px the wrapping controls come before the globe, with the index below it.
 - About (band): the statement as the `h2` pull quote on 1–11 at `--fs-2xl`; the photo (≤520px) on 1–6 captioned
   "Hi, I’m Febriel"; the facts as a ruled `dl` on 8–12, bottom-aligned.
 - Contact: the question at `--fs-display` on 1–11; standfirst, Messenger and the reply lines on 1–5; email (+ Copy),
@@ -97,8 +86,8 @@ Owner's decisions and waivers below bind like the rest: a Hallmark run reports t
 - Canvas memory (iOS): about 32 MB of live canvas backing on a 390×844@3 phone; no canvas over 4.19M device px; a
   section's rain canvas is freed more than a screen away. Any new canvas or large illustration follows these rules
   (`PROJECT.md`, Canvas memory).
-- CSS: reveal 0.9s (opacity and an 18px rise; the blur was dropped 2026-11-19 for cost on tall sections), panels 0.6s, project view 0.35s, colour 0.2s, press 0.15s; the marquee loops 48s
-  and pauses under the pointer; the logo caret blinks five times and stays.
+- CSS: reveal 0.55s (88% opacity and an 8px rise), panels 0.6s, project view 0.35s, colour 0.2s and press 0.15s.
+  The marquee loops in 48s and pauses under the pointer. The logo caret blinks five times and stays.
 - Reduced motion: no veil, decode, scramble, loop or transition; content always visible.
 
 ## Owner's decisions (2026-11-19)
