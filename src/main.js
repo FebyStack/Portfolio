@@ -15,7 +15,7 @@ const ARROW = 'M7 17 17 7M8 7h9v9'; // same arrow as the contact section's exter
 
 const state = { dark: root.classList.contains('is-dark'), svc: 0, cat: 'all', menu: false, modal: -1 };
 const logic = {
-  root: { current: root }, avatar: { current: ref('avatar') }, stage: { current: null },
+  root: { current: root }, inkField: { current: ref('inkField') }, avatar: { current: ref('avatar') }, stage: { current: null },
   globe: { current: ref('globe') }, tide: { current: ref('tide') }, photo: { current: ref('photo') },
   state
 };

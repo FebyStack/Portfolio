@@ -118,6 +118,12 @@ export function startEngine(logic) {
     var cs = getComputedStyle(r);
     function v(n, d) { var s = cs.getPropertyValue(n).trim(); return s || d; }
     E.col = { ink: v('--ink', '#E7E2D3'), mute: v('--mute', '#8FA6A4'), accent: v('--accent', '#C2A8FF'), shade: v('--shade', '8,25,29') };
+    var cover = getComputedStyle(A.el || r);
+    E.poster = {
+      ink: cover.getPropertyValue('--ink').trim(),
+      accent: cover.getPropertyValue('--accent').trim(),
+      mark: cover.getPropertyValue('--mark').trim()
+    };
     E.themeDirty = false;
   }
   function loadImage(url, done) {
@@ -125,6 +131,39 @@ export function startEngine(logic) {
     im.onload = function () { done(im); };
     im.onerror = function () { done(null); };
     im.src = url;
+  }
+
+  /* Bent contours pick up the portrait's silhouette and break up into individual glyphs. */
+  var Ink = makeLayer(false);
+  function drawInkField() {
+    if (!fit(Ink)) return;
+    var ctx = Ink.ctx, w = Ink.w, h = Ink.h;
+    var stamp = [w, h, Ink.dpr, E.poster.accent, E.poster.mark].join('/');
+    if (stamp === Ink.stamp) return;
+    Ink.stamp = stamp;
+    ctx.clearRect(0, 0, w, h);
+    ctx.textBaseline = 'top';
+    ctx.font = monoFont(9, 500);
+    var stepX = 7, stepY = 10;
+    var narrow = w <= 820, cx = narrow ? 0.67 : 0.77, cy = narrow ? 0.44 : 0.43;
+    for (var y = 0; y < h; y += stepY) for (var x = 0; x < w; x += stepX) {
+      var u = x / w, v = y / h;
+      var dx = (u - cx) * Math.max(0.85, w / h), dy = (v - cy) * (narrow ? 1.5 : 1);
+      var angle = Math.atan2(dy, dx), r = Math.hypot(dx, dy);
+      var wave = r + 0.078 * Math.sin(angle * 2 - r * 6) + 0.032 * Math.sin(angle * 5 + r * 7);
+      var contour = Math.pow(0.5 + 0.5 * Math.cos(wave * (narrow ? 116 : 143)), 4);
+      var envelope = smooth(0.24, 0.46, r) * (1 - smooth(0.65, 1.1, r));
+      var clearType = narrow ? smooth(0.08, 0.32, v) : 0.16 + 0.84 * smooth(0.28, 0.7, u);
+      var taper = clearType * (1 - smooth(0.69, 0.99, v));
+      var noise = hash2(x * 0.6, y * 0.7);
+      var ink = envelope * taper * (0.14 * noise + contour * (0.35 + 0.65 * noise));
+      if (ink < 0.048) continue;
+      var warm = Math.sin(angle + r * 1.3) > 0.48;
+      ctx.fillStyle = warm ? E.poster.mark : E.poster.accent;
+      ctx.globalAlpha = Math.min(0.69, ink * 0.86);
+      ctx.fillText(RAMP.charAt(1 + Math.floor(ink * 13)), x, y);
+    }
+    ctx.globalAlpha = 1;
   }
 
   /* ----- avatar: the INKWILD portrait, head and shoulders, set in ASCII ----- */
@@ -154,9 +193,8 @@ export function startEngine(logic) {
         var T = 0, G = 0, R = 0, Al = 0, n = 0;
         for (j = y0; j < y1; j++) for (i = x0; i < x1; i++) { var o = (j * 264 + i) * 4; T += aMap[o]; G += aMap[o + 1]; R += aMap[o + 2]; Al += aMap[o + 3]; n++; }
         T /= n * 255; G /= n * 255; R /= n * 255; Al /= n * 255;
-        var v;
-        if (E.dark) { v = Math.pow(clamp01((T - 0.06) / 0.86), 1.15); if (R < 0.25) v = Math.max(v, 0.22) + G * 0.1; }
-        else { v = Math.pow(clamp01((0.97 - T) / 0.8), 0.9); }
+        var v = Math.pow(clamp01((T - 0.05) / 0.86), 1.12);
+        if (R < 0.25) v = Math.max(v, 0.24) + G * 0.1;
         dens[y * cols + x] = clamp01(v) * Al;
       }
     }
@@ -175,7 +213,7 @@ export function startEngine(logic) {
     if (!fit(A)) return;
     var ctx = A.ctx, w = A.w, h = A.h, still = calm.matches;
     if (!aMap) return;
-    var stamp = w + 'x' + h + (E.dark ? 'd' : 'l') + E.glyph;
+    var stamp = w + 'x' + h + '/' + E.glyph;
     if (stamp !== A.stamp) { buildAvatar(); A.stamp = stamp; aPaint = ''; }
     var g = aGrid, cols = g.cols, rows = g.rows, cw = g.cw, ch = g.ch, x, y, d, idx;
     aIntro = still ? 1 : clamp01(aIntro + dt / 1.05);
@@ -184,7 +222,7 @@ export function startEngine(logic) {
     if (paint === aPaint) return;
     aPaint = paint;
     ctx.clearRect(0, 0, w, h);
-    ctx.font = monoFont(g.fs); ctx.textBaseline = 'top'; ctx.fillStyle = E.col.ink;
+    ctx.font = monoFont(g.fs); ctx.textBaseline = 'top'; ctx.fillStyle = E.poster.ink;
     var tiers = g.tiers, alphas = [0.5, 0.78, 1];
     if (aIntro < 1) {
       for (y = 0; y < rows; y++) for (x = 0; x < cols; x++) {
@@ -202,7 +240,7 @@ export function startEngine(logic) {
     var band = 0.12 * w;
     var c0 = Math.max(0, Math.floor((cx - band - g.ox) / cw)), c1 = Math.min(cols - 1, Math.ceil((cx + band - g.ox) / cw));
     var r0 = Math.max(0, Math.floor((cy - band - g.oy) / ch)), r1 = Math.min(rows - 1, Math.ceil((cy + band - g.oy) / ch));
-    ctx.fillStyle = E.col.accent;
+    ctx.fillStyle = E.poster.accent;
     for (y = r0; y <= r1; y++) for (x = c0; x <= c1; x++) {
       d = g.dens[y * cols + x]; if (d < 0.03) continue;
       var gx = g.ox + (x + 0.5) * cw - cx, gy = g.oy + (y + 0.5) * ch - cy;
@@ -480,7 +518,7 @@ export function startEngine(logic) {
   }
 
   function bind() {
-    hold(A, logic.avatar.current); hold(S, logic.stage.current); hold(Gl, logic.globe.current); hold(Td, logic.tide.current); hold(Ph, logic.photo.current);
+    hold(Ink, logic.inkField.current); hold(A, logic.avatar.current); hold(S, logic.stage.current); hold(Gl, logic.globe.current); hold(Td, logic.tide.current); hold(Ph, logic.photo.current);
     if (pNear && Ph.el) pNear.observe(Ph.el);
   }
   /* one layer throwing doesn't stop the others; each logs once */
@@ -492,6 +530,7 @@ export function startEngine(logic) {
     var dt = Math.min(0.1, (now - last) / 1000); last = now; lastDraw = now;
     if (E.themeDirty || !E.col) readTheme();
     if (!E.col) return;
+    if (Ink.el && Ink.vis) run('ink', drawInkField);
     if (A.el && A.vis) run('avatar', drawAvatar, now, dt);
     if (S.el && S.vis) run('stage', drawStage, now, dt);
     if (Gl.el && Gl.vis) run('globe', drawGlobe, now, dt);
@@ -508,14 +547,14 @@ export function startEngine(logic) {
   }
   sync();
   if (document.fonts && document.fonts.load) {
-    document.fonts.load(monoFont(12)).then(function () { A.stamp = ''; }, function () {});
+    document.fonts.load(monoFont(12)).then(function () { A.stamp = ''; Ink.stamp = ''; }, function () {});
   }
   raf = requestAnimationFrame(frame);
   return {
     sync: sync,
     stop: function () {
       cancelAnimationFrame(raf);
-      hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null);
+      hold(Ink, null); hold(A, null); hold(S, null); hold(Gl, null); hold(Td, null); hold(Ph, null);
       io.disconnect(); if (pNear) pNear.disconnect();
     }
   };
